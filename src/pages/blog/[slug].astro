@@ -22,7 +22,7 @@ export async function getStaticPaths() {
   const data = await response.json();
   const allResults = data.results || [];
 
-  // 💡 修正：タグに「講座」が含まれていないものだけをブログとして扱う
+  // タグに「講座」が含まれていないものだけをブログとして扱う
   const blogPosts = allResults.filter((post: any) => {
     const tags = post.properties['タグ']?.multi_select?.map((t: any) => t.name) || [];
     return !tags.includes('講座');
@@ -44,11 +44,21 @@ if (!post) {
   return Astro.redirect('/404');
 }
 
-// 💡 修正：プロパティへのアクセスをすべて「?.」で保護（講座用の列が空でも止まらないように）
+// プロパティへのアクセスをすべて「?.」で保護
 const title = post.properties['タイトル']?.title?.[0]?.plain_text || '無題の記事';
 const dateStr = post.properties['公開日']?.date?.start || '';
 const date = dateStr ? new Date(dateStr).toLocaleDateString('ja-JP') : '未設定';
 const tags = post.properties['タグ']?.multi_select?.map((t: any) => t.name) || [];
+
+// 🌟 修正：アイキャッチ画像の取得ロジックを追加
+const imageProp = post.properties['アイキャッチ画像']?.files?.[0];
+let eyecatchUrl = '';
+if (imageProp) {
+    // Notionの画像は、アップロード（file）と外部リンク（external）の2パターンあります
+    eyecatchUrl = imageProp.type === 'file' ? imageProp.file.url : imageProp.external?.url;
+}
+// 画像がない場合の代替画像URL（publicフォルダに画像を用意しておくと良いです）
+const noImageUrl = '/image/no-image.png'; 
 
 // 4. 本文（ブロック）の取得
 const apiKey = import.meta.env.NOTION_API_KEY;
@@ -65,6 +75,13 @@ const blocks = blocksData.results || [];
 <Layout title={`${title} | マヨネリブログ`}>
     <article class="single-post-container">
         <header class="post-header">
+            
+            {eyecatchUrl ? (
+                <img src={eyecatchUrl} alt={title} class="post-eyecatch" loading="lazy" />
+            ) : (
+                <img src={noImageUrl} alt="no image" class="post-eyecatch" loading="lazy" />
+            )}
+            
             <div class="post-meta-top">
                 <span class="post-date">📅 公開日：{date}</span>
                 <div class="post-tags">
@@ -140,6 +157,17 @@ const blocks = blocksData.results || [];
 <style>
     .single-post-container { max-width: 800px; margin: 0 auto; padding: 50px 20px; }
     .post-header { border-bottom: 2px solid var(--color-primary); padding-bottom: 20px; margin-bottom: 40px; }
+    
+    /* 🌟 修正：アイキャッチ画像のスタイルを追加 */
+    .post-eyecatch {
+        width: 100%;
+        max-height: 400px; /* 必要に応じて高さを制限 */
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
     .post-meta-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     .post-date { color: #777; font-weight: bold; font-size: 0.9rem; }
     .post-tags { display: flex; gap: 8px; }
