@@ -21,10 +21,11 @@ jobs:
         uses: withastro/action@v3
         with:
           node-version: 22
-        # 先ほどGitHubの金庫に預けた鍵を取り出してAstroに渡す指示
+        # GitHubのSecrets（金庫）から鍵を取り出してプログラムに渡す設定
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          NOTION_GLOSSARY_ID: ${{ secrets.NOTION_GLOSSARY_ID }}
 
   deploy:
     needs: build
