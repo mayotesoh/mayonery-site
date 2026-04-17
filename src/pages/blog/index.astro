@@ -48,7 +48,6 @@ const allTags = [...new Set(posts.flatMap((post: any) => post.properties['タグ
                 const tags = post.properties['タグ']?.multi_select?.map((t: any) => t.name) || [];
                 const slug = post.properties['URLスラッグ']?.rich_text[0]?.plain_text || post.id;
 
-                // 🌟 アイキャッチ画像の取得
                 const imageProp = post.properties['アイキャッチ']?.files?.[0];
                 let eyecatchUrl = '/favicon.png'; 
                 if (imageProp) {
@@ -81,7 +80,33 @@ const allTags = [...new Set(posts.flatMap((post: any) => post.properties['タグ
     .page-title { text-align: center; color: var(--color-primary); margin-bottom: 40px; font-size: 2rem; }
     
     .search-and-filter-wrapper { margin-bottom: 40px; text-align: center; }
-    #blog-search { padding: 12px 20px; border-radius: 25px; border: 2px solid var(--color-primary); width: 100%; max-width: 500px; margin-bottom: 20px; outline: none; }
+    
+    /* 🌟 スマホはみ出し防止用のコンテナ設定 */
+    .search-input-container {
+        position: relative;
+        max-width: 500px;
+        width: 100%;
+        margin: 0 auto 20px;
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+    }
+    
+    #blog-search {
+        width: 100%;
+        box-sizing: border-box; /* 🌟 枠線や余白を含めて100%に収める魔法 */
+        padding: 12px 20px 12px 45px;
+        border-radius: 25px;
+        border: 2px solid var(--color-primary);
+        outline: none;
+        font-size: 1rem;
+    }
+    
     .filter-tags { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
     .filter-btn { padding: 6px 15px; border-radius: 20px; border: 1px solid #ccc; background: white; cursor: pointer; transition: all 0.2s; }
     .filter-btn.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
@@ -89,7 +114,6 @@ const allTags = [...new Set(posts.flatMap((post: any) => post.properties['タグ
     .post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
     .post-link-wrapper { text-decoration: none; color: inherit; }
 
-    /* 🌟 一覧のカードデザイン */
     .post-card {
         position: relative;
         height: 300px;
@@ -111,7 +135,6 @@ const allTags = [...new Set(posts.flatMap((post: any) => post.properties['タグ
         bottom: 0;
         left: 0;
         width: 100%;
-        /* 🌟 白透過の度合いを上げ、視認性を確保 */
         background: rgba(255, 255, 255, 0.68);
         backdrop-filter: blur(5px);
         padding: 20px;
@@ -122,10 +145,14 @@ const allTags = [...new Set(posts.flatMap((post: any) => post.properties['タグ
     .post-date { color: #666; }
     .tag { color: var(--color-primary); font-weight: bold; margin-left: 5px; }
     .post-card-title { font-size: 1.2rem; margin: 0; line-height: 1.4; color: var(--color-text); }
+    
+    /* 🌟 スマホ用の微調整 */
+    @media (max-width: 480px) {
+        .post-grid { grid-template-columns: 1fr; } /* 1列に強制 */
+    }
 </style>
 
 <script>
-    // 簡易フィルタリングロジック（そのまま保持）
     const searchInput = document.getElementById('blog-search') as HTMLInputElement;
     const filterBtns = document.querySelectorAll('.filter-btn');
     const cards = document.querySelectorAll('.post-link-wrapper');
