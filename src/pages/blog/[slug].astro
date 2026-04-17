@@ -50,14 +50,13 @@ const dateStr = post.properties['公開日']?.date?.start || '';
 const date = dateStr ? new Date(dateStr).toLocaleDateString('ja-JP') : '未設定';
 const tags = post.properties['タグ']?.multi_select?.map((t: any) => t.name) || [];
 
-// 🌟 修正：アイキャッチ画像の取得ロジックを追加
+// アイキャッチ画像の取得
 const imageProp = post.properties['アイキャッチ画像']?.files?.[0];
 let eyecatchUrl = '';
 if (imageProp) {
-    // Notionの画像は、アップロード（file）と外部リンク（external）の2パターンあります
     eyecatchUrl = imageProp.type === 'file' ? imageProp.file.url : imageProp.external?.url;
 }
-// 画像がない場合の代替画像URL（publicフォルダに画像を用意しておくと良いです）
+// 代替画像
 const noImageUrl = '/image/no-image.png'; 
 
 // 4. 本文（ブロック）の取得
@@ -76,19 +75,23 @@ const blocks = blocksData.results || [];
     <article class="single-post-container">
         <header class="post-header">
             
-            {eyecatchUrl ? (
-                <img src={eyecatchUrl} alt={title} class="post-eyecatch" loading="lazy" />
-            ) : (
-                <img src={noImageUrl} alt="no image" class="post-eyecatch" loading="lazy" />
-            )}
-            
-            <div class="post-meta-top">
-                <span class="post-date">📅 公開日：{date}</span>
-                <div class="post-tags">
-                    {tags.map((tag: string) => <span class="tag">#{tag}</span>)}
+            <div class="post-eyecatch-wrapper">
+                {eyecatchUrl ? (
+                    <img src={eyecatchUrl} alt={title} class="post-eyecatch" loading="lazy" />
+                ) : (
+                    <img src={noImageUrl} alt="no image" class="post-eyecatch" loading="lazy" />
+                )}
+                
+                <div class="post-title-overlay">
+                    <div class="post-meta-top">
+                        <span class="post-date">📅 公開日：{date}</span>
+                        <div class="post-tags">
+                            {tags.map((tag: string) => <span class="tag">#{tag}</span>)}
+                        </div>
+                    </div>
+                    <h1 class="post-title">{title}</h1>
                 </div>
             </div>
-            <h1 class="post-title">{title}</h1>
         </header>
 
         <div class="post-content">
@@ -156,23 +159,41 @@ const blocks = blocksData.results || [];
 
 <style>
     .single-post-container { max-width: 800px; margin: 0 auto; padding: 50px 20px; }
-    .post-header { border-bottom: 2px solid var(--color-primary); padding-bottom: 20px; margin-bottom: 40px; }
+    .post-header { margin-bottom: 40px; }
     
-    /* 🌟 修正：アイキャッチ画像のスタイルを追加 */
+    /* 🌟 サムネイルの上にタイトルを乗せるためのコンテナ */
+    .post-eyecatch-wrapper {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
     .post-eyecatch {
         width: 100%;
         max-height: 400px; /* 必要に応じて高さを制限 */
         object-fit: cover;
-        border-radius: 12px;
-        margin-bottom: 25px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
 
-    .post-meta-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .post-date { color: #777; font-weight: bold; font-size: 0.9rem; }
+    /* 🌟 うっすら透過した白を背景にしたタイトルオーバーレイ */
+    .post-title-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.6); /* 🌟 うっすら透過した白 */
+        backdrop-filter: blur(5px); /* オプション：さらに視認性を上げるためにボカシを追加 */
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .post-meta-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .post-date { color: #555; font-weight: bold; font-size: 0.9rem; }
     .post-tags { display: flex; gap: 8px; }
-    .tag { background: #e5ede9; color: var(--color-primary); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
-    .post-title { font-size: 2.2rem; color: var(--color-text); line-height: 1.4; margin: 0; }
+    .tag { background: rgba(78, 123, 103, 0.1); color: var(--color-primary); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+    
+    /* タイトルの文字色は濃いグリーンで */
+    .post-title { font-size: 2rem; color: var(--color-text); line-height: 1.4; margin: 0; }
 
     .post-content { font-size: 1.1rem; line-height: 1.8; color: var(--color-text); }
     .post-content p { margin-bottom: 1.5em; }
