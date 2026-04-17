@@ -1,114 +1,153 @@
 ---
-import { Image } from 'astro:assets';
-import { getCollection } from 'astro:content';
-import BaseHead from '../../components/BaseHead.astro';
-import Footer from '../../components/Footer.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
-import Header from '../../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import Layout from '../../layouts/Layout.astro';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+const apiKey = import.meta.env.NOTION_API_KEY;
+const databaseId = import.meta.env.NOTION_DATABASE_ID;
+
+const response = await fetch(`https://api.notion.com/v1/databases/${databaseId}/query`, {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${apiKey}`,
+    'Notion-Version': '2022-06-28',
+    'Content-Type': 'application/json',
+  },
+});
+
+const data = await response.json();
+const allPosts = data.results || [];
+
+const posts = allPosts.filter((post: any) => {
+  const status = post.properties['ステータス']?.status?.name || post.properties['ステータス']?.select?.name || '';
+  return status === '公開中';
+});
+
+const allTags = [...new Set(posts.flatMap((post: any) => post.properties['タグ']?.multi_select?.map((t: any) => t.name) || []))].filter(Boolean);
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			main {
-				width: 960px;
-			}
-			ul {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
-				padding: 0;
-			}
-			ul li {
-				width: calc(50% - 1rem);
-			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			ul li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-			ul li:first-child img {
-				width: 100%;
-			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
-			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
-			}
-			ul li a {
-				display: block;
-			}
-			.title {
-				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
-			}
-			.date {
-				margin: 0;
-				color: rgb(var(--gray));
-			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
-			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
-			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
-				}
-				ul li {
-					width: 100%;
-					text-align: center;
-				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
-				}
-			}
-		</style>
-	</head>
-	<body>
-		<Header />
-		<main>
-			<section>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`/blog/${post.id}/`}>
-									{post.data.heroImage && (
-										<Image width={720} height={360} src={post.data.heroImage} alt="" />
-									)}
-									<h4 class="title">{post.data.title}</h4>
-									<p class="date">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
-			</section>
-		</main>
-		<Footer />
-	</body>
-</html>
+<Layout title="ブログ・思考録 | マヨネリ (Mayonery)">
+    <section class="blog-container">
+        <h1 class="page-title">ブログ・思考録</h1>
+        <p class="page-desc">Notionに書き留めた手相の考察や、動画のまとめを公開しています。</p>
+
+        <div class="search-and-filter-wrapper">
+            <div class="search-input-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="blog-search" placeholder="記事のタイトルやタグで検索..." autocomplete="off" />
+            </div>
+            <div class="filter-tags">
+                <button class="filter-btn active" data-tag="all">すべて</button>
+                {allTags.map(tag => ( <button class="filter-btn" data-tag={tag}>{tag}</button> ))}
+            </div>
+        </div>
+
+        <div class="post-grid" id="post-grid">
+            {posts.length > 0 ? (
+                posts.map((post: any) => {
+                    const title = post.properties['タイトル']?.title[0]?.plain_text || '（タイトルなし）';
+                    const dateStr = post.properties['公開日']?.date?.start || '';
+                    const date = dateStr ? new Date(dateStr).toLocaleDateString('ja-JP') : '未設定';
+                    const tags = post.properties['タグ']?.multi_select?.map((t: any) => t.name) || [];
+                    const tagsStr = tags.join(','); 
+                    
+                    // 💡 追加：NotionからURLスラッグを取得（空の場合はIDを代用）
+                    const slug = post.properties['URLスラッグ']?.rich_text[0]?.plain_text || post.id;
+
+                    return (
+                        /* 💡 変更：カード全体を <a> タグで囲んでリンクにする！ */
+                        <a href={`/blog/${slug}`} class="post-link-wrapper" data-title={title} data-tags={tagsStr}>
+                            <article class="post-card">
+                                <div class="post-meta">
+                                    <span class="post-date">📅 {date}</span>
+                                    <div class="post-tags">
+                                        {tags.map((tag: string) => ( <span class="tag">{tag}</span> ))}
+                                    </div>
+                                </div>
+                                <h2 class="post-title">{title}</h2>
+                                <span class="read-more">記事を読む →</span>
+                            </article>
+                        </a>
+                    )
+                })
+            ) : (
+                <div class="empty-state"><p>現在、公開中の記事はありません。</p></div>
+            )}
+        </div>
+        <div id="no-results" class="hidden"><p>該当する記事が見つかりませんでした。</p></div>
+    </section>
+</Layout>
+
+<script>
+    const searchInput = document.getElementById('blog-search') as HTMLInputElement;
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.post-link-wrapper'); // 検索対象をaタグに変更
+    const noResults = document.getElementById('no-results');
+
+    function filterPosts() {
+        const query = searchInput.value.toLowerCase().trim();
+        const activeBtn = document.querySelector('.filter-btn.active') as HTMLElement;
+        const activeTag = activeBtn?.getAttribute('data-tag') || 'all';
+        let visibleCount = 0;
+
+        cards.forEach((card) => {
+            const htmlCard = card as HTMLElement;
+            const title = htmlCard.getAttribute('data-title')?.toLowerCase() || '';
+            const tagsStr = htmlCard.getAttribute('data-tags')?.toLowerCase() || '';
+            const tagsArray = htmlCard.getAttribute('data-tags')?.split(',') || [];
+            const matchSearch = title.includes(query) || tagsStr.includes(query);
+            const matchTag = activeTag === 'all' || tagsArray.includes(activeTag);
+
+            if (matchSearch && matchTag) {
+                htmlCard.style.display = 'block';
+                visibleCount++;
+            } else {
+                htmlCard.style.display = 'none';
+            }
+        });
+
+        if (visibleCount === 0) {
+            noResults?.classList.remove('hidden');
+        } else {
+            noResults?.classList.add('hidden');
+        }
+    }
+    searchInput.addEventListener('input', filterPosts);
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            const target = e.currentTarget as HTMLElement;
+            target.classList.add('active');
+            filterPosts();
+        });
+    });
+</script>
+
+<style>
+    /* CSSは省略せずにそのまま保持します */
+    .blog-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+    .page-title { color: var(--color-primary); font-size: 2.2rem; text-align: center; margin-bottom: 10px; }
+    .page-desc { text-align: center; color: #666; margin-bottom: 30px; font-size: 1.1rem; }
+    .search-and-filter-wrapper { background-color: var(--color-bg); padding: 20px 0; margin-bottom: 40px; position: sticky; top: 60px; z-index: 10; border-bottom: 1px dashed #ccc; }
+    .search-input-container { position: relative; max-width: 600px; margin: 0 auto 20px; }
+    .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; }
+    #blog-search { width: 100%; box-sizing: border-box; padding: 12px 15px 12px 45px; border: 2px solid var(--color-primary); border-radius: 50px; font-size: 1.1rem; outline: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .filter-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 800px; margin: 0 auto; }
+    .filter-btn { background-color: white; border: 1px solid #ccc; color: var(--color-text); padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+    .filter-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+    .filter-btn.active { background-color: var(--color-primary); color: white; border-color: var(--color-primary); font-weight: bold; }
+    
+    /* リンクの線を消す */
+    .post-link-wrapper { text-decoration: none; color: inherit; display: block; }
+    
+    .post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+    .post-card { background: white; border: 1px solid #e0e0e0; padding: 25px; border-radius: 12px; transition: transform 0.2s ease, box-shadow 0.2s ease; display: flex; flex-direction: column; justify-content: flex-start; height: 100%; box-sizing: border-box;}
+    .post-link-wrapper:hover .post-card { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-color: var(--color-accent); }
+    .post-meta { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; font-size: 0.85rem; }
+    .post-date { color: #777; font-weight: bold; }
+    .post-tags { display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end; }
+    .tag { background: var(--color-primary); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; }
+    .post-title { font-size: 1.25rem; color: var(--color-text); margin-bottom: 20px; line-height: 1.5; flex-grow: 1; }
+    .read-more { display: inline-block; font-size: 0.95rem; color: var(--color-accent); font-weight: bold; text-align: right; margin-top: auto; }
+    .empty-state { grid-column: 1 / -1; text-align: center; padding: 50px; color: #777; background: #f9f9f9; border-radius: 10px; }
+    .hidden { display: none !important; }
+    #no-results { text-align: center; padding: 50px; color: #999; }
+</style>

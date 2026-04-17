@@ -1,0 +1,325 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const apiKey = import.meta.env.NOTION_API_KEY;
+const glossaryId = import.meta.env.NOTION_GLOSSARY_ID;
+
+// Notionから用語集データを取得
+const response = await fetch(`https://api.notion.com/v1/databases/${glossaryId}/query`, {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${apiKey}`,
+    'Notion-Version': '2022-06-28',
+    'Content-Type': 'application/json',
+  },
+});
+
+const data = await response.json();
+const terms = data.results || [];
+
+// Notionのデータから、登録されている「カテゴリー」の種類を重複なしで抜き出す魔法
+const categories = [...new Set(terms.map((t: any) => t.properties['カテゴリー']?.select?.name).filter(Boolean))];
+
+// 50音の行リスト
+const kanaRows = ['あ行', 'か行', 'さ行', 'た行', 'な行', 'は行', 'ま行', 'や行', 'ら行', 'わ行'];
+---
+
+<Layout title="手相用語集 | マヨネリ (Mayonery)">
+  <div class="glossary-container">
+    <h1 class="page-title">手相用語集</h1>
+    <p class="page-desc">マヨネリ独自の視点で解説する手相用語辞典です。</p>
+
+    <div class="search-and-filter-wrapper">
+      
+      <div class="search-input-container">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          id="glossary-search" 
+          placeholder="用語や読み方で検索... (例: 地丘、かんじょうせん)" 
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="index-section">
+        <div class="index-group">
+          <span class="index-label">カテゴリー：</span>
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">すべて</button>
+            {categories.map((cat) => {
+              return <button class="filter-btn" data-filter-type="category" data-filter-val={cat}>{cat}</button>;
+            })}
+          </div>
+        </div>
+
+        <div class="index-group">
+          <span class="index-label">五十音順：</span>
+          <div class="filter-buttons">
+            {kanaRows.map((row) => {
+              return <button class="filter-btn" data-filter-type="kana" data-filter-val={row}>{row}</button>;
+            })}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="terms-grid" id="terms-grid">
+      {terms.map((term: any) => {
+        const name = term.properties['名前']?.title[0]?.plain_text || '';
+        const category = term.properties['カテゴリー']?.select?.name || '未分類';
+        const reading = term.properties['読み']?.rich_text[0]?.plain_text || '';
+        const meaning = term.properties['意味']?.rich_text[0]?.plain_text || '';
+        
+        return (
+          <div class="term-card" data-name={name} data-reading={reading} data-category={category}>
+            <div class="term-header">
+              <span class="category-tag">{category}</span>
+              <span class="reading-label">{reading}</span>
+            </div>
+            <h2 class="term-name">{name}</h2>
+            {meaning && <p class="term-meaning">{meaning}</p>}
+          </div>
+        );
+      })}
+    </div>
+
+    <div id="no-results" class="hidden">
+      <p>該当する用語が見つかりませんでした。</p>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // 🚀 検索 ＋ 索引ボタンの連動システム
+  const searchInput = document.getElementById('glossary-search') as HTMLInputElement;
+  const cards = document.querySelectorAll('.term-card');
+  const noResults = document.getElementById('no-results');
+  const filterBtns = document.querySelectorAll('.filter-btn');
+
+  // ひらがなの最初の1文字から、どの「行」かを判定するための辞書
+  const kanaMap: Record<string, RegExp> = {
+    'あ行': /^[あ-お]/,
+    'か行': /^[か-こが-ご]/,
+    'さ行': /^[さ-そざ-ぞ]/,
+    'た行': /^[た-とだ-ど]/,
+    'な行': /^[な-の]/,
+    'は行': /^[は-ほば-ぼぱ-ぽ]/,
+    'ま行': /^[ま-も]/,
+    'や行': /^[や-よ]/,
+    'ら行': /^[ら-ろ]/,
+    'わ行': /^[わ-ん]/,
+  };
+
+  // 絞り込みを実行する関数
+  function filterTerms() {
+    const query = searchInput.value.toLowerCase().trim();
+    const activeBtn = document.querySelector('.filter-btn.active') as HTMLElement;
+    const filterType = activeBtn?.getAttribute('data-filter-type');
+    const filterVal = activeBtn?.getAttribute('data-filter-val');
+
+    let visibleCount = 0;
+
+    cards.forEach((card) => {
+      const htmlCard = card as HTMLElement;
+      const name = htmlCard.getAttribute('data-name')?.toLowerCase() || '';
+      const reading = htmlCard.getAttribute('data-reading') || ''; 
+      const category = htmlCard.getAttribute('data-category') || '';
+
+      // 1. 検索窓の条件をクリアしているか？
+      const matchSearch = name.includes(query) || reading.includes(query);
+
+      // 2. 索引ボタンの条件をクリアしているか？
+      let matchButton = true;
+      if (filterType === 'category') {
+        matchButton = (category === filterVal);
+      } else if (filterType === 'kana') {
+        const regex = kanaMap[filterVal!];
+        matchButton = regex ? regex.test(reading) : false;
+      }
+
+      // 両方の条件をクリアしたものだけを表示
+      if (matchSearch && matchButton) {
+        htmlCard.style.display = 'block';
+        visibleCount++;
+      } else {
+        htmlCard.style.display = 'none';
+      }
+    });
+
+    // 1件もなかった場合のメッセージ表示
+    if (visibleCount === 0) {
+      noResults?.classList.remove('hidden');
+    } else {
+      noResults?.classList.add('hidden');
+    }
+  }
+
+  // 検索窓に文字を入力した時のイベント
+  searchInput.addEventListener('input', filterTerms);
+
+  // 索引ボタンをクリックした時のイベント
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      const target = e.currentTarget as HTMLElement;
+      target.classList.add('active');
+      filterTerms();
+    });
+  });
+</script>
+
+<style>
+  .glossary-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .page-title {
+    text-align: center;
+    color: var(--color-primary);
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+  }
+  .page-desc {
+    text-align: center;
+    color: #666;
+    margin-bottom: 40px;
+  }
+
+  /* 検索＆索引エリアを上部に固定 */
+  .search-and-filter-wrapper {
+    background-color: var(--color-bg);
+    padding: 20px 0;
+    margin-bottom: 40px;
+    position: sticky;
+    top: 60px;
+    z-index: 10;
+    border-bottom: 1px dashed #ccc;
+  }
+
+  /* 検索窓 */
+  .search-input-container {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto 30px;
+  }
+  .search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+  }
+  #glossary-search {
+    width: 100%;
+    box-sizing: border-box; /* はみ出し防止 */
+    padding: 15px 15px 15px 45px;
+    border: 2px solid var(--color-primary);
+    border-radius: 50px;
+    font-size: 1.1rem;
+    outline: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    background-color: white;
+  }
+
+  /* 索引エリア */
+  .index-section {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .index-group {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+  }
+  .index-label {
+    font-weight: bold;
+    color: var(--color-primary);
+    min-width: 90px;
+    padding-top: 5px;
+  }
+  .filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .filter-btn {
+    background-color: white;
+    border: 1px solid #ccc;
+    color: var(--color-text);
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+  .filter-btn.active {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+    font-weight: bold;
+  }
+
+  /* カードのデザイン */
+  .terms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  .term-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+  }
+  .term-card:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transform: translateY(-3px);
+  }
+  .term-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .category-tag {
+    font-size: 0.75rem;
+    background: var(--color-primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .reading-label {
+    font-size: 0.85rem;
+    color: #888;
+  }
+  .term-name {
+    margin: 0;
+    font-size: 1.4rem;
+    color: var(--color-text);
+  }
+  .term-meaning {
+    margin-top: 15px;
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.6;
+    border-top: 1px dashed #eee;
+    padding-top: 15px;
+    white-space: pre-wrap; /* Notionの改行をそのまま反映する魔法 */
+  }
+
+  /* ここがないと隠れません！ */
+  .hidden { display: none !important; }
+  #no-results {
+    text-align: center;
+    padding: 50px;
+    color: #999;
+  }
+</style>

@@ -1,0 +1,109 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const apiKey = import.meta.env.NOTION_API_KEY;
+const databaseId = import.meta.env.NOTION_DATABASE_ID;
+
+const response = await fetch(`https://api.notion.com/v1/databases/${databaseId}/query`, {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${apiKey}`,
+    'Notion-Version': '2022-06-28',
+    'Content-Type': 'application/json',
+  },
+});
+
+const data = await response.json();
+const allPosts = data.results || [];
+
+const courses = allPosts.filter((post: any) => {
+  const status = post.properties['ステータス']?.status?.name || post.properties['ステータス']?.select?.name || '';
+  const tags = post.properties['タグ']?.multi_select?.map((t: any) => t.name) || [];
+  return status === '公開中' && tags.includes('講座');
+});
+
+courses.reverse();
+---
+
+<Layout title="手相講座 | 手相のマヨネリ">
+    <div class="page-container container">
+        <header class="page-header text-center">
+            <h1 class="page-title">手相講座のご案内</h1>
+            <p class="page-desc">迷信やスピリチュアルに依存しない、<br>論理的で体系化された「根本解決の手相学」を学ぶ講座です。</p>
+        </header>
+
+        <div class="concept-box">
+            <h3>「見えた相」から本質を導き出す</h3>
+            <p>当講座では、従来の「〇〇線があるから幸運」といった表面的な知識（アンチテーゼ）ではなく、なぜその線がそこに刻まれたのか、手の形や厚み（地丘）が何を意味しているのかを、理論立てて学習します。<br>自分自身の理解を深めたい初心者の方から、説得力のある鑑定ができるプロを目指す方まで、しっかりとサポートいたします。</p>
+        </div>
+
+        <div class="course-list">
+            {courses.length > 0 ? (
+                courses.map((course: any) => {
+                    const title = course.properties['タイトル']?.title[0]?.plain_text || '講座名未設定';
+                    const level = course.properties['レベル']?.select?.name || 'クラス未設定';
+                    const price = course.properties['価格']?.rich_text[0]?.plain_text || '価格未設定';
+                    const detail = course.properties['内容']?.rich_text[0]?.plain_text || '講座の詳細がまだありません。';
+                    
+                    // 💡 URLスラッグを取得
+                    const slug = course.properties['URLスラッグ']?.rich_text[0]?.plain_text || course.id;
+                    const isPro = level.includes('プロ');
+
+                    return (
+                        /* 💡 カード全体をリンク（aタグ）で囲みました！ */
+                        <a href={`/kouza/${slug}`} class="course-card-link">
+                            <div class="course-card">
+                                <div class="course-info">
+                                    <span class={`course-level ${isPro ? 'pro' : ''}`}>{level}</span>
+                                    <h2 class="course-name">{title}</h2>
+                                    <p class="course-price">{price}</p>
+                                    <p class="course-detail">{detail}</p>
+                                    <div class="read-more">講座の詳細を見る →</div>
+                                </div>
+                            </div>
+                        </a>
+                    );
+                })
+            ) : (
+                <div class="empty-state">
+                    <p>現在、募集中の講座はありません。</p>
+                </div>
+            )}
+        </div>
+    </div>
+</Layout>
+
+<style>
+    .page-container { padding: 50px 15px; max-width: 900px; margin: 0 auto; min-height: 70vh; }
+    .page-header { margin-bottom: 40px; }
+    .page-title { color: var(--color-primary); font-size: 2.5rem; margin-bottom: 15px; }
+    .page-desc { color: var(--color-text); font-size: 1.1rem; line-height: 1.6; }
+
+    .concept-box { background: var(--color-bg); padding: 35px; border-radius: 16px; margin-bottom: 50px; border-left: 5px solid var(--color-accent); }
+    .concept-box h3 { color: var(--color-primary); margin-bottom: 15px; font-size: 1.3rem; }
+    .concept-box p { line-height: 1.8; color: var(--color-text); }
+
+    .course-list { display: flex; flex-direction: column; gap: 30px; margin-bottom: 60px; }
+    
+    /* 💡 リンクの線を消す */
+    .course-card-link { text-decoration: none; color: inherit; display: block; }
+    
+    .course-card { background: white; border-radius: 16px; border: 1px solid #e1ebe5; overflow: hidden; box-shadow: 0 4px 15px rgba(78, 123, 103, 0.05); transition: transform 0.2s, box-shadow 0.2s; }
+    .course-card-link:hover .course-card { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(78, 123, 103, 0.15); border-color: var(--color-primary); }
+    
+    .course-info { padding: 40px; }
+    .course-level { display: inline-block; background: #e5ede9; color: var(--color-primary); padding: 6px 14px; border-radius: 6px; font-size: 0.9rem; font-weight: bold; margin-bottom: 15px; }
+    .course-level.pro { background: var(--color-primary); color: white; }
+    
+    .course-name { font-size: 1.6rem; color: var(--color-text); margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px; transition: color 0.2s; }
+    .course-card-link:hover .course-name { color: var(--color-primary); }
+    
+    .course-price { font-size: 1.5rem; font-weight: bold; color: var(--color-accent); margin-bottom: 20px; }
+    .course-detail { line-height: 1.8; color: #555; font-size: 1.05rem; margin-bottom: 20px;}
+    
+    /* 💡 「詳細を見る」ボタン風のテキストを追加 */
+    .read-more { text-align: right; color: var(--color-primary); font-weight: bold; font-size: 1.05rem; }
+
+    .empty-state { text-align: center; padding: 50px; background: white; border-radius: 16px; border: 1px dashed #ccc; color: #777; }
+    .text-center { text-align: center; }
+</style>

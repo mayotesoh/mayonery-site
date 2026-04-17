@@ -1,63 +1,138 @@
 ---
-import AboutHeroImage from '../assets/blog-placeholder-about.jpg';
-import Layout from '../layouts/BlogPost.astro';
+import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout
-	title="About Me"
-	description="Lorem ipsum dolor sit amet"
-	pubDate={new Date('August 08 2021')}
-	heroImage={AboutHeroImage}
->
-	<p>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-		labore et dolore magna aliqua. Vitae ultricies leo integer malesuada nunc vel risus commodo
-		viverra. Adipiscing enim eu turpis egestas pretium. Euismod elementum nisi quis eleifend quam
-		adipiscing. In hac habitasse platea dictumst vestibulum. Sagittis purus sit amet volutpat. Netus
-		et malesuada fames ac turpis egestas. Eget magna fermentum iaculis eu non diam phasellus
-		vestibulum lorem. Varius sit amet mattis vulputate enim. Habitasse platea dictumst quisque
-		sagittis. Integer quis auctor elit sed vulputate mi. Dictumst quisque sagittis purus sit amet.
-	</p>
+<Layout title="自己紹介 | 手相のマヨネリ">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-	<p>
-		Morbi tristique senectus et netus. Id semper risus in hendrerit gravida rutrum quisque non
-		tellus. Habitasse platea dictumst quisque sagittis purus sit amet. Tellus molestie nunc non
-		blandit massa. Cursus vitae congue mauris rhoncus. Accumsan tortor posuere ac ut. Fringilla urna
-		porttitor rhoncus dolor. Elit ullamcorper dignissim cras tincidunt lobortis. In cursus turpis
-		massa tincidunt dui ut ornare lectus. Integer feugiat scelerisque varius morbi enim nunc.
-		Bibendum neque egestas congue quisque egestas diam. Cras ornare arcu dui vivamus arcu felis
-		bibendum. Dignissim suspendisse in est ante in nibh mauris. Sed tempus urna et pharetra pharetra
-		massa massa ultricies mi.
-	</p>
+    <div class="page-container container">
+        
+        <section class="hero-section text-center">
+            <h1 class="main-catch">手相は最強の「自己分析ツール」である。</h1>
+            <p class="sub-catch">運命を「当てる」のではなく、手相の「仕組み」を論理的に紐解く。<br>迷信やオカルトを排除し、論理と現実的な視点であなたの「設計」を読み解き、人生の戦略ツールへと昇華させます。</p>
+        </section>
 
-	<p>
-		Mollis nunc sed id semper risus in. Convallis a cras semper auctor neque. Diam sit amet nisl
-		suscipit. Lacus viverra vitae congue eu consequat ac felis donec. Egestas integer eget aliquet
-		nibh praesent tristique magna sit amet. Eget magna fermentum iaculis eu non diam. In vitae
-		turpis massa sed elementum. Tristique et egestas quis ipsum suspendisse ultrices. Eget lorem
-		dolor sed viverra ipsum. Vel turpis nunc eget lorem dolor sed viverra. Posuere ac ut consequat
-		semper viverra nam. Laoreet suspendisse interdum consectetur libero id faucibus. Diam phasellus
-		vestibulum lorem sed risus ultricies tristique. Rhoncus dolor purus non enim praesent elementum
-		facilisis. Ultrices tincidunt arcu non sodales neque. Tempus egestas sed sed risus pretium quam
-		vulputate. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Fringilla
-		urna porttitor rhoncus dolor purus non. Amet dictum sit amet justo donec enim.
-	</p>
+        <section class="greeting-section">
+            <h2 class="section-title left-align">ご挨拶・手相への理念</h2>
+            
+            <div class="greeting-top-content">
+                <div class="profile-image-wrap">
+                    <img src="/mayonery.png" alt="手相研究家 マヨネリ" class="profile-img" />
+                </div>
+                <div class="greeting-intro">
+                    <p class="lead-text">はじめまして。札幌を拠点に手相鑑定や情報発信を行っている手相研究家のマヨネリです。</p>
+                </div>
+            </div>
 
-	<p>
-		Mattis ullamcorper velit sed ullamcorper morbi tincidunt. Tortor posuere ac ut consequat semper
-		viverra. Tellus mauris a diam maecenas sed enim ut sem viverra. Venenatis urna cursus eget nunc
-		scelerisque viverra mauris in. Arcu ac tortor dignissim convallis aenean et tortor at. Curabitur
-		gravida arcu ac tortor dignissim convallis aenean et tortor. Egestas tellus rutrum tellus
-		pellentesque eu. Fusce ut placerat orci nulla pellentesque dignissim enim sit amet. Ut enim
-		blandit volutpat maecenas volutpat blandit aliquam etiam. Id donec ultrices tincidunt arcu. Id
-		cursus metus aliquam eleifend mi.
-	</p>
+            <div class="greeting-main-text">
+                <p>世間一般の手相占いに対して、「線が短いから短命だ」「この線を書き足せば金運が上がる」といった、不安を煽るような迷信や、根拠のないスピリチュアルな解釈に違和感を持ったことはありませんか？</p>
+                <p>私は、そうした従来の手相観に対する<strong>「アンチテーゼ（常識破壊）」</strong>として、徹底的に論理的・分析的な手相術を提唱しています。</p>
+                
+                <p>手相とは、あなたの現状や本来の設計（どのような役割をもって生まれたか）を映し出す鏡であり、あなたが持っているリソース（体力・思考・感情）の配分を示す、非常に現実的で精密な客観的データです。</p>
+                <p>自分の設計を深く理解し、その姿に合った立ち回りができるようになることで、悩みや不安は解消され、自分が行っていることに確かな自信が湧いてきます。</p>
+                
+                <p class="highlight-quote">自分に合った設計を見つけることで、あなたという「キャラクター」の最高の活かし方が見えてきます。</p>
+                
+                <p>ただ結果を伝える占いではなく、「なぜそうなるのか」という根本的な理由を紐解き、あなたが「自分らしいブレない軸」を見つけて前向きに生きるためのヒントをお渡しします。</p>
+            </div>
+        </section>
 
-	<p>
-		Tempus quam pellentesque nec nam aliquam sem. Risus at ultrices mi tempus imperdiet. Id porta
-		nibh venenatis cras sed felis eget velit. Ipsum a arcu cursus vitae. Facilisis magna etiam
-		tempor orci eu lobortis elementum. Tincidunt dui ut ornare lectus sit. Quisque non tellus orci
-		ac. Blandit libero volutpat sed cras. Nec tincidunt praesent semper feugiat nibh sed pulvinar
-		proin gravida. Egestas integer eget aliquet nibh praesent tristique magna.
-	</p>
+        <section class="profile-section">
+            <h2 class="section-title">プロフィール</h2>
+            <div class="profile-box">
+                <p>実家の古書をきっかけに手相の世界へ入り、後に実祖父が手相家であったことを知る。以来、独学で10年以上の歳月をかけ、人間の「違い」や本質と手相の相関性を追究し続けています。</p>
+                <p>現在は神経科学や脳科学の視点も交え、手相を個人の特性（パラメーター）として捉える独自のアプローチを確立。</p>
+                <p>鑑定においては、相談者の現状と手相が示す特性の「ミスマッチ」を暴き出し、「流年法」を用いて運命が動く時期を正確に特定。弱点をカバーし強みを活かすための「具体的な人生の戦略」を導き出す、実践的なコンサルティングスタイルを得意としています。</p>
+            </div>
+        </section>
+
+        <section class="activities-section">
+            <h2 class="section-title">主な活動内容</h2>
+            <div class="activities-grid">
+                
+                <div class="activity-card">
+                    <div class="act-icon youtube"><i class="fa-brands fa-youtube"></i></div>
+                    <h3>YouTubeでの動画発信</h3>
+                    <p>「なぜその線がそういう意味になるのか？」という根本的な理由を、図解や論理的なアプローチで分かりやすく解説する教育系コンテンツ（ショート・本編）を配信しています。</p>
+                </div>
+
+                <div class="activity-card">
+                    <div class="act-icon database"><i class="fa-solid fa-database"></i></div>
+                    <h3>手相データベースの構築と執筆</h3>
+                    <p>感覚的な占いを脱却するため、手相の用語や知識を体系的にまとめた辞書サイトを運営しています。誰もが検索・学習できる環境を構築しつつ、さらに深く学べる電子書籍の出版に向けて執筆活動を行っています。</p>
+                </div>
+
+                <div class="activity-card">
+                    <div class="act-icon community"><i class="fa-solid fa-users"></i></div>
+                    <h3>コミュニティ運営・後進育成</h3>
+                    <p>手相を深く学び、疑問を共有できるLINEオープンチャット『手相学会』や、自身の鑑定ノウハウを体系化した「手相学習得プログラム」を主宰し、後進の育成にも注力しています。</p>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="closing-section text-center">
+            <h2 class="final-message">「観れる相を探す」のではなく、<br>「観た相を分析する」。</h2>
+            <p>他の占いでは納得できなかった方、もっと本質的な知識を学びたい方に向けて、<br>嘘偽りのない手相学を発信していきます。</p>
+        </section>
+
+    </div>
 </Layout>
+
+<style>
+    .page-container { padding: 60px 15px; max-width: 900px; margin: 0 auto; color: var(--color-text); }
+    .text-center { text-align: center; }
+
+    /* 1. ヒーローセクション */
+    .hero-section { margin-bottom: 80px; }
+    .main-catch { color: var(--color-primary); font-size: 2.4rem; line-height: 1.4; margin-bottom: 25px; letter-spacing: 0.05em; }
+    .sub-catch { font-size: 1.15rem; line-height: 1.8; color: #555; }
+
+    /* 2. ご挨拶と写真 */
+    .greeting-section { margin-bottom: 80px; }
+    .section-title { color: var(--color-primary); font-size: 1.8rem; margin-bottom: 30px; text-align: center; }
+    .section-title.left-align { text-align: left; border-bottom: 2px solid var(--color-bg); padding-bottom: 15px; }
+
+    .greeting-top-content { display: flex; gap: 40px; align-items: center; margin-bottom: 30px; }
+    .profile-image-wrap { flex: 1; max-width: 350px; }
+    .profile-img { width: 100%; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 3px solid white; object-fit: cover; }
+    .greeting-intro { flex: 1.5; }
+    .lead-text { font-weight: bold; font-size: 1.25rem !important; color: var(--color-accent); line-height: 1.8; }
+
+    .greeting-main-text p { line-height: 1.9; margin-bottom: 20px; font-size: 1.05rem; }
+    .highlight-quote { background: var(--color-bg); padding: 20px; border-left: 5px solid var(--color-primary); font-weight: bold; border-radius: 0 8px 8px 0; font-size: 1.1rem !important; margin: 30px 0 !important; color: var(--color-text); }
+
+    /* 3. プロフィール詳細 */
+    .profile-section { margin-bottom: 80px; }
+    .profile-box { background: white; padding: 40px; border-radius: 16px; border: 1px solid #e1ebe5; box-shadow: 0 4px 15px rgba(78, 123, 103, 0.05); }
+    .profile-box p { line-height: 1.8; font-size: 1.05rem; margin-bottom: 15px; }
+    .profile-box p:last-child { margin-bottom: 0; }
+
+    /* 4. 主な活動内容 */
+    .activities-section { margin-bottom: 80px; }
+    .activities-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px; }
+    .activity-card { background: white; padding: 35px 25px; border-radius: 16px; text-align: center; border: 1px solid #e1ebe5; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: transform 0.3s; }
+    .activity-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(78, 123, 103, 0.1); }
+    
+    .act-icon { width: 60px; height: 60px; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center; border-radius: 50%; font-size: 1.8rem; color: white; }
+    .act-icon.youtube { background-color: #FF0000; }
+    .act-icon.database { background-color: var(--color-primary); }
+    .act-icon.community { background-color: #06C755; }
+    
+    .activity-card h3 { color: var(--color-text); font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px; }
+    .activity-card p { font-size: 0.95rem; line-height: 1.7; color: #555; text-align: left; }
+
+    /* 5. 締めくくり */
+    .closing-section { background: var(--color-bg); padding: 50px 30px; border-radius: 20px; }
+    .final-message { color: var(--color-primary); font-size: 2rem; line-height: 1.5; margin-bottom: 20px; }
+    .closing-section p { font-size: 1.1rem; line-height: 1.8; color: #555; font-weight: bold; }
+
+    /* スマホ・タブレット用レスポンシブ */
+    @media (max-width: 768px) {
+        .main-catch { font-size: 1.8rem; }
+        .greeting-top-content { flex-direction: column; gap: 20px; }
+        .profile-image-wrap { max-width: 100%; width: 80%; }
+        .section-title.left-align { text-align: center; }
+        .final-message { font-size: 1.5rem; }
+    }
+</style>

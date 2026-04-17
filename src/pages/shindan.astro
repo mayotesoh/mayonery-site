@@ -1,0 +1,407 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="無料手相診断 | 手相のマヨネリ">
+    <div class="shindan-page container">
+        
+        <div id="start-screen" class="shindan-card text-center">
+            <h1 class="main-title">✋ 無料手相・性格診断</h1>
+            <p class="sub-title">あなたの「設計」を見つめ直す第一歩</p>
+            <div class="desc-box">
+                <p>専門的な手相知識に基づいて、あなたの性格や行動特性を詳しく分析します。</p>
+                <p>質問は全部で12問。約2分で完了します。</p>
+            </div>
+            <button onclick="startDiagnosis()" class="btn-primary pulse-animation">
+                診断を始める
+            </button>
+        </div>
+
+        <div id="question-screen" class="shindan-card" style="display: none;">
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            
+            <div class="question-header text-center">
+                <span id="question-number" class="q-number"></span>
+                <h2 id="question-title" class="q-title"></h2>
+            </div>
+            
+            <div id="question-image" class="image-container text-center">
+                </div>
+            
+            <div id="choices" class="choices-container">
+                </div>
+            
+            <div class="back-btn-container text-center" id="back-button-container" style="display: none;">
+                <button onclick="previousQuestion()" class="btn-text">
+                    ← 前の質問に戻る
+                </button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="shindan-card" style="display: none;">
+            <div class="text-center">
+                <h1 class="main-title">🎯 診断結果</h1>
+                <p class="sub-title mb-8">あなたの手相から読み解いた詳細な分析</p>
+            </div>
+            
+            <div id="diagnosis-result" class="result-content">
+                </div>
+            
+            <div class="action-buttons text-center mt-10">
+                <p class="share-text">診断結果をシェアする</p>
+                <div class="share-buttons">
+                    <button onclick="shareToTwitter()" class="btn-share twitter">X (Twitter)</button>
+                    <button onclick="shareToFacebook()" class="btn-share facebook">Facebook</button>
+                    <button onclick="shareToLine()" class="btn-share line">LINE</button>
+                </div>
+                
+                <div class="mt-8">
+                    <button onclick="restartDiagnosis()" class="btn-secondary">
+                        もう一度診断する
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</Layout>
+
+<script is:inline>
+    // 💡 すべて .png で指定しています
+    const questions = [
+        { id: 1, category: "lifeline", title: "生命線の高さ", image: "/lifeline_height.png", choices: ["高い", "低い", "普通"] },
+        { id: 2, category: "lifeline", title: "生命線の張り", image: "/lifeline_curve.png", choices: ["大きい", "少ない", "普通"] },
+        { id: 3, category: "lifeline", title: "生命線の向き", image: "/lifeline_direction.png", choices: ["小指方面", "親指方面", "手首方面"] },
+        { id: 4, category: "headline", title: "頭脳線の長さ", image: "/headline_length.png", choices: ["長い", "短い", "普通"] },
+        { id: 5, category: "headline", title: "頭脳線と感情線の距離", image: "/headline_emotion_distance.png", choices: ["近い", "遠い", "くっついている"] },
+        { id: 6, category: "headline", title: "頭脳線と生命線の距離", image: "/headline_life_distance.png", choices: ["離れている", "同じくらい", "くっついている"] },
+        { id: 7, category: "headline", title: "頭脳線の向き", image: "/headline_direction.png", choices: ["まっすぐ", "斜め", "大きく下がる"] },
+        { id: 8, category: "heartline", title: "感情線の長さ", image: "/heartline_length.png", choices: ["長い", "短い", "普通"] },
+        { id: 9, category: "heartline", title: "感情線の高さ", image: "/heartline_height.png", choices: ["高い", "低い", "普通"] },
+        { id: 10, category: "heartline", title: "感情線の向き", image: "/heartline_direction.png", choices: ["まっすぐ", "上まで上がっている", "中間", "下がっている"] },
+        { id: 11, category: "hand", title: "手の形", image: "/hand_shape.png", choices: ["正方形", "長方形"] },
+        { id: 12, category: "finger", title: "指の長さ", image: "/finger_length.png", choices: ["長い", "短い"] }
+    ];
+
+    let currentQuestion = 0;
+    let answers = {};
+
+    function startDiagnosis() {
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('question-screen').style.display = 'block';
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const question = questions[currentQuestion];
+        const progress = ((currentQuestion + 1) / questions.length) * 100;
+        
+        document.getElementById('progress-bar').style.width = progress + '%';
+        document.getElementById('question-number').textContent = `質問 ${currentQuestion + 1} / ${questions.length}`;
+        document.getElementById('question-title').textContent = question.title;
+        
+        const imageContainer = document.getElementById('question-image');
+        imageContainer.innerHTML = `<img src="${question.image}" alt="${question.title}" class="palm-image" onerror="this.style.display='none'">`;
+        
+        const choicesContainer = document.getElementById('choices');
+        choicesContainer.innerHTML = '';
+        
+        question.choices.forEach((choice) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-choice';
+            btn.textContent = choice;
+            btn.onclick = () => selectChoice(choice);
+            choicesContainer.appendChild(btn);
+        });
+        
+        document.getElementById('back-button-container').style.display = currentQuestion > 0 ? 'block' : 'none';
+    }
+
+    function selectChoice(choice) {
+        const question = questions[currentQuestion];
+        answers[question.id] = { question: question.title, answer: choice, category: question.category };
+        currentQuestion++;
+        
+        if (currentQuestion < questions.length) {
+            setTimeout(showQuestion, 200);
+        } else {
+            setTimeout(showResult, 200);
+        }
+    }
+
+    function previousQuestion() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            delete answers[questions[currentQuestion].id];
+            showQuestion();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('question-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('diagnosis-result').innerHTML = generateDiagnosis();
+    }
+
+    function generateDiagnosis() {
+        const lifeline = getAnswersByCategory('lifeline');
+        const headline = getAnswersByCategory('headline');
+        const heartline = getAnswersByCategory('heartline');
+        const hand = getAnswersByCategory('hand');
+        const finger = getAnswersByCategory('finger');
+        
+        return `
+            <div class="result-box">
+                <h3 class="result-title">🏃 生命線から見る行動特性</h3>
+                <p class="result-text">${generateLifelineDiagnosis(lifeline)}</p>
+            </div>
+            <div class="result-box">
+                <h3 class="result-title">🧠 頭脳線から見る思考パターン</h3>
+                <p class="result-text">${generateHeadlineDiagnosis(headline)}</p>
+            </div>
+            <div class="result-box">
+                <h3 class="result-title">❤️ 感情線から見る感情表現</h3>
+                <p class="result-text">${generateHeartlineDiagnosis(heartline)}</p>
+            </div>
+            <div class="result-box">
+                <h3 class="result-title">✋ 手の形と指から見る価値観</h3>
+                <p class="result-text">${generateHandDiagnosis(hand, finger)}</p>
+            </div>
+            <div class="result-box highlight-box">
+                <h3 class="result-title">✨ 総合的なあなたの性格</h3>
+                <p class="result-text">${generateOverallDiagnosis(lifeline, headline, heartline, hand, finger)}</p>
+            </div>
+        `;
+    }
+
+    function getAnswersByCategory(category) { return Object.values(answers).filter(answer => answer.category === category); }
+
+    function generateLifelineDiagnosis(lifeline) {
+        const height = lifeline.find(a => a.question === '生命線の高さ')?.answer;
+        const curve = lifeline.find(a => a.question === '生命線の張り')?.answer;
+        const direction = lifeline.find(a => a.question === '生命線の向き')?.answer;
+        
+        let diagnosis = "あなたの生命線の特徴から、基本的な行動パターンと活動エネルギーの使い方が読み取れます。";
+        if (height === '高い') diagnosis += "直感的で衝動的な行動を取りやすい傾向があります。新しいアイデアや機会が現れたとき、深く考える前にまず行動に移すタイプです。";
+        else if (height === '低い') diagnosis += "物事を慎重に考えてから行動する非衝動的なタイプです。リスクを十分に検討し、計画的にアプローチすることで、安定した成果を上げることができます。";
+        else diagnosis += "衝動性と慎重さのバランスが取れています。状況に応じて、時には積極的に行動し、時には慎重に判断するという柔軟性を持っています。";
+        
+        if (curve === '大きい') diagnosis += "また、豊富なバイタリティと活動的なエネルギーを持っています。困難な状況でも持ち前のエネルギーで乗り越えられます。";
+        else if (curve === '少ない') diagnosis += "また、精神的な充実感を重視するタイプで、量よりも質を大切にし、深く考え抜かれた行動を取ることを好みます。";
+        else diagnosis += "また、活動的な面と精神的な面のバランスが良く取れています。";
+
+        if (direction === '小指方面') diagnosis += "外向的で環境を変化させることを好む、向上心の強い性格です。";
+        else if (direction === '親指方面') diagnosis += "内向的で安定した環境を好み、信頼できる仲間との絆を大切にする性格です。";
+        else diagnosis += "基盤を重視する安定志向の性格で、持続可能な成長を目指す賢明さを持っています。";
+        return diagnosis;
+    }
+
+    function generateHeadlineDiagnosis(headline) {
+        const length = headline.find(a => a.question === '頭脳線の長さ')?.answer;
+        const emotionDistance = headline.find(a => a.question === '頭脳線と感情線の距離')?.answer;
+        const lifeDistance = headline.find(a => a.question === '頭脳線と生命線の距離')?.answer;
+        const direction = headline.find(a => a.question === '頭脳線の向き')?.answer;
+        
+        let diagnosis = "あなたの頭脳線から、思考の特徴と意思決定のパターンを詳しく分析してみましょう。";
+        if (length === '長い') diagnosis += "物事を深く考え抜く長考型の思考パターンを持っています。複雑な問題に対しても時間をかけてじっくりと分析できます。";
+        else if (length === '短い') diagnosis += "直感的で素早い判断を得意とする回転の早い思考タイプです。スピーディーに結論を導き出すことができます。";
+        else diagnosis += "深く考える時と直感で判断する時のバランスが良く取れており、効率的で現実的な判断を下すことができます。";
+        
+        if (emotionDistance === '近い') diagnosis += "思考に感情が大きく影響するタイプで、人の気持ちを理解した温かみのある決定ができます。";
+        else if (emotionDistance === '遠い') diagnosis += "冷静で客観的な判断力に優れており、感情に左右されることなく合理的な決定を下すことができます。";
+        else diagnosis += "頭脳線と感情線がくっついているマスカケ線をお持ちのあなたは、極端で独創的な発想を生み出すことができる稀有な才能の持ち主です。";
+
+        if (lifeDistance === '離れている') diagnosis += "行動に対して思考の制約が少なく、自由な発想で積極的に行動することができます。";
+        else if (lifeDistance === '同じくらい') diagnosis += "思考と行動の調和が取れており、適度に考えてから行動に移すという現実的なスタイルを持っています。";
+        else diagnosis += "行動する前にしっかりと考える慎重なタイプで、リスクを最小限に抑えた安全な判断を下すことができます。";
+
+        if (direction === 'まっすぐ') diagnosis += "理論よりも実際の結果を重視する、現実的で実践的な思考を好みます。";
+        else if (direction === '斜め') diagnosis += "現実的な思考と理想的な発想のバランスが取れた柔軟な思考力を持っています。";
+        else diagnosis += "想像力豊かで、既存の枠にとらわれない斬新なアイデアを生み出すことができる感性豊かな思考力を持っています。";
+        return diagnosis;
+    }
+
+    function generateHeartlineDiagnosis(heartline) {
+        const length = heartline.find(a => a.question === '感情線の長さ')?.answer;
+        const height = heartline.find(a => a.question === '感情線の高さ')?.answer;
+        const direction = heartline.find(a => a.question === '感情線の向き')?.answer;
+        
+        let diagnosis = "あなたの感情線から、感情の豊かさと表現方法の特徴を詳しく見ていきましょう。";
+        if (length === '長い') diagnosis += "非常に豊かで深い感情を持っています。愛情深く情熱的で、人との関係においても深いつながりを求める傾向があります。";
+        else if (length === '短い') diagnosis += "さっぱりとした爽やかな感情表現を持っています。感情に振り回されることなく、冷静で客観的な判断ができます。";
+        else diagnosis += "感情の豊かさと冷静さのバランスが取れています。柔軟な感情表現ができるタイプです。";
+        
+        if (height === '高い') diagnosis += "また、外向的で社交性に優れています。自分の感情を素直に表現することができ、明るく開放的な性格です。";
+        else if (height === '低い') diagnosis += "また、内向的で深く考える傾向があります。少数の親しい人との時間を大切にし、質の高い人間関係を築くことを好みます。";
+        else diagnosis += "また、外向性と内向性のバランスが取れており、適応性の高い感情表現ができます。";
+
+        if (direction === 'まっすぐ') diagnosis += "クールで落ち着いた感情表現を持ち、理性的に自分の気持ちをコントロールできます。";
+        else if (direction === '上まで上がっている') diagnosis += "積極的で情熱的な感情表現を持ち、自分の気持ちをはっきりと相手に伝えることができます。";
+        else if (direction === '中間') diagnosis += "状況を見ながら適切なタイミングで自分の気持ちを伝えることができる配慮深さを持っています。";
+        else diagnosis += "控えめで奥ゆかしい感情表現を持ち、相手のペースに合わせることができる思いやり深い性格です。";
+        return diagnosis;
+    }
+
+    function generateHandDiagnosis(hand, finger) {
+        const handShape = hand[0]?.answer;
+        const fingerLength = finger[0]?.answer;
+        
+        let diagnosis = "あなたの手の形と指の長さから、基本的な価値観と情報処理のスタイルを分析します。";
+        if (handShape === '正方形') diagnosis += "現実的で実践的な価値観を重視します。理論よりも実際の体験を重視し、着実に結果を積み重ねていく堅実さを持っています。";
+        else diagnosis += "理想的で精神的な価値観を重視します。目に見えない価値や精神的な豊かさを大切にし、独創的な発想を生み出すことができます。";
+        
+        if (fingerLength === '長い') diagnosis += "また、複雑な情報でも整理整頓して理解し、詳細な部分まで注意深く検討する、情報処理能力に優れた分析的なタイプです。";
+        else diagnosis += "また、詳細な分析よりも、直感や過去の経験に基づいて素早く判断を下すことを好む、主観的で直感的な判断を重視するタイプです。";
+        return diagnosis;
+    }
+
+    function generateOverallDiagnosis(lifeline, headline, heartline, hand, finger) {
+        const lifeHeight = lifeline.find(a => a.question === '生命線の高さ')?.answer;
+        const headLength = headline.find(a => a.question === '頭脳線の長さ')?.answer;
+        const heartLength = heartline.find(a => a.question === '感情線の長さ')?.answer;
+        const handShape = hand[0]?.answer;
+        
+        let diagnosis = "これまでの分析を総合すると、あなたは非常にユニークで魅力的な個性を持った人物であることがわかります。<br><br>";
+        
+        if (lifeHeight === '高い' && headLength === '短い') diagnosis += "最大の強みは「直感的な行動力と素早い判断力」です。他の人が迷っている間に迅速に行動を起こし、チャンスを掴むことができます。";
+        else if (lifeHeight === '低い' && headLength === '長い') diagnosis += "最大の強みは「慎重な性格と深い思考力」です。多角的な分析を行ってから行動するため、失敗が少なく安定した成果を上げることができます。";
+        else diagnosis += "最大の強みは「バランスの取れた行動力と思考力」です。状況に応じて柔軟に対応し、適切な判断を下すことができる適応力の高さが光ります。";
+        
+        if (heartLength === '長い') diagnosis += "人間関係においては、その深い愛情と温かさで多くの人から信頼され、頼られる存在となるでしょう。";
+        else if (heartLength === '短い') diagnosis += "人間関係においては、相手に重い負担をかけることなく、長続きする安定した心地よい関係を築くことができます。";
+        else diagnosis += "人間関係においては、適度な距離感を保ちながら深いつながりも築けるため、多様な人々と良好な関係を維持できます。";
+        
+        if (handShape === '正方形') diagnosis += "今後は、その実践的なアプローチを活かし、具体的な成果を上げることができる分野でさらなる活躍が期待できます。";
+        else diagnosis += "今後は、その創造性と理想を追求する姿勢を活かし、革新的なアイデアで社会に新しい価値を提供していくことができるでしょう。";
+        
+        diagnosis += "<br><br>あなたには無限の可能性があります。この診断結果を参考に、自信を持って人生を歩んでいってください。";
+        return diagnosis;
+    }
+
+    function shareToTwitter() {
+        const text = encodeURIComponent("手相のマヨネリで無料性格診断をやってみました！専門的な手相知識ベースで面白い✨ #手相占い #性格診断");
+        const url = encodeURIComponent(window.location.href);
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+    }
+    function shareToFacebook() { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank'); }
+    function shareToLine() { window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent("手相で性格がわかる診断サイト見つけた！無料だから試してみて✨")}`, '_blank'); }
+    function restartDiagnosis() {
+        currentQuestion = 0;
+        answers = {};
+        document.getElementById('result-screen').style.display = 'none';
+        document.getElementById('start-screen').style.display = 'block';
+    }
+</script>
+
+<style is:global>
+    /* 🌟 魔法１：すべての要素の横幅計算を「枠内」に強制する */
+    .shindan-page * {
+        box-sizing: border-box !important;
+    }
+
+    .shindan-page {
+        padding: 40px 15px;
+        max-width: 800px;
+        margin: 0 auto;
+        min-height: 70vh;
+    }
+
+    .shindan-card {
+        background-color: white;
+        border-radius: 16px;
+        padding: 40px 30px;
+        box-shadow: 0 10px 30px rgba(92, 74, 64, 0.08);
+        border: 1px solid #eee;
+        width: 100%;       /* 枠いっぱいに広げる */
+        overflow: hidden;  /* 🌟 魔法２：枠からはみ出したものは強制的に切り捨てる（隠す） */
+    }
+
+    .main-title { color: var(--color-primary); font-size: 2rem; margin-bottom: 10px; }
+    .sub-title { color: var(--color-accent); font-weight: bold; font-size: 1.1rem; margin-bottom: 30px; }
+    .desc-box { background-color: var(--color-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; color: var(--color-text); line-height: 1.6; }
+
+    .progress-container { background-color: #eee; height: 8px; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+    .progress-bar { background-color: var(--color-accent); height: 100%; transition: width 0.4s ease; }
+
+    .question-header { margin-bottom: 30px; }
+    .q-number { display: inline-block; background-color: var(--color-bg); color: var(--color-primary); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; }
+    .q-title { font-size: 1.5rem; color: var(--color-text); }
+    
+    /* 🌟 画像エリアの最終調整 */
+    .image-container {
+        width: 100%;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .palm-image {
+        max-width: 100%;    /* 絶対に枠を超えない */
+        width: auto;
+        height: auto;
+        max-height: 320px;  /* 高すぎないように制御 */
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* 🌟 ボタンエリアの最終調整 */
+    .choices-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+        margin-bottom: 30px;
+    }
+    .btn-choice {
+        background-color: white;
+        border: 2px solid var(--color-primary);
+        color: var(--color-primary);
+        padding: 15px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+        -webkit-appearance: none; /* 🌟 魔法３：ブラウザ標準のグレーボタンデザインを強制リセット */
+        appearance: none;
+    }
+    .btn-choice:hover {
+        background-color: var(--color-primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* 結果画面の要素 */
+    .result-box { background-color: var(--color-bg); padding: 25px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid var(--color-accent); text-align: left;}
+    .highlight-box { background-color: var(--color-primary); color: white; border-left: none; }
+    .result-title { font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px dashed rgba(0,0,0,0.1); padding-bottom: 10px; }
+    .highlight-box .result-title { border-bottom-color: rgba(255,255,255,0.3); }
+    .result-text { line-height: 1.8; font-size: 1rem; }
+
+    /* ボタン類 */
+    .btn-primary { background-color: var(--color-primary); color: white; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 30px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(92, 74, 64, 0.3); }
+    .btn-secondary { background-color: white; color: var(--color-text); border: 2px solid #ccc; padding: 12px 30px; font-weight: bold; border-radius: 30px; cursor: pointer; transition: all 0.2s; }
+    .btn-secondary:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .btn-text { background: none; border: none; color: #888; cursor: pointer; font-weight: bold; text-decoration: underline; }
+    .btn-text:hover { color: var(--color-primary); }
+
+    .share-text { font-weight: bold; margin-bottom: 15px; }
+    .share-buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+    .btn-share { padding: 10px 20px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
+    .btn-share:hover { opacity: 0.8; }
+    .twitter { background-color: #000000; }
+    .facebook { background-color: #1877F2; }
+    .line { background-color: #06C755; }
+
+    .pulse-animation { animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    .text-center { text-align: center; }
+    .mb-8 { margin-bottom: 2rem; }
+    .mt-10 { margin-top: 2.5rem; }
+    .mt-8 { margin-top: 2rem; }
+</style>
