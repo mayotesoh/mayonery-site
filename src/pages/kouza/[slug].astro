@@ -1,12 +1,12 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 
-// 1. TypeScriptに「講座データが入ってくるよ」と教える
+// 1. TypeScriptにデータの形を教える（白画面防止）
 interface Props {
   course: any;
 }
 
-// 1. 全講座のURLのリストを作る
+// 2. 全講座のURLリストを作成
 export async function getStaticPaths() {
   const apiKey = import.meta.env.NOTION_API_KEY;
   const databaseId = import.meta.env.NOTION_DATABASE_ID;
@@ -29,7 +29,7 @@ export async function getStaticPaths() {
   });
 
   return courses.map((course: any) => {
-    const slug = course.properties['URLスラッグ']?.rich_text[0]?.plain_text || course.id;
+    const slug = course.properties['URLスラッグ']?.rich_text?.[0]?.plain_text || course.id;
     return {
       params: { slug: slug },
       props: { course: course },
@@ -37,20 +37,25 @@ export async function getStaticPaths() {
   });
 }
 
-// 2. データの受け取り
+// 3. データの受け取りと安全な抽出
 const { course } = Astro.props;
 
-// courseが存在しない場合の安全策
 if (!course) {
   return Astro.redirect('/404');
 }
 
-const title = course.properties['タイトル']?.title[0]?.plain_text || '無題';
-const level = course.properties['レベル']?.select?.name || 'クラス未設定';
-const price = course.properties['価格']?.rich_text[0]?.plain_text || '';
-const isPro = level.includes('プロ');
+// プロパティ名の不一致や空欄でも止まらないようガード
+const title = course.properties['タイトル']?.title?.[0]?.plain_text || '無題の講座';
 
-// 3. NotionのAPIを叩いて「本文（ブロック）」を取得する
+// レベル（マルチセレクト）から最初の1つを取得。なければ「クラス未設定」
+const levels = course.properties['レベル']?.multi_select?.map((m: any) => m.name) || [];
+const level = levels[0] || 'クラス未設定';
+const isPro = levels.includes('プロ');
+
+// 価格（リッチテキスト）を取得。なければ空文字
+const price = course.properties['価格']?.rich_text?.[0]?.plain_text || '';
+
+// 4. 本文（ブロック）の取得
 const apiKey = import.meta.env.NOTION_API_KEY;
 const blocksResponse = await fetch(`https://api.notion.com/v1/blocks/${course.id}/children?page_size=100`, {
   headers: {
@@ -61,3 +66,131 @@ const blocksResponse = await fetch(`https://api.notion.com/v1/blocks/${course.id
 const blocksData = await blocksResponse.json();
 const blocks = blocksData.results || [];
 ---
+
+<Layout title={`${title} | マヨネリ手相講座`}>
+    <article class="single-course-container container">
+        
+        <div class="back-link-top">
+            <a href="/kouza" class="btn-text">← 講座一覧へ戻る</a>
+        </div>
+
+        <header class="course-header">
+            <span class={`course-level ${isPro ? 'pro' : ''}`}>{level}</span>
+            <h1 class="course-title">{title}</h1>
+            {price && <p class="course-price">{price}</p>}
+        </header>
+
+        <div class="post-content">
+            {blocks.length > 0 ? (
+                blocks.map((block: any) => {
+                    if (block.type === 'paragraph') {
+                        const text = block.paragraph.rich_text.map((t:any) => {
+                            if(t.href) return `<a href="${t.href}" target="_blank">${t.plain_text}</a>`;
+                            return t.plain_text;
+                        }).join('');
+                        return <p set:html={text || '<br/>'}></p>;
+                    }
+                    if (block.type === 'heading_2') {
+                        const text = block.heading_2.rich_text.map((t:any) => t.plain_text).join('');
+                        return <h2>{text}</h2>;
+                    }
+                    if (block.type === 'heading_3') {
+                        const text = block.heading_3.rich_text.map((t:any) => t.plain_text).join('');
+                        return <h3>{text}</h3>;
+                    }
+                    if (block.type === 'bulleted_list_item') {
+                         const text = block.bulleted_list_item.rich_text.map((t:any) => t.plain_text).join('');
+                         return <li class="bullet-list">・ {text}</li>;
+                    }
+                    if (block.type === 'image') {
+                        const imageUrl = block.image.type === 'external' ? block.image.external.url : block.image.file.url;
+                        return <img src={imageUrl} alt="講座画像" class="post-image" loading="lazy" />;
+                    }
+                    if (block.type === 'callout') {
+                         const icon = block.callout.icon?.emoji || '💡';
+                         const text = block.callout.rich_text.map((t:any) => t.plain_text).join('');
+                         return <div class="callout-box"><span class="callout-icon">{icon}</span><p>{text}</p></div>;
+                    }
+                    return null;
+                })
+            ) : (
+                <p>講座の詳しい内容を準備中です。</p>
+            )}
+        </div>
+        
+        <div class="auto-cta-box">
+            <p class="cta-message">講座の開講スケジュールや詳細については、お気軽にお問い合わせください。</p>
+            <a href="https://lin.ee/W5EO3gZ" target="_blank" rel="noopener noreferrer" class="btn-line-cta">
+                公式LINEでお問い合わせ
+            </a>
+        </div>
+        
+    </article>
+</Layout>
+
+<style>
+    .single-course-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 15px 80px;
+    }
+    
+    .back-link-top { margin-bottom: 30px; }
+    .btn-text { color: var(--color-primary); text-decoration: none; font-weight: bold; transition: color 0.2s; }
+    .btn-text:hover { color: var(--color-accent); text-decoration: underline; }
+    
+    .course-header {
+        border-bottom: 2px solid var(--color-bg);
+        padding-bottom: 25px;
+        margin-bottom: 40px;
+        text-align: center;
+    }
+    
+    .course-level { display: inline-block; background: #e5ede9; color: var(--color-primary); padding: 6px 14px; border-radius: 6px; font-size: 0.9rem; font-weight: bold; margin-bottom: 15px; }
+    .course-level.pro { background: var(--color-primary); color: white; }
+    
+    .course-title { font-size: 2.2rem; color: var(--color-text); line-height: 1.4; margin-bottom: 15px; }
+    .course-price { font-size: 1.6rem; color: var(--color-accent); font-weight: bold; }
+
+    .post-content { font-size: 1.1rem; line-height: 1.8; color: var(--color-text); margin-bottom: 60px;}
+    .post-content p { margin-bottom: 1.5em; }
+    .post-content a { color: var(--color-accent); text-decoration: underline; }
+    .post-content h2 { font-size: 1.6rem; color: var(--color-primary); margin-top: 2.5em; margin-bottom: 1em; padding-left: 15px; border-left: 5px solid var(--color-primary); }
+    .post-content h3 { font-size: 1.3rem; color: var(--color-text); margin-top: 2em; margin-bottom: 0.8em; font-weight: bold;}
+    .bullet-list { margin-left: 1.5em; margin-bottom: 0.5em; list-style-type: none; }
+    .post-image { max-width: 100%; height: auto; border-radius: 8px; margin: 2em auto; display: block; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    
+    .callout-box { display: flex; background-color: var(--color-bg); padding: 20px; border-radius: 8px; margin: 2em 0; border-left: 4px solid var(--color-primary); }
+    .callout-icon { font-size: 1.5rem; margin-right: 15px; }
+    .callout-box p { margin-bottom: 0; }
+
+    .auto-cta-box {
+        background-color: white;
+        border: 1px solid var(--color-primary);
+        border-radius: 12px;
+        padding: 40px 20px;
+        text-align: center;
+        box-shadow: 0 8px 20px rgba(78, 123, 103, 0.08);
+    }
+    .cta-message {
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: var(--color-text);
+        margin-bottom: 25px;
+    }
+    .btn-line-cta {
+        display: inline-block;
+        background-color: #06C755;
+        color: white;
+        padding: 15px 40px;
+        border-radius: 30px;
+        font-weight: bold;
+        font-size: 1.2rem;
+        text-decoration: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-line-cta:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(6, 199, 85, 0.3);
+    }
+</style>
