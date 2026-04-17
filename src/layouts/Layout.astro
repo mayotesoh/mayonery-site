@@ -258,29 +258,55 @@ const snsLinks = [
         margin: 0;
     }
 
-    /* 🌟 スマホ用レスポンシブ対応（横スクロール化） */
+/* 🌟 スマホ用レスポンシブ対応（スワイプのヒントを追加） */
     @media (max-width: 768px) {
         .main-nav {
             flex-direction: column;
             align-items: flex-start;
             padding: 15px 0 5px;
+            position: relative; /* グラデーションの基準にするため追加 */
         }
+        
+        /* 🌟 対策1：右端に「続きがあるよ」と伝えるグラデーションの影 */
+        .main-nav::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 40px;
+            height: 60px; /* メニューの高さに合わせる */
+            background: linear-gradient(to right, rgba(242, 246, 244, 0), var(--color-bg) 80%);
+            pointer-events: none; /* タップの邪魔にならないようにする */
+            z-index: 10;
+        }
+
         .nav-logo {
             margin-bottom: 15px;
         }
+        
         .nav-links {
             width: 100vw;
-            margin-left: -4%; /* .containerの余白分を相殺して画面端まで伸ばす */
-            padding: 5px 4% 20px;
-            overflow-x: auto; /* 横スクロールを可能に */
-            white-space: nowrap; /* ボタンを折り返さない */
-            -webkit-overflow-scrolling: touch; /* スムーズなスクロール */
+            margin-left: -4%;
+            padding: 5px 4% 15px; /* 下の余白を少し調整 */
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
         }
+
+        /* 🌟 対策2：完全に隠さず、細くて上品なスクロールバーを表示する */
         .nav-links::-webkit-scrollbar {
-            display: none; /* 見栄え良くスクロールバーを隠す */
+            height: 3px; /* とても細いスクロールバー */
         }
+        .nav-links::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        .nav-links::-webkit-scrollbar-thumb {
+            background: rgba(78, 123, 103, 0.3); /* マヨネリカラーを薄く使う */
+            border-radius: 10px;
+        }
+
         .nav-item {
-            flex: 0 0 auto; /* 幅を縮小させない */
+            flex: 0 0 auto;
             font-size: 0.85rem;
             padding: 8px 14px;
         }
