@@ -39,7 +39,7 @@ const snsLinks = [
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <title>{title}</title>
 </head>
 <body>
@@ -57,7 +57,7 @@ const snsLinks = [
         
         <nav class="main-nav container">
             <a href="/" class="nav-logo">
-                <img src="/手相のマヨネリ.png" alt="手相のマヨネリ ロゴ" class="logo-image" />
+                <img src="/favicon.png" alt="手相のマヨネリ ロゴ" class="logo-image" />
                 手相のマヨネリ
             </a>
             <div class="nav-links">
@@ -190,34 +190,27 @@ const snsLinks = [
     .nav-links {
         display: flex;
         align-items: center;
-        gap: 12px; /* ボタンが大きくなるので、隙間を少し詰めました */
+        gap: 12px;
     }
 
-    /* 💡 立体的な3Dボタンに進化したタブメニュー */
     .nav-item {
         position: relative;
         text-decoration: none;
         color: var(--color-text);
         font-weight: bold;
         font-size: 0.95rem;
-        
-        /* ボタンとしての余白と背景色を追加 */
         padding: 10px 16px; 
         background-color: #ffffff; 
-        border-radius: 12px; /* 角を優しく丸める */
-        border: 1px solid #e1ebe5; /* うっすらとした枠線 */
-        
-        /* 🌟 立体感（厚み）を出す影の魔法 */
-        /* 下方向への濃い影（4px）と、全体を覆う柔らかい影の組み合わせ */
+        border-radius: 12px; 
+        border: 1px solid #e1ebe5; 
         box-shadow: 0 4px 0 #d1e0d7, 0 5px 10px rgba(78, 123, 103, 0.06);
-        transition: all 0.2s ease; /* アニメーションの滑らかさ */
+        transition: all 0.2s ease;
     }
     
-    /* ホバー時に中央から伸びるアンダーライン（ボタンの内側に配置） */
     .nav-item::after {
         content: '';
         position: absolute;
-        bottom: 8px; /* ボタンの下端から少し浮かせた位置 */
+        bottom: 8px; 
         left: 50%;
         width: 0;
         height: 3px;
@@ -228,24 +221,19 @@ const snsLinks = [
         opacity: 0;
     }
 
-    /* マウスが乗った時のエフェクト（フワッと浮き上がる） */
     .nav-item:hover {
         color: var(--color-primary);
-        transform: translateY(-2px); /* 上に2px浮く */
-        /* 影が伸びて、より高く浮いたように見せる */
+        transform: translateY(-2px); 
         box-shadow: 0 6px 0 #d1e0d7, 0 8px 15px rgba(78, 123, 103, 0.12); 
     }
     
-    /* マウスが乗ると線が伸びる */
     .nav-item:hover::after {
         width: 50%; 
         opacity: 1;
     }
 
-    /* 🌟 クリックした瞬間のエフェクト（ガシャンと押し込む） */
     .nav-item:active {
-        transform: translateY(4px); /* 下に4px沈み込む（厚みの分だけ移動） */
-        /* 厚み（影）が消えて、物理的に押し込まれたように見せる */
+        transform: translateY(4px); 
         box-shadow: 0 0 0 #d1e0d7, 0 2px 4px rgba(78, 123, 103, 0.05); 
     }
 
