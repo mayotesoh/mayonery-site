@@ -1,12 +1,12 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 
-// 1. TypeScriptにデータの形（Props）を教える
+// 1. TypeScriptの型定義（安全のため）
 interface Props {
   post: any;
 }
 
-// 2. 全記事のURL（スラッグ）のリストを作る
+// 2. ブログ記事だけのURLリストを作る
 export async function getStaticPaths() {
   const apiKey = import.meta.env.NOTION_API_KEY;
   const databaseId = import.meta.env.NOTION_DATABASE_ID;
@@ -20,11 +20,16 @@ export async function getStaticPaths() {
     },
   });
   const data = await response.json();
-  const allPosts = data.results || [];
+  const allResults = data.results || [];
 
-  return allPosts.map((post: any) => {
-    // Notionのプロパティ名「URLスラッグ」が正しいか確認してください
-    const slug = post.properties['URLスラッグ']?.rich_text[0]?.plain_text || post.id;
+  // 💡 修正：タグに「講座」が含まれていないものだけをブログとして扱う
+  const blogPosts = allResults.filter((post: any) => {
+    const tags = post.properties['タグ']?.multi_select?.map((t: any) => t.name) || [];
+    return !tags.includes('講座');
+  });
+
+  return blogPosts.map((post: any) => {
+    const slug = post.properties['URLスラッグ']?.rich_text?.[0]?.plain_text || post.id;
     return {
       params: { slug: slug },
       props: { post: post },
@@ -32,19 +37,20 @@ export async function getStaticPaths() {
   });
 }
 
-// 3. データの受け取り（ここがエラーの原因でした）
+// 3. データの受け取りと安全な抽出
 const { post } = Astro.props;
 
-// postが存在しない場合の安全策
 if (!post) {
   return Astro.redirect('/404');
 }
 
-const title = post.properties['タイトル']?.title[0]?.plain_text || '無題';
+// 💡 修正：プロパティへのアクセスをすべて「?.」で保護（講座用の列が空でも止まらないように）
+const title = post.properties['タイトル']?.title?.[0]?.plain_text || '無題の記事';
 const dateStr = post.properties['公開日']?.date?.start || '';
 const date = dateStr ? new Date(dateStr).toLocaleDateString('ja-JP') : '未設定';
+const tags = post.properties['タグ']?.multi_select?.map((t: any) => t.name) || [];
 
-// 4. NotionのAPIを叩いて「本文（ブロック）」を取得する
+// 4. 本文（ブロック）の取得
 const apiKey = import.meta.env.NOTION_API_KEY;
 const blocksResponse = await fetch(`https://api.notion.com/v1/blocks/${post.id}/children?page_size=100`, {
   headers: {
@@ -57,3 +63,103 @@ const blocks = blocksData.results || [];
 ---
 
 <Layout title={`${title} | マヨネリブログ`}>
+    <article class="single-post-container">
+        <header class="post-header">
+            <div class="post-meta-top">
+                <span class="post-date">📅 公開日：{date}</span>
+                <div class="post-tags">
+                    {tags.map((tag: string) => <span class="tag">#{tag}</span>)}
+                </div>
+            </div>
+            <h1 class="post-title">{title}</h1>
+        </header>
+
+        <div class="post-content">
+            {blocks.length > 0 ? (
+                blocks.map((block: any) => {
+                    // 段落
+                    if (block.type === 'paragraph') {
+                        const text = block.paragraph.rich_text.map((t:any) => {
+                            if(t.href) return `<a href="${t.href}" target="_blank">${t.plain_text}</a>`;
+                            return t.plain_text;
+                        }).join('');
+                        return <p set:html={text || '<br/>'}></p>;
+                    }
+                    // 見出し2
+                    if (block.type === 'heading_2') {
+                        const text = block.heading_2.rich_text.map((t:any) => t.plain_text).join('');
+                        return <h2>{text}</h2>;
+                    }
+                    // 見出し3
+                    if (block.type === 'heading_3') {
+                        const text = block.heading_3.rich_text.map((t:any) => t.plain_text).join('');
+                        return <h3>{text}</h3>;
+                    }
+                    // 箇条書き
+                    if (block.type === 'bulleted_list_item') {
+                         const text = block.bulleted_list_item.rich_text.map((t:any) => t.plain_text).join('');
+                         return <li class="bullet-list">・ {text}</li>;
+                    }
+                    // 画像
+                    if (block.type === 'image') {
+                        const imageUrl = block.image.type === 'external' ? block.image.external.url : block.image.file.url;
+                        return <img src={imageUrl} alt="記事画像" class="post-image" loading="lazy" />;
+                    }
+                    // コールアウト
+                    if (block.type === 'callout') {
+                         const icon = block.callout.icon?.emoji || '💡';
+                         const text = block.callout.rich_text.map((t:any) => t.plain_text).join('');
+                         return <div class="callout-box"><span class="callout-icon">{icon}</span><p>{text}</p></div>;
+                    }
+                    // YouTube埋め込み
+                    if (block.type === 'video' || block.type === 'bookmark') {
+                        const url = block.video?.external?.url || block.bookmark?.url;
+                        if(url && url.includes('youtube.com/watch?v=')){
+                            const videoId = url.split('v=')[1]?.split('&')[0];
+                            const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                            return (
+                                <div class="youtube-wrapper">
+                                    <iframe src={embedUrl} title="YouTube video player" frameborder="0" allowfullscreen></iframe>
+                                </div>
+                            );
+                        }
+                    }
+                    return null;
+                })
+            ) : (
+                <p>本文がありません。</p>
+            )}
+        </div>
+        
+        <div class="back-link">
+            <a href="/blog" class="btn-back">← ブログ一覧へ戻る</a>
+        </div>
+    </article>
+</Layout>
+
+<style>
+    .single-post-container { max-width: 800px; margin: 0 auto; padding: 50px 20px; }
+    .post-header { border-bottom: 2px solid var(--color-primary); padding-bottom: 20px; margin-bottom: 40px; }
+    .post-meta-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .post-date { color: #777; font-weight: bold; font-size: 0.9rem; }
+    .post-tags { display: flex; gap: 8px; }
+    .tag { background: #e5ede9; color: var(--color-primary); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+    .post-title { font-size: 2.2rem; color: var(--color-text); line-height: 1.4; margin: 0; }
+
+    .post-content { font-size: 1.1rem; line-height: 1.8; color: var(--color-text); }
+    .post-content p { margin-bottom: 1.5em; }
+    .post-content h2 { font-size: 1.7rem; color: var(--color-primary); margin: 2em 0 1em; padding-left: 10px; border-left: 5px solid var(--color-primary); }
+    .post-content h3 { font-size: 1.3rem; margin: 1.5em 0 0.8em; font-weight: bold; }
+    .bullet-list { margin-left: 1.2em; margin-bottom: 0.5em; list-style: none; }
+    .post-image { max-width: 100%; height: auto; border-radius: 8px; margin: 2em 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    
+    .youtube-wrapper { position: relative; padding-bottom: 56.25%; height: 0; margin: 2em 0; }
+    .youtube-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px; }
+
+    .callout-box { display: flex; background: #fff; padding: 20px; border-radius: 8px; margin: 2em 0; border-left: 4px solid var(--color-primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .callout-icon { font-size: 1.5rem; margin-right: 15px; }
+
+    .back-link { margin-top: 60px; text-align: center; }
+    .btn-back { display: inline-block; padding: 12px 30px; background: white; color: var(--color-primary); text-decoration: none; border-radius: 30px; font-weight: bold; border: 1px solid var(--color-primary); transition: all 0.3s; }
+    .btn-back:hover { background: var(--color-primary); color: white; }
+</style>
