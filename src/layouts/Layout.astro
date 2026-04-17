@@ -258,61 +258,36 @@ const snsLinks = [
         margin: 0;
     }
 
-/* 🌟 スマホ用レスポンシブ対応（スワイプのヒントを追加） */
+/* 🌟 スマホ用レスポンシブ対応（全出し・折り返しレイアウト） */
     @media (max-width: 768px) {
         .main-nav {
             flex-direction: column;
             align-items: flex-start;
-            padding: 15px 0 5px;
-            position: relative; /* グラデーションの基準にするため追加 */
+            padding: 15px 0 10px;
         }
         
-        /* 🌟 対策1：右端に「続きがあるよ」と伝えるグラデーションの影 */
-        .main-nav::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 40px;
-            height: 60px; /* メニューの高さに合わせる */
-            background: linear-gradient(to right, rgba(242, 246, 244, 0), var(--color-bg) 80%);
-            pointer-events: none; /* タップの邪魔にならないようにする */
-            z-index: 10;
-        }
-
         .nav-logo {
             margin-bottom: 15px;
         }
         
         .nav-links {
-            width: 100vw;
-            margin-left: -4%;
-            padding: 5px 4% 15px; /* 下の余白を少し調整 */
-            overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* 🌟 対策2：完全に隠さず、細くて上品なスクロールバーを表示する */
-        .nav-links::-webkit-scrollbar {
-            height: 3px; /* とても細いスクロールバー */
-        }
-        .nav-links::-webkit-scrollbar-track {
-            background: transparent; 
-        }
-        .nav-links::-webkit-scrollbar-thumb {
-            background: rgba(78, 123, 103, 0.3); /* マヨネリカラーを薄く使う */
-            border-radius: 10px;
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap; /* 🌟 魔法のコード：画面の端に来たら自動で次の行に折り返す */
+            justify-content: flex-start; /* 左寄せに整列 */
+            gap: 10px 8px; /* 縦の隙間を10px、横の隙間を8pxに設定 */
         }
 
         .nav-item {
-            flex: 0 0 auto;
             font-size: 0.85rem;
-            padding: 8px 14px;
+            padding: 8px 12px; /* スマホ画面でも押しやすいギリギリのサイズに調整 */
+            /* 💡 横幅を指定していないため、文字数に合わせて綺麗なレンガ状に並びます */
         }
+        
         .top-bar-text {
             font-size: 0.75rem;
         }
+        
         .sns-link {
             width: 18px;
             height: 18px;
