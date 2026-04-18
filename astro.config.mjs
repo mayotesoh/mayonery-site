@@ -1,14 +1,16 @@
 // @ts-check
-
+import { defineConfig, fontProviders } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
-import { defineConfig, fontProviders } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-    // 💡 ここを example.com から mayonery.jp に変更します！
+    // 🌟 サイトのベースURLを設定
     site: 'https://mayonery.jp',
+    
+    // 🌟 MDXとサイトマップの機能を有効化
     integrations: [mdx(), sitemap()],
+
     fonts: [
         {
             provider: fontProviders.local(),
