@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 
 const apiKey = import.meta.env.NOTION_API_KEY;
-const databaseId = import.meta.env.NOTION_DATABASE_ID;
+const databaseId = import.meta.env.NOTION_BLOG_ID; // 🌟 新しいブログID
 
 const response = await fetch(`https://api.notion.com/v1/databases/${databaseId}/query`, {
   method: 'POST',
@@ -18,11 +18,11 @@ const allPosts = data.results || [];
 
 const posts = allPosts.filter((post: any) => {
   const status = post.properties['ステータス']?.status?.name || post.properties['ステータス']?.select?.name || '';
-  const tags = post.properties['タグ']?.multi_select?.map((t: any) => t.name) || [];
-  return status === '公開中' && !tags.includes('講座');
+  return status === '公開'; // 🌟 「講座」タグの除外は不要になりました
 });
 
-const allTags = [...new Set(posts.flatMap((post: any) => post.properties['タグ']?.multi_select?.map((t: any) => t.name) || []))].filter(Boolean);
+// 全カテゴリーのリストを作成
+const allTags = [...new Set(posts.flatMap((post: any) => post.properties['カテゴリー']?.multi_select?.map((t: any) => t.name) || []))].filter(Boolean);
 ---
 
 <Layout title="ブログ・思考録 | マヨネリ">
@@ -43,26 +43,26 @@ const allTags = [...new Set(posts.flatMap((post: any) => post.properties['タグ
         <div class="post-grid" id="post-grid">
             {posts.map((post: any) => {
                 const title = post.properties['タイトル']?.title[0]?.plain_text || '無題';
-                const dateStr = post.properties['公開日']?.date?.start || '';
+                const dateStr = post.properties['日付']?.date?.start || ''; // 🌟
                 const date = dateStr ? new Date(dateStr).toLocaleDateString('ja-JP') : '';
-                const tags = post.properties['タグ']?.multi_select?.map((t: any) => t.name) || [];
+                const categories = post.properties['カテゴリー']?.multi_select?.map((t: any) => t.name) || []; // 🌟
                 const slug = post.properties['URLスラッグ']?.rich_text[0]?.plain_text || post.id;
 
-                const imageProp = post.properties['アイキャッチ']?.files?.[0];
+                const imageProp = post.properties['アイキャッチ']?.files?.[0]; // 🌟
                 let eyecatchUrl = '/favicon.png'; 
                 if (imageProp) {
                     eyecatchUrl = imageProp.type === 'file' ? imageProp.file.url : imageProp.external?.url;
                 }
 
                 return (
-                    <a href={`/blog/${slug}`} class="post-link-wrapper" data-title={title} data-tags={tags.join(',')}>
+                    <a href={`/blog/${slug}`} class="post-link-wrapper" data-title={title} data-tags={categories.join(',')}>
                         <article class="post-card">
                             <img src={eyecatchUrl} alt="" class="post-card-img" />
                             <div class="post-card-overlay">
                                 <div class="post-meta">
                                     <span class="post-date">{date}</span>
                                     <div class="post-tags">
-                                        {tags.map((tag: string) => ( <span class="tag">#{tag}</span> ))}
+                                        {categories.map((cat: string) => ( <span class="tag">#{cat}</span> ))}
                                     </div>
                                 </div>
                                 <h2 class="post-card-title">{title}</h2>
@@ -78,78 +78,24 @@ const allTags = [...new Set(posts.flatMap((post: any) => post.properties['タグ
 <style>
     .blog-container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
     .page-title { text-align: center; color: var(--color-primary); margin-bottom: 40px; font-size: 2rem; }
-    
     .search-and-filter-wrapper { margin-bottom: 40px; text-align: center; }
-    
-    /* 🌟 スマホはみ出し防止用のコンテナ設定 */
-    .search-input-container {
-        position: relative;
-        max-width: 500px;
-        width: 100%;
-        margin: 0 auto 20px;
-    }
-    
-    .search-icon {
-        position: absolute;
-        left: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 1.2rem;
-    }
-    
-    #blog-search {
-        width: 100%;
-        box-sizing: border-box; /* 🌟 枠線や余白を含めて100%に収める魔法 */
-        padding: 12px 20px 12px 45px;
-        border-radius: 25px;
-        border: 2px solid var(--color-primary);
-        outline: none;
-        font-size: 1rem;
-    }
-    
+    .search-input-container { position: relative; max-width: 500px; width: 100%; margin: 0 auto 20px; }
+    .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; }
+    #blog-search { width: 100%; box-sizing: border-box; padding: 12px 20px 12px 45px; border-radius: 25px; border: 2px solid var(--color-primary); outline: none; font-size: 1rem; }
     .filter-tags { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
     .filter-btn { padding: 6px 15px; border-radius: 20px; border: 1px solid #ccc; background: white; cursor: pointer; transition: all 0.2s; }
     .filter-btn.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
-
     .post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
     .post-link-wrapper { text-decoration: none; color: inherit; }
-
-    .post-card {
-        position: relative;
-        height: 300px;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease;
-    }
+    .post-card { position: relative; height: 300px; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s ease; }
     .post-link-wrapper:hover .post-card { transform: translateY(-5px); }
-
-    .post-card-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .post-card-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: rgba(255, 255, 255, 0.68);
-        backdrop-filter: blur(5px);
-        padding: 20px;
-        box-sizing: border-box;
-    }
-
+    .post-card-img { width: 100%; height: 100%; object-fit: cover; }
+    .post-card-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(255, 255, 255, 0.68); backdrop-filter: blur(5px); padding: 20px; box-sizing: border-box; }
     .post-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.8rem; }
     .post-date { color: #666; }
     .tag { color: var(--color-primary); font-weight: bold; margin-left: 5px; }
     .post-card-title { font-size: 1.2rem; margin: 0; line-height: 1.4; color: var(--color-text); }
-    
-    /* 🌟 スマホ用の微調整 */
-    @media (max-width: 480px) {
-        .post-grid { grid-template-columns: 1fr; } /* 1列に強制 */
-    }
+    @media (max-width: 480px) { .post-grid { grid-template-columns: 1fr; } }
 </style>
 
 <script>
