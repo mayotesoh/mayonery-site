@@ -77,8 +77,7 @@ const snsLinks = [
                 <a href="/" class="nav-item">ホーム</a>
                 <a href="/about" class="nav-item">自己紹介</a>
                 <a href="/gakkai" class="nav-item">手相学会</a> 
-                <a href="/blog" class="nav-item">ブログ・思考録</a>
-                <a href="/glossary" class="nav-item">手相用語集</a>
+                <a href="/blog" class="nav-item">ブログ</a>  <a href="/glossary" class="nav-item">手相用語集</a>
                 <a href="/quiz" class="nav-item">手相クイズ</a>
                 <a href="/kouza" class="nav-item">講座</a>
                 <a href="/kantei" class="nav-item">鑑定</a>
@@ -178,7 +177,7 @@ const snsLinks = [
     }
     
     .nav-logo {
-        font-size: 1.4rem; /* 🌟 ほんの少しだけスリムに */
+        font-size: 1.4rem;
         font-weight: bold;
         color: var(--color-primary);
         text-decoration: none;
@@ -187,7 +186,7 @@ const snsLinks = [
         align-items: center;
         gap: 10px;
         transition: opacity 0.2s, transform 0.2s;
-        white-space: nowrap; /* 🌟 魔法のコード1：ロゴの文字折り返しを禁止！ */
+        white-space: nowrap;
     }
     .nav-logo:hover {
         opacity: 0.8;
@@ -205,8 +204,8 @@ const snsLinks = [
     .nav-links {
         display: flex;
         align-items: center;
-        gap: 8px; /* 🌟 ボタン同士の隙間を少し詰める */
-        flex-wrap: wrap; /* 🌟 はみ出す場合は、文字を折らずにボタンごと下の行へ */
+        gap: 8px;
+        flex-wrap: wrap;
         justify-content: flex-end;
     }
 
@@ -215,14 +214,14 @@ const snsLinks = [
         text-decoration: none;
         color: var(--color-text);
         font-weight: bold;
-        font-size: 0.9rem; /* 🌟 1行に収まりやすいサイズに調整 */
-        padding: 8px 12px; /* 🌟 余白を少しスッキリと */
+        font-size: 0.9rem;
+        padding: 8px 12px;
         background-color: #ffffff; 
         border-radius: 12px; 
         border: 1px solid #e1ebe5; 
         box-shadow: 0 4px 0 #d1e0d7, 0 5px 10px rgba(78, 123, 103, 0.06);
         transition: all 0.2s ease;
-        white-space: nowrap; /* 🌟 魔法のコード2：ボタンの中の文字折り返しを絶対禁止！ */
+        white-space: nowrap;
     }
     
     .nav-item::after {
@@ -276,7 +275,6 @@ const snsLinks = [
         margin: 0;
     }
 
-/* 🌟 スマホ用レスポンシブ対応（全出し・折り返しレイアウト） */
     @media (max-width: 768px) {
         .main-nav {
             flex-direction: column;
@@ -291,15 +289,14 @@ const snsLinks = [
         .nav-links {
             width: 100%;
             display: flex;
-            flex-wrap: wrap; /* 🌟 魔法のコード：画面の端に来たら自動で次の行に折り返す */
-            justify-content: flex-start; /* 左寄せに整列 */
-            gap: 10px 8px; /* 縦の隙間を10px、横の隙間を8pxに設定 */
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 10px 8px;
         }
 
         .nav-item {
             font-size: 0.85rem;
-            padding: 8px 12px; /* スマホ画面でも押しやすいギリギリのサイズに調整 */
-            /* 💡 横幅を指定していないため、文字数に合わせて綺麗なレンガ状に並びます */
+            padding: 8px 12px;
         }
         
         .top-bar-text {
