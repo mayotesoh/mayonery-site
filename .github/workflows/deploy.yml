@@ -26,6 +26,10 @@ jobs:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
           NOTION_GLOSSARY_ID: ${{ secrets.NOTION_GLOSSARY_ID }}
+          # 👇 今回新しく追加した3つの鍵を工場に渡す！
+          NOTION_KOUZA_ID: ${{ secrets.NOTION_KOUZA_ID }}
+          NOTION_BLOG_ID: ${{ secrets.NOTION_BLOG_ID }}
+          NOTION_QUIZ_ID: ${{ secrets.NOTION_QUIZ_ID }}
 
   deploy:
     needs: build
