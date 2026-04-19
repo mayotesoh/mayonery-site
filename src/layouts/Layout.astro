@@ -79,6 +79,7 @@ const snsLinks = [
                 <a href="/gakkai" class="nav-item">手相学会</a> 
                 <a href="/blog" class="nav-item">ブログ・思考録</a>
                 <a href="/glossary" class="nav-item">手相用語集</a>
+                <a href="/quiz" class="nav-item">手相クイズ</a>
                 <a href="/kouza" class="nav-item">講座</a>
                 <a href="/kantei" class="nav-item">鑑定</a>
                 <a href="/shindan" class="nav-item">無料手相診断</a>
@@ -177,15 +178,16 @@ const snsLinks = [
     }
     
     .nav-logo {
-        font-size: 1.5rem;
+        font-size: 1.4rem; /* 🌟 ほんの少しだけスリムに */
         font-weight: bold;
         color: var(--color-primary);
         text-decoration: none;
         letter-spacing: 0.05em;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
         transition: opacity 0.2s, transform 0.2s;
+        white-space: nowrap; /* 🌟 魔法のコード1：ロゴの文字折り返しを禁止！ */
     }
     .nav-logo:hover {
         opacity: 0.8;
@@ -203,7 +205,9 @@ const snsLinks = [
     .nav-links {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 8px; /* 🌟 ボタン同士の隙間を少し詰める */
+        flex-wrap: wrap; /* 🌟 はみ出す場合は、文字を折らずにボタンごと下の行へ */
+        justify-content: flex-end;
     }
 
     .nav-item {
@@ -211,13 +215,14 @@ const snsLinks = [
         text-decoration: none;
         color: var(--color-text);
         font-weight: bold;
-        font-size: 0.95rem;
-        padding: 10px 16px; 
+        font-size: 0.9rem; /* 🌟 1行に収まりやすいサイズに調整 */
+        padding: 8px 12px; /* 🌟 余白を少しスッキリと */
         background-color: #ffffff; 
         border-radius: 12px; 
         border: 1px solid #e1ebe5; 
         box-shadow: 0 4px 0 #d1e0d7, 0 5px 10px rgba(78, 123, 103, 0.06);
         transition: all 0.2s ease;
+        white-space: nowrap; /* 🌟 魔法のコード2：ボタンの中の文字折り返しを絶対禁止！ */
     }
     
     .nav-item::after {
