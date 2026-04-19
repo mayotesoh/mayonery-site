@@ -74,6 +74,7 @@ const questions = data.results || [];
           <div class="result-actions">
             <button onclick="window.location.reload();" class="retry-btn">別の問題に挑戦する</button>
             <a href="/kouza" class="learn-btn">講座で基礎から学ぶ</a>
+            <a href="/" class="home-btn">ホームへ戻る</a>
           </div>
         </div>
       </div>
@@ -252,8 +253,9 @@ const questions = data.results || [];
   .score-message { font-size: 1.1rem; line-height: 1.5; color: var(--color-text); margin-bottom: 40px; }
   
   .result-actions { display: flex; flex-direction: column; gap: 15px; }
-  .retry-btn, .learn-btn { display: block; padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; transition: opacity 0.2s; cursor: pointer; }
+  .retry-btn, .learn-btn, .home-btn { display: block; padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; transition: opacity 0.2s; cursor: pointer; text-align: center; }
   .retry-btn { border: 2px solid var(--color-primary); color: var(--color-primary); background: white; }
   .learn-btn { background: var(--color-primary); color: white; }
-  .retry-btn:hover, .learn-btn:hover { opacity: 0.8; }
+  .home-btn { background: #eef2f5; color: #555; border: 1px solid #dcdcdc; }
+  .retry-btn:hover, .learn-btn:hover, .home-btn:hover { opacity: 0.8; }
 </style>
