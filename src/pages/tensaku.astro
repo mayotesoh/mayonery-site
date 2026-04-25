@@ -17,7 +17,6 @@ try {
     const data = await response.json();
     const allPosts = data.results || [];
 
-    // 🌟 「公開」かつ「レベルに『プロ』を含む」ものだけを抽出！
     proPosts = allPosts.filter((post: any) => {
         const status = post.properties['ステータス']?.status?.name || post.properties['ステータス']?.select?.name || '';
         const levels = post.properties['レベル']?.multi_select?.map((t: any) => t.name) || [];
@@ -52,7 +51,7 @@ try {
                         <div class="kouza-content">
                             <div class="kouza-meta">
                                 <span class="tag-pro">PRO</span>
-                                <span class="kouza-price">¥{price}</span>
+                                <span class="kouza-price">{price}</span>
                             </div>
                             <h2 class="kouza-title">{title}</h2>
                             <p class="kouza-summary">{summary}</p>
@@ -88,7 +87,6 @@ try {
     
     .kouza-grid { display: flex; flex-direction: column; gap: 30px; margin-bottom: 60px; }
     
-    /* プロ向けは少しシックで高級感のあるデザインに */
     .pro-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 16px; overflow: hidden; transition: transform 0.2s; }
     .pro-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08); border-color: #94a3b8; }
     .kouza-content { padding: 35px; }

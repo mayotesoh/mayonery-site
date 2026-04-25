@@ -1,0 +1,177 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// 🌟 全クイズのURLパスを自動生成する処理
+export async function getStaticPaths() {
+    const apiKey = import.meta.env.NOTION_API_KEY;
+    const quizDbId = import.meta.env.NOTION_QUIZ_ID;
+
+    if (!quizDbId) return [];
+
+    const response = await fetch(`https://api.notion.com/v1/databases/${quizDbId}/query`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Notion-Version': '2022-06-28',
+            'Content-Type': 'application/json',
+        },
+    });
+    const data = await response.json();
+    const allQuizzes = data.results || [];
+
+    return allQuizzes.map((quiz: any) => {
+        const slugProp = quiz.properties['URLスラッグ']?.rich_text;
+        const slug = (slugProp && slugProp.length > 0) ? slugProp[0].plain_text : quiz.id;
+        return {
+            params: { slug: slug },
+            props: { quiz: quiz },
+        };
+    });
+}
+
+const { quiz } = Astro.props;
+
+// プロパティを安全に取得する関数
+function getPlainText(prop: any) {
+    if (!prop) return "";
+    if (prop.title && prop.title.length > 0) return prop.title[0]?.plain_text || "";
+    if (prop.rich_text && prop.rich_text.length > 0) return prop.rich_text[0]?.plain_text || "";
+    // 数値（正解の番号など）も文字列として取得
+    if (prop.number !== undefined && prop.number !== null) return String(prop.number);
+    return "";
+}
+
+// Notionの各カラムからデータを取得
+const question = getPlainText(quiz.properties['問題文'] || quiz.properties['問題'] || quiz.properties['タイトル']) || '問題がありません';
+const choice1 = getPlainText(quiz.properties['選択肢1']);
+const choice2 = getPlainText(quiz.properties['選択肢2']);
+const choice3 = getPlainText(quiz.properties['選択肢3']);
+const choice4 = getPlainText(quiz.properties['選択肢4']);
+const correctAnswer = getPlainText(quiz.properties['正解の番号'] || quiz.properties['正解']);
+const explanation = getPlainText(quiz.properties['解説']);
+
+// 存在する選択肢だけを配列にまとめる
+const choices = [choice1, choice2, choice3, choice4].filter(c => c !== "");
+---
+
+<Layout title={`${question} | 手相クイズ`}>
+    <div class="container page-container">
+        
+        <div class="quiz-box">
+            <span class="badge">論理的手相クイズ</span>
+            <h1 class="question-text">Q. {question}</h1>
+            
+            <div class="choices-container">
+                {choices.map((choice, index) => (
+                    <button class="choice-btn" data-number={index + 1}>
+                        <span class="choice-number">{index + 1}</span>
+                        {choice}
+                    </button>
+                ))}
+            </div>
+
+            <div class="action-area">
+                <button id="show-answer-btn" class="btn-primary" disabled>選択肢を選んでください</button>
+            </div>
+
+            <div id="explanation-area" class="explanation-box" style="display: none;" data-correct={correctAnswer}>
+                <div class="result-header">
+                    <span id="result-mark" class="result-mark"></span>
+                    <h2 class="result-title">正解は「{correctAnswer}」です</h2>
+                </div>
+                <div class="explanation-content">
+                    <h3>【解説】</h3>
+                    <p>{explanation || '解説は現在準備中です。'}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="back-link">
+            <a href="/" class="btn-back">← ホームに戻る</a>
+        </div>
+
+    </div>
+</Layout>
+
+<style>
+    .page-container { padding: 60px 15px 80px; max-width: 800px; margin: 0 auto; }
+    
+    .quiz-box { background: white; padding: 40px; border-radius: 16px; border: 1px solid #e1ebe5; box-shadow: 0 8px 25px rgba(0,0,0,0.05); margin-bottom: 40px; }
+    .badge { display: inline-block; background: #fff1e6; color: #c2410c; padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; margin-bottom: 20px; }
+    
+    .question-text { font-size: 1.6rem; color: var(--color-text); line-height: 1.5; margin-bottom: 30px; }
+    
+    .choices-container { display: flex; flex-direction: column; gap: 15px; margin-bottom: 40px; }
+    .choice-btn { display: flex; align-items: center; text-align: left; width: 100%; background: #f8fafc; border: 2px solid #e2e8f0; padding: 15px 20px; border-radius: 12px; font-size: 1.1rem; color: var(--color-text); cursor: pointer; transition: all 0.2s; }
+    .choice-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .choice-btn.selected { background: #e0f2fe; border-color: #0284c7; color: #0369a1; font-weight: bold; }
+    .choice-number { display: inline-flex; justify-content: center; align-items: center; width: 28px; height: 28px; background: white; border: 2px solid currentcolor; border-radius: 50%; margin-right: 15px; font-size: 0.9rem; font-weight: bold; }
+
+    .action-area { text-align: center; margin-bottom: 30px; }
+    .btn-primary { background: var(--color-primary); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 30px; cursor: pointer; transition: opacity 0.2s; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+    .explanation-box { background: #f0fdf4; border: 2px solid #bbf7d0; border-radius: 12px; padding: 30px; animation: fadeIn 0.5s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .result-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 2px dashed #bbf7d0; padding-bottom: 20px; }
+    .result-mark { font-size: 2.5rem; font-weight: bold; }
+    .result-mark.correct { color: #16a34a; }
+    .result-mark.incorrect { color: #ef4444; }
+    .result-title { margin: 0; font-size: 1.5rem; color: #166534; }
+    
+    .explanation-content h3 { color: #166534; margin: 0 0 10px 0; font-size: 1.1rem; }
+    .explanation-content p { margin: 0; line-height: 1.8; color: #333; }
+
+    .back-link { text-align: center; }
+    .btn-back { display: inline-block; padding: 12px 30px; background: white; color: var(--color-primary); text-decoration: none; border-radius: 30px; font-weight: bold; border: 1px solid var(--color-primary); transition: all 0.3s; }
+    .btn-back:hover { background: var(--color-primary); color: white; }
+</style>
+
+<script>
+    // ブラウザ側で動く、答え合わせのJavaScript
+    const choiceBtns = document.querySelectorAll('.choice-btn');
+    const showAnswerBtn = document.getElementById('show-answer-btn') as HTMLButtonElement;
+    const explanationArea = document.getElementById('explanation-area') as HTMLElement;
+    const resultMark = document.getElementById('result-mark') as HTMLElement;
+    
+    let selectedNumber = '';
+
+    // 選択肢をクリックした時の処理
+    choiceBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // 他の選択肢の選択状態を解除
+            choiceBtns.forEach(b => b.classList.remove('selected'));
+            // クリックしたものを選択状態に
+            this.classList.add('selected');
+            
+            selectedNumber = this.getAttribute('data-number') || '';
+            
+            // ボタンを活性化
+            showAnswerBtn.disabled = false;
+            showAnswerBtn.textContent = '答え合わせをする！';
+        });
+    });
+
+    // 答え合わせボタンをクリックした時の処理
+    showAnswerBtn?.addEventListener('click', function() {
+        const correctAnswer = explanationArea.getAttribute('data-correct');
+        
+        // 正誤判定
+        if (selectedNumber === correctAnswer) {
+            resultMark.textContent = '⭕️';
+            resultMark.className = 'result-mark correct';
+        } else {
+            resultMark.textContent = '❌';
+            resultMark.className = 'result-mark incorrect';
+        }
+
+        // 解説エリアを表示して、ボタンを隠す
+        explanationArea.style.display = 'block';
+        this.style.display = 'none';
+        
+        // 選択肢をこれ以上押せないようにする
+        choiceBtns.forEach(b => (b as HTMLButtonElement).style.pointerEvents = 'none');
+    });
+</script>
