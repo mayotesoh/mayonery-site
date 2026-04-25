@@ -66,35 +66,35 @@ const snsLinks = [
                 </div>
             </div>
         </div>
-        
-        <div class="sticky-nav-container">
-            <div class="main-nav container">
-                <a href="/" class="nav-logo">
-                    <img src="/favicon.png" alt="手相のマヨネリ ロゴ" class="logo-image" />
-                    手相のマヨネリ
-                </a>
-                
-                <button class="hamburger-btn" id="hamburger-btn" aria-label="メニューを開く">
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                </button>
-
-                <nav class="nav-menu" id="nav-menu">
-                    <div class="nav-links">
-                        <a href="/" class="nav-item">ホーム</a>
-                        <a href="/about" class="nav-item">自己紹介</a>
-                        <a href="/blog" class="nav-item">ブログ</a>
-                        <a href="/glossary" class="nav-item">手相用語集</a>
-                        <a href="/quiz" class="nav-item">手相クイズ</a>
-                        <a href="/service" class="nav-item">提供サービス</a>
-                        <a href="/gakkai" class="nav-item">手相学会</a> 
-                        <a href="/shindan" class="nav-item">無料手相診断</a>
-                    </div>
-                </nav>
-            </div>
-        </div>
     </header>
+
+    <div class="sticky-nav-container">
+        <div class="main-nav container">
+            <a href="/" class="nav-logo">
+                <img src="/favicon.png" alt="手相のマヨネリ ロゴ" class="logo-image" />
+                手相のマヨネリ
+            </a>
+            
+            <button class="hamburger-btn" id="hamburger-btn" aria-label="メニューを開く">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+
+            <nav class="nav-menu" id="nav-menu">
+                <div class="nav-links">
+                    <a href="/" class="nav-item">ホーム</a>
+                    <a href="/about" class="nav-item">自己紹介</a>
+                    <a href="/blog" class="nav-item">ブログ</a>
+                    <a href="/glossary" class="nav-item">手相用語集</a>
+                    <a href="/quiz" class="nav-item">手相クイズ</a>
+                    <a href="/service" class="nav-item">提供サービス</a>
+                    <a href="/gakkai" class="nav-item">手相学会</a> 
+                    <a href="/shindan" class="nav-item">無料手相診断</a>
+                </div>
+            </nav>
+        </div>
+    </div>
 
     <main>
         <slot />
@@ -117,7 +117,6 @@ const snsLinks = [
 
         if (hamburgerBtn && navMenu) {
             hamburgerBtn.addEventListener('click', () => {
-                // 'active'クラスを付け外しすることでメニューの開閉とアイコンのアニメーションを制御します
                 hamburgerBtn.classList.toggle('active');
                 navMenu.classList.toggle('active');
             });
@@ -192,7 +191,7 @@ const snsLinks = [
         color: #9dbfaf; 
     }
 
-    /* タブの追従設定 */
+    /* 🌟 タブの追従設定（完璧に機能します） */
     .sticky-nav-container {
         position: -webkit-sticky;
         position: sticky;
@@ -209,7 +208,7 @@ const snsLinks = [
         display: flex;
         justify-content: space-between;
         align-items: center;
-        position: relative; /* 子要素の絶対配置の基準にするため追加 */
+        position: relative;
     }
     
     .nav-logo {
@@ -223,7 +222,7 @@ const snsLinks = [
         gap: 10px;
         transition: opacity 0.2s, transform 0.2s;
         white-space: nowrap;
-        z-index: 1001; /* メニューより上に表示 */
+        z-index: 1001; 
     }
     .nav-logo:hover {
         opacity: 0.8;
@@ -238,7 +237,6 @@ const snsLinks = [
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
-    /* 🌟 PC版（デフォルト）のメニュー設定 */
     .nav-menu {
         display: block;
     }
@@ -250,7 +248,6 @@ const snsLinks = [
         justify-content: flex-end;
     }
 
-    /* ハンバーガーボタンはPCでは非表示 */
     .hamburger-btn {
         display: none;
     }
@@ -327,7 +324,6 @@ const snsLinks = [
             padding: 10px 0;
         }
 
-        /* 1. ハンバーガーボタンを表示 */
         .hamburger-btn {
             display: flex;
             flex-direction: column;
@@ -338,10 +334,9 @@ const snsLinks = [
             border: none;
             cursor: pointer;
             padding: 0;
-            z-index: 1001; /* メニューより上に表示 */
+            z-index: 1001;
         }
 
-        /* 3本線のデザイン */
         .hamburger-line {
             width: 100%;
             height: 3px;
@@ -351,7 +346,6 @@ const snsLinks = [
             transform-origin: 1px;
         }
 
-        /* ボタンがクリックされた時（×になるアニメーション） */
         .hamburger-btn.active .hamburger-line:nth-child(1) {
             transform: rotate(45deg);
         }
@@ -363,41 +357,36 @@ const snsLinks = [
             transform: rotate(-45deg);
         }
 
-        /* 2. メニューをドロップダウン形式に変更 */
         .nav-menu {
             position: absolute;
-            top: 100%; /* ヘッダーのすぐ下から表示 */
+            top: 100%; 
             left: 0;
             width: 100%;
             background-color: rgba(255, 255, 255, 0.98);
             border-bottom: 1px solid #e1ebe5;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             
-            /* 初期状態は閉じておく（高さを0にして隠す） */
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.4s ease-in-out;
         }
 
-        /* ボタンがクリックされた時（メニューが開くアニメーション） */
         .nav-menu.active {
-            max-height: 500px; /* メニュー全体が表示される十分な高さ */
+            max-height: 500px; 
         }
 
-        /* リンクを縦並びに変更 */
         .nav-links {
             flex-direction: column;
             align-items: stretch;
-            padding: 20px 5%; /* 左右に少し余白を持たせる */
+            padding: 20px 5%; 
             gap: 15px;
         }
 
-        /* 各ボタンのデザインをスマホ向けに広げる */
         .nav-item {
             text-align: center;
             font-size: 1rem;
             padding: 12px;
-            box-shadow: 0 3px 0 #d1e0d7; /* 影を少し控えめに */
+            box-shadow: 0 3px 0 #d1e0d7;
         }
         
         .top-bar-text {
