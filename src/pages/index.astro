@@ -381,12 +381,10 @@ const mainVideo = {
 
     .text-center { text-align: center; }
 
-    /* 🌟 スマホ・タブレット用レスポンシブ（改行対策） */
     @media (max-width: 768px) {
         .hero-title { 
-            font-size: 1.6rem; 
+            font-size: 1.5rem; 
             line-height: 1.5; 
-            word-break: keep-all; 
         }
         .hero-desc { font-size: 0.95rem; }
         .btn-primary { padding: 15px 30px; font-size: 1.1rem; width: 90%; box-sizing: border-box; }
@@ -394,7 +392,6 @@ const mainVideo = {
         .section-header { flex-direction: column; align-items: flex-start; gap: 10px; }
         .section-title { 
             font-size: 1.4rem; 
-            word-break: keep-all; 
         }
         
         .youtube-grid { grid-template-columns: 1fr; }

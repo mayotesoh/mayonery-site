@@ -127,18 +127,16 @@ import Layout from '../layouts/Layout.astro';
     .final-message { color: var(--color-primary); font-size: 2rem; line-height: 1.5; margin-bottom: 20px; }
     .closing-section p { font-size: 1.1rem; line-height: 1.8; color: #555; font-weight: bold; }
 
-    /* 🌟 スマホ・タブレット用レスポンシブ（改行対策） */
+   /* 🌟 スマホ・タブレット用レスポンシブ（横スクロール対策済） */
     @media (max-width: 768px) {
         .main-catch { 
-            font-size: 1.6rem; 
-            word-break: keep-all; /* 単語途中での改行を防ぐ */
+            font-size: 1.5rem; /* 横にはみ出さない安全なサイズ */
         }
         .greeting-top-content { flex-direction: column; gap: 20px; }
         .profile-image-wrap { max-width: 100%; width: 80%; }
         .section-title.left-align { text-align: center; }
         .final-message { 
-            font-size: 1.4rem; 
-            word-break: keep-all; /* 単語途中での改行を防ぐ */
+            font-size: 1.3rem; /* 横にはみ出さない安全なサイズ */
         }
     }
 </style>
