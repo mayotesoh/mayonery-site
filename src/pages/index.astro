@@ -14,7 +14,6 @@ try {
       'Notion-Version': '2022-06-28',
       'Content-Type': 'application/json',
     },
-    // 🌟 新しい順（日付の降順）に並び替えて取得
     body: JSON.stringify({
       sorts: [{ property: '日付', direction: 'descending' }]
     })
@@ -22,7 +21,6 @@ try {
   const data = await response.json();
   const allPosts = data.results || [];
 
-  // 🌟 ステータスが「公開」のものを抽出し、最新の3件だけ取得
   recentPosts = allPosts.filter((post: any) => {
     const status = post.properties['ステータス']?.status?.name || post.properties['ステータス']?.select?.name || '';
     return status === '公開';
@@ -59,24 +57,41 @@ try {
                 {recentPosts.length > 0 ? (
                     recentPosts.map((post: any) => {
                         const title = post.properties['タイトル']?.title[0]?.plain_text || '無題';
-                        // 🌟 プロパティ名を新しいデータベースに合わせて修正
                         const dateStr = post.properties['日付']?.date?.start || '';
                         const date = dateStr ? new Date(dateStr).toLocaleDateString('ja-JP') : '日付なし';
                         const categories = post.properties['カテゴリー']?.multi_select?.map((t: any) => t.name) || [];
                         const slug = post.properties['URLスラッグ']?.rich_text[0]?.plain_text || post.id;
                         
+                        // 🌟 アイキャッチ画像の取得
+                        const eyecatchProp = post.properties['アイキャッチ'];
+                        let eyecatchUrl = '/favicon.png'; 
+                        
+                        if (eyecatchProp) {
+                            if (eyecatchProp.type === 'rich_text' && eyecatchProp.rich_text.length > 0) {
+                                const textUrl = eyecatchProp.rich_text[0].plain_text.trim();
+                                if (textUrl !== "") eyecatchUrl = textUrl;
+                            } else if (eyecatchProp.type === 'files' && eyecatchProp.files.length > 0) {
+                                eyecatchUrl = eyecatchProp.files[0].type === 'file' ? eyecatchProp.files[0].file.url : eyecatchProp.files[0].external?.url;
+                            }
+                        }
+                        
                         return (
                             <a href={`/blog/${slug}`} class="blog-card-link">
                                 <article class="blog-card">
-                                    <div class="blog-meta">
-                                        <time class="blog-date">{date}</time>
-                                        <div class="blog-tags">
-                                            {categories.map((cat: string) => (
-                                                <span class="tag">#{cat}</span>
-                                            ))}
-                                        </div>
+                                    <div class="blog-card-img-wrapper">
+                                        <img src={eyecatchUrl} alt={title} class="blog-card-img" loading="lazy" />
                                     </div>
-                                    <h3 class="blog-title">{title}</h3>
+                                    <div class="blog-card-content">
+                                        <div class="blog-meta">
+                                            <time class="blog-date">{date}</time>
+                                            <div class="blog-tags">
+                                                {categories.map((cat: string) => (
+                                                    <span class="tag">#{cat}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <h3 class="blog-title">{title}</h3>
+                                    </div>
                                 </article>
                             </a>
                         );
@@ -130,7 +145,6 @@ try {
     .btn-primary:hover { transform: translateY(-3px); }
     .btn-icon { margin-right: 8px; font-size: 1.4rem; }
 
-    /* アニメーション */
     .pulse-animation { animation: pulse 2s infinite; }
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
 
@@ -141,11 +155,18 @@ try {
     .view-all { color: var(--color-accent); font-weight: bold; text-decoration: none; transition: opacity 0.2s; }
     .view-all:hover { opacity: 0.7; }
 
-    /* 2. ブロググリッド */
+    /* 2. ブロググリッド (画像を組み込んだスタイルに修正) */
     .blog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
     .blog-card-link { text-decoration: none; color: inherit; display: block; }
-    .blog-card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e1ebe5; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: transform 0.2s, box-shadow 0.2s; height: 100%; }
+    .blog-card { background: white; border-radius: 12px; border: 1px solid #e1ebe5; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: transform 0.2s, box-shadow 0.2s; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
     .blog-card-link:hover .blog-card { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(78, 123, 103, 0.1); border-color: var(--color-primary); }
+    
+    /* 🌟 画像用のスタイル追加 */
+    .blog-card-img-wrapper { width: 100%; height: 160px; overflow: hidden; background-color: var(--color-bg); display: flex; align-items: center; justify-content: center; }
+    .blog-card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+    .blog-card-link:hover .blog-card-img { transform: scale(1.05); }
+    
+    .blog-card-content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
     .blog-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     .blog-date { font-size: 0.9rem; color: #888; }
     .blog-tags { display: flex; gap: 8px; flex-wrap: wrap; }

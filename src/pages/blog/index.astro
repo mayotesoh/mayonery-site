@@ -4,7 +4,6 @@ import Layout from '../../layouts/Layout.astro';
 const apiKey = import.meta.env.NOTION_API_KEY;
 const databaseId = import.meta.env.NOTION_BLOG_ID;
 
-// 🌟 Notion API側で「日付が新しい順（descending）」に並べて取得するように指示
 const response = await fetch(`https://api.notion.com/v1/databases/${databaseId}/query`, {
   method: 'POST',
   headers: {
@@ -25,7 +24,6 @@ const posts = allPosts.filter((post: any) => {
   return status === '公開';
 });
 
-// 全カテゴリーのリストを作成
 const allTags = [...new Set(posts.flatMap((post: any) => post.properties['カテゴリー']?.multi_select?.map((t: any) => t.name) || []))].filter(Boolean);
 ---
 
@@ -59,16 +57,22 @@ const allTags = [...new Set(posts.flatMap((post: any) => post.properties['カテ
                 const title = post.properties['タイトル']?.title[0]?.plain_text || '無題';
                 const dateStr = post.properties['日付']?.date?.start || '';
                 const date = dateStr ? new Date(dateStr).toLocaleDateString('ja-JP') : '';
-                // 🌟 JavaScriptで正確に並び替えるための時間データ（ミリ秒）を作成
                 const timestamp = dateStr ? new Date(dateStr).getTime() : 0;
                 
                 const categories = post.properties['カテゴリー']?.multi_select?.map((t: any) => t.name) || [];
                 const slug = post.properties['URLスラッグ']?.rich_text[0]?.plain_text || post.id;
 
-                const imageProp = post.properties['アイキャッチ']?.files?.[0];
-                let eyecatchUrl = '/favicon.png'; 
-                if (imageProp) {
-                    eyecatchUrl = imageProp.type === 'file' ? imageProp.file.url : imageProp.external?.url;
+                // 🌟 空欄なら自動でマヨネリアイコンになる強力なコード
+                const eyecatchProp = post.properties['アイキャッチ'];
+                let eyecatchUrl = '/favicon.png'; // 👈 デフォルト画像
+                
+                if (eyecatchProp) {
+                    if (eyecatchProp.type === 'rich_text' && eyecatchProp.rich_text.length > 0) {
+                        const textUrl = eyecatchProp.rich_text[0].plain_text.trim();
+                        if (textUrl !== "") eyecatchUrl = textUrl;
+                    } else if (eyecatchProp.type === 'files' && eyecatchProp.files.length > 0) {
+                        eyecatchUrl = eyecatchProp.files[0].type === 'file' ? eyecatchProp.files[0].file.url : eyecatchProp.files[0].external?.url;
+                    }
                 }
 
                 return (
@@ -100,7 +104,6 @@ const allTags = [...new Set(posts.flatMap((post: any) => post.properties['カテ
     .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; }
     #blog-search { width: 100%; box-sizing: border-box; padding: 12px 20px 12px 45px; border-radius: 25px; border: 2px solid var(--color-primary); outline: none; font-size: 1rem; }
     
-    /* 🌟 コントロールエリアのレイアウト */
     .controls-container { display: flex; flex-direction: column; gap: 15px; align-items: center; justify-content: center; }
     .filter-tags { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
     .filter-btn { padding: 6px 15px; border-radius: 20px; border: 1px solid #ccc; background: white; cursor: pointer; transition: all 0.2s; }
@@ -132,7 +135,6 @@ const allTags = [...new Set(posts.flatMap((post: any) => post.properties['カテ
     const filterBtns = document.querySelectorAll('.filter-btn');
     const sortSelect = document.getElementById('blog-sort') as HTMLSelectElement;
     const grid = document.getElementById('post-grid');
-    // 🌟 並び替えができるように配列としてカードを取得
     let cardsArray = Array.from(document.querySelectorAll('.post-link-wrapper'));
 
     function applyFiltersAndSort() {
@@ -140,16 +142,14 @@ const allTags = [...new Set(posts.flatMap((post: any) => post.properties['カテ
         const activeTag = document.querySelector('.filter-btn.active')?.getAttribute('data-tag');
         const sortOrder = sortSelect.value;
 
-        // 1. まず並び替え（ソート）を実行
         cardsArray.sort((a: any, b: any) => {
             const timeA = parseInt(a.getAttribute('data-time') || '0');
             const timeB = parseInt(b.getAttribute('data-time') || '0');
             return sortOrder === 'desc' ? timeB - timeA : timeA - timeB;
         });
 
-        // 2. 並び替えた順番に表示し直しつつ、検索・タグで絞り込み
         cardsArray.forEach((card: any) => {
-            grid?.appendChild(card); // 🌟 これでDOM（画面の見た目）の順番が入れ替わる
+            grid?.appendChild(card); 
 
             const title = card.getAttribute('data-title').toLowerCase();
             const tags = card.getAttribute('data-tags');
@@ -161,7 +161,7 @@ const allTags = [...new Set(posts.flatMap((post: any) => post.properties['カテ
     }
 
     searchInput?.addEventListener('input', applyFiltersAndSort);
-    sortSelect?.addEventListener('change', applyFiltersAndSort); // 🌟 プルダウン変更時も即時反映
+    sortSelect?.addEventListener('change', applyFiltersAndSort);
     filterBtns.forEach(btn => btn.addEventListener('click', (e) => {
         filterBtns.forEach(b => b.classList.remove('active'));
         (e.target as HTMLElement).classList.add('active');
