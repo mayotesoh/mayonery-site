@@ -38,10 +38,18 @@ async function fetchNotionData(databaseId: string) {
 
 // 1. ブログ
 const allPosts = await fetchNotionData(blogDbId);
-const recentPosts = allPosts.filter((post: any) => {
-  const status = post.properties['ステータス']?.status?.name || post.properties['ステータス']?.select?.name || '';
-  return status === '公開';
-}).slice(0, 3);
+const recentPosts = allPosts
+  .filter((post: any) => {
+    const status = post.properties['ステータス']?.status?.name || post.properties['ステータス']?.select?.name || '';
+    return status === '公開';
+  })
+  .sort((a: any, b: any) => {
+    // 🌟 日付を取得して新しい順（降順）に並び替える処理を追加
+    const dateA = new Date(a.properties['日付']?.date?.start || 0).getTime();
+    const dateB = new Date(b.properties['日付']?.date?.start || 0).getTime();
+    return dateB - dateA;
+  })
+  .slice(0, 3);
 
 // 2. 用語集
 const allGlossary = await fetchNotionData(glossaryDbId);
