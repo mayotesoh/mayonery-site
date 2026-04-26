@@ -148,11 +148,11 @@ const blocks = blocksData.results || [];
     .post-header { margin-bottom: 40px; }
     
     .post-eyecatch-wrapper { position: relative; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    .post-eyecatch { width: 100%; max-height: 400px; object-fit: cover; }
-    .post-title-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background-color: rgba(255, 255, 255, 0.7); backdrop-filter: blur(5px); padding: 20px; box-sizing: border-box; }
+    .post-eyecatch { width: 100%; max-height: 400px; object-fit: cover; display: block; }
+    .post-title-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px); padding: 20px; box-sizing: border-box; }
     .post-meta-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .post-date { color: #555; font-weight: bold; font-size: 0.9rem; }
-    .post-tags { display: flex; gap: 8px; }
+    .post-tags { display: flex; flex-wrap: wrap; gap: 8px; }
     .tag { background: rgba(78, 123, 103, 0.1); color: var(--color-primary); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
     .post-title { font-size: 2rem; color: var(--color-text); line-height: 1.4; margin: 0; }
 
@@ -170,4 +170,29 @@ const blocks = blocksData.results || [];
     .back-link { margin-top: 60px; text-align: center; }
     .btn-back { display: inline-block; padding: 12px 30px; background: white; color: var(--color-primary); text-decoration: none; border-radius: 30px; font-weight: bold; border: 1px solid var(--color-primary); transition: all 0.3s; }
     .btn-back:hover { background: var(--color-primary); color: white; }
+
+    /* 🌟 スマホ用レスポンシブ設定（ブログ記事を圧倒的に読みやすく） */
+    @media (max-width: 768px) {
+        .single-post-container { padding: 30px 15px; }
+        
+        /* タイトルを画像の上に重ねず、下にスッキリ配置させる */
+        .post-eyecatch-wrapper { box-shadow: none; border-radius: 0; background: white; }
+        .post-eyecatch { border-radius: 8px; max-height: 250px; }
+        .post-title-overlay { 
+            position: static; /* 画像から独立させて下に落とす */
+            background-color: transparent; 
+            padding: 20px 0 10px 0; 
+            backdrop-filter: none;
+        }
+        
+        .post-meta-top { flex-direction: column; align-items: flex-start; gap: 10px; }
+        
+        /* スマホ向けにフォントサイズを縮小・最適化 */
+        .post-title { font-size: 1.4rem; line-height: 1.5; }
+        .post-content { font-size: 1rem; line-height: 1.8; }
+        .post-content h2 { font-size: 1.3rem; margin: 1.8em 0 1em; }
+        .post-content h3 { font-size: 1.15rem; }
+        .callout-box { padding: 15px; flex-direction: column; gap: 10px; }
+        .callout-icon { margin-right: 0; margin-bottom: 5px; }
+    }
 </style>
