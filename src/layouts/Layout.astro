@@ -86,11 +86,20 @@ const snsLinks = [
                     <a href="/" class="nav-item">ホーム</a>
                     <a href="/about" class="nav-item">自己紹介</a>
                     <a href="/blog" class="nav-item">ブログ</a>
+                    
+                    <div class="nav-dropdown">
+                        <button class="nav-item dropdown-toggle">占い総合 ▼</button>
+                        <div class="dropdown-menu">
+                            <a href="/shindan" class="dropdown-item">無料手相診断</a>
+                            <a href="/tarot" class="dropdown-item">タロット（準備中）</a>
+                            <a href="/other" class="dropdown-item">その他の占い（準備中）</a>
+                        </div>
+                    </div>
+
                     <a href="/glossary" class="nav-item">手相用語集</a>
                     <a href="/quiz" class="nav-item">手相クイズ</a>
                     <a href="/service" class="nav-item">提供サービス</a>
                     <a href="/gakkai" class="nav-item">手相学会</a> 
-                    <a href="/shindan" class="nav-item">無料手相診断</a>
                 </div>
             </nav>
         </div>
@@ -114,13 +123,27 @@ const snsLinks = [
     <script>
         const hamburgerBtn = document.getElementById('hamburger-btn');
         const navMenu = document.getElementById('nav-menu');
+        const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
 
+        // ハンバーガーメニューの開閉
         if (hamburgerBtn && navMenu) {
             hamburgerBtn.addEventListener('click', () => {
                 hamburgerBtn.classList.toggle('active');
                 navMenu.classList.toggle('active');
             });
         }
+
+        // スマホでのドロップダウンメニューの開閉
+        dropdownToggles.forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                // PC幅以上の場合はCSSのホバーで処理するためJSをキャンセル
+                if (window.innerWidth > 768) return; 
+                
+                e.preventDefault();
+                const parent = this.parentElement;
+                parent.classList.toggle('open');
+            });
+        });
     </script>
 </body>
 </html>
@@ -169,27 +192,19 @@ const snsLinks = [
         display: flex;
         gap: 18px;
     }
-    .sns-link {
+    .sns-link, .footer-sns-link {
         color: inherit;
         display: inline-block;
-        width: 22px;
-        height: 22px;
         transition: transform 0.2s, color 0.2s;
     }
-    .footer-sns-link {
-        color: #e5ede9;
-        display: inline-block;
-        width: 28px;
-        height: 28px;
-        transition: transform 0.2s, color 0.2s;
-    }
+    .sns-link { width: 22px; height: 22px; }
+    .footer-sns-link { width: 28px; height: 28px; color: #e5ede9; }
+    
     .sns-link:hover, .footer-sns-link:hover {
         transform: scale(1.2);
         color: white;
     }
-    .footer-sns-link:hover {
-        color: #9dbfaf; 
-    }
+    .footer-sns-link:hover { color: #9dbfaf; }
 
     .sticky-nav-container {
         position: -webkit-sticky;
@@ -236,9 +251,7 @@ const snsLinks = [
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
-    .nav-menu {
-        display: block;
-    }
+    .nav-menu { display: block; }
     .nav-links {
         display: flex;
         align-items: center;
@@ -247,10 +260,9 @@ const snsLinks = [
         justify-content: flex-end;
     }
 
-    .hamburger-btn {
-        display: none;
-    }
+    .hamburger-btn { display: none; }
 
+    /* 基本のナビゲーションアイテム（ボタンとリンク共通） */
     .nav-item {
         position: relative;
         text-decoration: none;
@@ -264,6 +276,9 @@ const snsLinks = [
         box-shadow: 0 4px 0 #d1e0d7, 0 5px 10px rgba(78, 123, 103, 0.06);
         transition: all 0.2s ease;
         white-space: nowrap;
+        cursor: pointer;
+        display: block;
+        font-family: inherit;
     }
     
     .nav-item::after {
@@ -286,14 +301,53 @@ const snsLinks = [
         box-shadow: 0 6px 0 #d1e0d7, 0 8px 15px rgba(78, 123, 103, 0.12); 
     }
     
-    .nav-item:hover::after {
-        width: 50%; 
-        opacity: 1;
-    }
-
+    .nav-item:hover::after { width: 50%; opacity: 1; }
     .nav-item:active {
         transform: translateY(4px); 
         box-shadow: 0 0 0 #d1e0d7, 0 2px 4px rgba(78, 123, 103, 0.05); 
+    }
+
+    /* 🌟 PC用ドロップダウンの設定 */
+    .nav-dropdown {
+        position: relative;
+    }
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: white;
+        min-width: 200px;
+        border: 1px solid #e1ebe5;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        padding: 10px 0;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+        z-index: 1002;
+    }
+    /* PCではホバーで展開 */
+    @media (min-width: 769px) {
+        .nav-dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(5px);
+        }
+    }
+    
+    .dropdown-item {
+        display: block;
+        padding: 10px 20px;
+        color: var(--color-text);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: bold;
+        transition: background 0.2s, color 0.2s;
+    }
+    .dropdown-item:hover {
+        background-color: var(--color-bg);
+        color: var(--color-primary);
     }
 
     .site-footer {
@@ -302,26 +356,18 @@ const snsLinks = [
         padding: 40px 0 20px;
         margin-top: 60px;
     }
-    .footer-inner {
-        text-align: center;
-    }
+    .footer-inner { text-align: center; }
     .footer-sns {
         display: flex;
         justify-content: center;
         gap: 30px;
         margin-bottom: 25px;
     }
-    .copyright {
-        font-size: 0.85rem;
-        opacity: 0.8;
-        margin: 0;
-    }
+    .copyright { font-size: 0.85rem; opacity: 0.8; margin: 0; }
 
     /* 🌟 スマホ用（横幅768px以下）の設定 */
     @media (max-width: 768px) {
-        .main-nav {
-            padding: 10px 0;
-        }
+        .main-nav { padding: 10px 0; }
 
         .hamburger-btn {
             display: flex;
@@ -345,16 +391,9 @@ const snsLinks = [
             transform-origin: 1px;
         }
 
-        .hamburger-btn.active .hamburger-line:nth-child(1) {
-            transform: rotate(45deg);
-        }
-        .hamburger-btn.active .hamburger-line:nth-child(2) {
-            opacity: 0;
-            transform: translateX(20px);
-        }
-        .hamburger-btn.active .hamburger-line:nth-child(3) {
-            transform: rotate(-45deg);
-        }
+        .hamburger-btn.active .hamburger-line:nth-child(1) { transform: rotate(45deg); }
+        .hamburger-btn.active .hamburger-line:nth-child(2) { opacity: 0; transform: translateX(20px); }
+        .hamburger-btn.active .hamburger-line:nth-child(3) { transform: rotate(-45deg); }
 
         .nav-menu {
             position: absolute;
@@ -365,16 +404,14 @@ const snsLinks = [
             border-bottom: 1px solid #e1ebe5;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             
-            /* 🌟 修正ポイント：高さを十分に取り、はみ出た場合はスクロールさせる */
+            /* メニューの見切れを防ぐスクロール対応 */
             max-height: 0;
             overflow-y: auto;
             transition: max-height 0.4s ease-in-out;
-            /* 画面の高さいっぱいまで広がるようにする（追従ヘッダーの分を引く） */
             max-height: calc(100vh - 70px) !important;
-            display: none; /* 初期状態は非表示 */
+            display: none;
         }
 
-        /* 🌟 アクティブ時に表示＆アニメーション */
         .nav-menu.active {
             display: block;
             animation: slideDown 0.3s ease forwards;
@@ -388,8 +425,8 @@ const snsLinks = [
         .nav-links {
             flex-direction: column;
             align-items: stretch;
-            padding: 20px 5% 40px; /* 下部に少し余裕を持たせる */
-            gap: 15px;
+            padding: 20px 5% 40px; 
+            gap: 10px;
         }
 
         .nav-item {
@@ -397,17 +434,43 @@ const snsLinks = [
             font-size: 1rem;
             padding: 12px;
             box-shadow: 0 3px 0 #d1e0d7;
-            /* スクロール時にタップしやすくするためマージンを調整 */
             margin-bottom: 5px;
         }
         
-        .top-bar-text {
-            font-size: 0.75rem;
+        /* 🌟 スマホ用のドロップダウン展開設定 */
+        .dropdown-menu {
+            position: static;
+            visibility: visible;
+            opacity: 1;
+            transform: none;
+            box-shadow: none;
+            border: none;
+            border-left: 3px solid var(--color-primary);
+            border-radius: 0;
+            background: transparent;
+            padding: 0;
+            margin-top: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
         }
         
-        .sns-link {
-            width: 18px;
-            height: 18px;
+        /* タップでクラスが付与されたら中身を展開 */
+        .nav-dropdown.open .dropdown-menu {
+            max-height: 200px;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
+        
+        .dropdown-item {
+            padding: 10px 0 10px 30px;
+            text-align: left;
+            font-size: 0.95rem;
+            border-bottom: 1px dashed #e1ebe5;
+        }
+        .dropdown-item:last-child { border-bottom: none; }
+
+        .top-bar-text { font-size: 0.75rem; }
+        .sns-link { width: 18px; height: 18px; }
     }
 </style>
