@@ -136,9 +136,7 @@ const snsLinks = [
         // スマホでのドロップダウンメニューの開閉
         dropdownToggles.forEach(toggle => {
             toggle.addEventListener('click', function(e) {
-                // PC幅以上の場合はCSSのホバーで処理するためJSをキャンセル
                 if (window.innerWidth > 768) return; 
-                
                 e.preventDefault();
                 const parent = this.parentElement;
                 parent.classList.toggle('open');
@@ -166,9 +164,7 @@ const snsLinks = [
         flex-direction: column;
         min-height: 100vh;
     }
-    main {
-        flex: 1;
-    }
+    main { flex: 1; }
 
     .container {
         width: 92%;
@@ -176,34 +172,13 @@ const snsLinks = [
         margin: 0 auto;
     }
 
-    .top-bar {
-        background-color: #2b453a;
-        color: #e5ede9;
-        padding: 8px 0;
-        font-size: 0.85rem;
-    }
-    .top-bar-inner {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .sns-icons {
-        display: flex;
-        gap: 18px;
-    }
-    .sns-link, .footer-sns-link {
-        color: inherit;
-        display: inline-block;
-        transition: transform 0.2s, color 0.2s;
-    }
+    .top-bar { background-color: #2b453a; color: #e5ede9; padding: 8px 0; font-size: 0.85rem; }
+    .top-bar-inner { display: flex; justify-content: space-between; align-items: center; }
+    .sns-icons { display: flex; gap: 18px; }
+    .sns-link, .footer-sns-link { color: inherit; display: inline-block; transition: transform 0.2s, color 0.2s; }
     .sns-link { width: 22px; height: 22px; }
     .footer-sns-link { width: 28px; height: 28px; color: #e5ede9; }
-    
-    .sns-link:hover, .footer-sns-link:hover {
-        transform: scale(1.2);
-        color: white;
-    }
+    .sns-link:hover, .footer-sns-link:hover { transform: scale(1.2); color: white; }
     .footer-sns-link:hover { color: #9dbfaf; }
 
     .sticky-nav-container {
@@ -217,49 +192,13 @@ const snsLinks = [
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 
-    .main-nav {
-        padding: 15px 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: relative;
-    }
-    
-    .nav-logo {
-        font-size: 1.4rem;
-        font-weight: bold;
-        color: var(--color-primary);
-        text-decoration: none;
-        letter-spacing: 0.05em;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        transition: opacity 0.2s, transform 0.2s;
-        white-space: nowrap;
-        z-index: 1001; 
-    }
-    .nav-logo:hover {
-        opacity: 0.8;
-        transform: scale(1.02);
-    }
-    
-    .logo-image {
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        object-fit: cover;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
+    .main-nav { padding: 15px 0; display: flex; justify-content: space-between; align-items: center; position: relative; }
+    .nav-logo { font-size: 1.4rem; font-weight: bold; color: var(--color-primary); text-decoration: none; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; transition: opacity 0.2s, transform 0.2s; white-space: nowrap; z-index: 1001; }
+    .nav-logo:hover { opacity: 0.8; transform: scale(1.02); }
+    .logo-image { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
     .nav-menu { display: block; }
-    .nav-links {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-    }
-
+    .nav-links { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
     .hamburger-btn { display: none; }
 
     /* 基本のナビゲーションアイテム（ボタンとリンク共通） */
@@ -281,36 +220,13 @@ const snsLinks = [
         font-family: inherit;
     }
     
-    .nav-item::after {
-        content: '';
-        position: absolute;
-        bottom: 8px; 
-        left: 50%;
-        width: 0;
-        height: 3px;
-        background-color: var(--color-primary);
-        transition: all 0.3s ease;
-        transform: translateX(-50%);
-        border-radius: 2px;
-        opacity: 0;
-    }
-
-    .nav-item:hover {
-        color: var(--color-primary);
-        transform: translateY(-2px); 
-        box-shadow: 0 6px 0 #d1e0d7, 0 8px 15px rgba(78, 123, 103, 0.12); 
-    }
-    
+    .nav-item::after { content: ''; position: absolute; bottom: 8px; left: 50%; width: 0; height: 3px; background-color: var(--color-primary); transition: all 0.3s ease; transform: translateX(-50%); border-radius: 2px; opacity: 0; }
+    .nav-item:hover { color: var(--color-primary); transform: translateY(-2px); box-shadow: 0 6px 0 #d1e0d7, 0 8px 15px rgba(78, 123, 103, 0.12); }
     .nav-item:hover::after { width: 50%; opacity: 1; }
-    .nav-item:active {
-        transform: translateY(4px); 
-        box-shadow: 0 0 0 #d1e0d7, 0 2px 4px rgba(78, 123, 103, 0.05); 
-    }
+    .nav-item:active { transform: translateY(4px); box-shadow: 0 0 0 #d1e0d7, 0 2px 4px rgba(78, 123, 103, 0.05); }
 
-    /* 🌟 PC用ドロップダウンの設定 */
-    .nav-dropdown {
-        position: relative;
-    }
+    /* PC用ドロップダウンの設定 */
+    .nav-dropdown { position: relative; }
     .dropdown-menu {
         position: absolute;
         top: 100%;
@@ -328,40 +244,15 @@ const snsLinks = [
         z-index: 1002;
     }
     @media (min-width: 769px) {
-        .nav-dropdown:hover .dropdown-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(5px);
-        }
+        .nav-dropdown:hover .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(5px); }
     }
     
-    .dropdown-item {
-        display: block;
-        padding: 10px 20px;
-        color: var(--color-text);
-        text-decoration: none;
-        font-size: 0.9rem;
-        font-weight: bold;
-        transition: background 0.2s, color 0.2s;
-    }
-    .dropdown-item:hover {
-        background-color: var(--color-bg);
-        color: var(--color-primary);
-    }
+    .dropdown-item { display: block; padding: 10px 20px; color: var(--color-text); text-decoration: none; font-size: 0.9rem; font-weight: bold; transition: background 0.2s, color 0.2s; }
+    .dropdown-item:hover { background-color: var(--color-bg); color: var(--color-primary); }
 
-    .site-footer {
-        background-color: var(--color-primary);
-        color: white;
-        padding: 40px 0 20px;
-        margin-top: 60px;
-    }
+    .site-footer { background-color: var(--color-primary); color: white; padding: 40px 0 20px; margin-top: 60px; }
     .footer-inner { text-align: center; }
-    .footer-sns {
-        display: flex;
-        justify-content: center;
-        gap: 30px;
-        margin-bottom: 25px;
-    }
+    .footer-sns { display: flex; justify-content: center; gap: 30px; margin-bottom: 25px; }
     .copyright { font-size: 0.85rem; opacity: 0.8; margin: 0; }
 
     /* 🌟 スマホ用（横幅768px以下）の設定 */
@@ -369,110 +260,49 @@ const snsLinks = [
         .main-nav { padding: 10px 0; }
 
         .hamburger-btn {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            width: 30px;
-            height: 24px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-            z-index: 1001;
+            display: flex; flex-direction: column; justify-content: space-around; width: 30px; height: 24px; background: transparent; border: none; cursor: pointer; padding: 0; z-index: 1001;
         }
 
-        .hamburger-line {
-            width: 100%;
-            height: 3px;
-            background-color: var(--color-primary);
-            border-radius: 10px;
-            transition: all 0.3s linear;
-            transform-origin: 1px;
-        }
-
+        .hamburger-line { width: 100%; height: 3px; background-color: var(--color-primary); border-radius: 10px; transition: all 0.3s linear; transform-origin: 1px; }
         .hamburger-btn.active .hamburger-line:nth-child(1) { transform: rotate(45deg); }
         .hamburger-btn.active .hamburger-line:nth-child(2) { opacity: 0; transform: translateX(20px); }
         .hamburger-btn.active .hamburger-line:nth-child(3) { transform: rotate(-45deg); }
 
         .nav-menu {
-            position: absolute;
-            top: 100%; 
-            left: 0;
-            width: 100%;
-            background-color: rgba(255, 255, 255, 0.98);
-            border-bottom: 1px solid #e1ebe5;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            
-            /* メニューの見切れを防ぐスクロール対応 */
-            max-height: 0;
-            overflow-y: auto;
-            transition: max-height 0.4s ease-in-out;
-            max-height: calc(100vh - 70px) !important;
-            display: none;
+            position: absolute; top: 100%; left: 0; width: 100%; background-color: rgba(255, 255, 255, 0.98); border-bottom: 1px solid #e1ebe5; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            max-height: 0; overflow-y: auto; transition: max-height 0.4s ease-in-out; max-height: calc(100vh - 70px) !important; display: none;
         }
 
-        .nav-menu.active {
-            display: block;
-            animation: slideDown 0.3s ease forwards;
-        }
+        .nav-menu.active { display: block; animation: slideDown 0.3s ease forwards; }
 
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .nav-links {
-            flex-direction: column;
-            align-items: stretch;
-            padding: 20px 5% 40px; 
-            gap: 10px;
-        }
+        .nav-links { flex-direction: column; align-items: stretch; padding: 20px 5% 40px; gap: 10px; }
 
-        /* 🌟 修正ポイント：ここが100%になることで他とデザインが揃う */
-        .nav-dropdown {
-            width: 100%; 
-        }
+        /* 🌟 強制的に100%幅にする設定 */
+        .nav-dropdown { width: 100%; display: block; }
 
         .nav-item {
-            text-align: center;
-            font-size: 1rem;
-            padding: 12px;
-            box-shadow: 0 3px 0 #d1e0d7;
-            margin-bottom: 5px;
-            width: 100%; /* ボタンもリンクも同じ幅にする */
-            box-sizing: border-box; /* 枠からはみ出ないように計算 */
+            text-align: center; font-size: 1rem; padding: 12px; box-shadow: 0 3px 0 #d1e0d7; margin-bottom: 5px;
+            width: 100% !important; /* 🌟 リンクもボタンも絶対に100%幅にする */
+            box-sizing: border-box; display: block;
         }
+        
+        button.nav-item { background-color: #ffffff; color: var(--color-text); } /* ボタン固有のリセット */
         
         /* 🌟 スマホ用のドロップダウン展開設定 */
         .dropdown-menu {
-            position: static;
-            visibility: visible;
-            opacity: 1;
-            transform: none;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.03); /* 内側にうっすら影を入れて区別 */
-            border: none;
-            border-radius: 8px;
-            background: #f8faf9; /* 少し色を変えて階層を表現 */
-            padding: 0;
-            margin-top: 0;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
+            position: static; visibility: visible; opacity: 1; transform: none;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.05); /* 内側に自然な影 */
+            border: none; border-radius: 8px; background: #f8faf9; padding: 0; margin-top: 0; max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
         }
         
-        .nav-dropdown.open .dropdown-menu {
-            max-height: 300px;
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
+        .nav-dropdown.open .dropdown-menu { max-height: 300px; margin-top: 5px; margin-bottom: 10px; }
         
         .dropdown-item {
             padding: 12px;
-            text-align: center; /* 左寄せから中央寄せに変更して統一感を出す */
-            font-size: 0.95rem;
-            border-bottom: 1px dashed #d1e0d7;
-            display: block;
-            color: var(--color-text);
+            text-align: center; /* 🌟 左寄せを解除して中央寄せで統一 */
+            font-size: 0.95rem; border-bottom: 1px dashed #d1e0d7; display: block; color: var(--color-text);
         }
         .dropdown-item:last-child { border-bottom: none; }
 
