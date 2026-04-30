@@ -26,6 +26,8 @@ import Layout from '../layouts/Layout.astro';
                     <div class="card-back anim-card1"></div>
                     <div class="card-back anim-card2"></div>
                     <div class="card-back anim-card3"></div>
+                    <div class="card-back anim-card4"></div>
+                    <div class="card-back anim-card5"></div>
                 </div>
                 <p class="shuffling-text">直感を信じて、あなたのタイミングでストップしてください。</p>
                 <button id="stop-shuffle-btn" class="btn-draw btn-stop">
@@ -69,15 +71,14 @@ import Layout from '../layouts/Layout.astro';
     .main-title { color: var(--color-primary); font-size: 2.2rem; margin-bottom: 15px; }
     .sub-desc { font-size: 1rem; line-height: 1.8; color: #555; }
 
-    .tarot-action { background: white; padding: 40px 20px; border-radius: 16px; border: 1px solid #e1ebe5; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 50px; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .tarot-action { background: white; padding: 40px 20px; border-radius: 16px; border: 1px solid #e1ebe5; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 50px; min-height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
     .action-prompt { font-weight: bold; margin-bottom: 25px; color: var(--color-accent); font-size: 1.1rem; }
     
-    .btn-draw { background: var(--color-primary); color: white; border: none; padding: 18px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 40px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 5px 15px rgba(78, 123, 103, 0.3); }
+    .btn-draw { background: var(--color-primary); color: white; border: none; padding: 18px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 40px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 5px 15px rgba(78, 123, 103, 0.3); z-index: 10; position: relative; }
     .btn-draw:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(78, 123, 103, 0.4); }
     .btn-draw:active { transform: translateY(2px); box-shadow: 0 2px 5px rgba(78, 123, 103, 0.3); }
     
-    /* ストップボタンの色を少し変えて目立たせる */
-    .btn-stop { background: #c2410c; box-shadow: 0 5px 15px rgba(194, 65, 12, 0.3); animation: pulse-stop 1.5s infinite; }
+    .btn-stop { background: #c2410c; box-shadow: 0 5px 15px rgba(194, 65, 12, 0.3); animation: pulse-stop 1.5s infinite; margin-top: 10px; }
     .btn-stop:hover { background: #9a3412; box-shadow: 0 8px 20px rgba(194, 65, 12, 0.4); }
     @keyframes pulse-stop { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
@@ -86,26 +87,30 @@ import Layout from '../layouts/Layout.astro';
 
     .hidden { display: none !important; }
 
-    /* 🌟 シャッフルアニメーション用（仮の裏面デザイン） */
-    .shuffling-text { color: var(--color-text); font-weight: bold; margin-bottom: 25px; }
-    .deck-animation { position: relative; width: 120px; height: 180px; margin: 0 auto 30px; perspective: 1000px; }
+    /* 🌟 新・本格シャッフルアニメーション（ぐるぐる混ぜる） */
+    .shuffling-text { color: var(--color-text); font-weight: bold; margin-bottom: 20px; position: relative; z-index: 10; }
+    .deck-animation { position: relative; width: 100px; height: 150px; margin: 40px auto 50px; perspective: 1000px; }
     
     .card-back {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         background: repeating-linear-gradient(45deg, #2b453a, #2b453a 10px, #1d332a 10px, #1d332a 20px);
-        border: 4px solid #e5ede9; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        display: flex; justify-content: center; align-items: center;
+        border: 4px solid #e5ede9; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        display: flex; justify-content: center; align-items: center; transform-origin: center center;
     }
-    .card-back::after { content: '✧'; font-size: 3rem; color: #e5ede9; opacity: 0.8; }
+    .card-back::after { content: '✧'; font-size: 2.5rem; color: #e5ede9; opacity: 0.8; }
     
-    /* 3枚のカードがバラバラに動くアニメーション */
-    .anim-card1 { animation: shuffle1 0.6s infinite alternate ease-in-out; z-index: 3; }
-    .anim-card2 { animation: shuffle2 0.7s infinite alternate ease-in-out reverse; z-index: 2; }
-    .anim-card3 { animation: shuffle3 0.5s infinite alternate ease-in-out; z-index: 1; }
+    /* 5枚のカードがそれぞれ異なる軌道で大きく回る */
+    .anim-card1 { animation: swirl1 1.2s infinite alternate ease-in-out; z-index: 5; }
+    .anim-card2 { animation: swirl2 1.5s infinite alternate ease-in-out; z-index: 4; }
+    .anim-card3 { animation: swirl3 1.1s infinite alternate ease-in-out; z-index: 3; }
+    .anim-card4 { animation: swirl4 1.4s infinite alternate ease-in-out; z-index: 2; }
+    .anim-card5 { animation: swirl5 1.3s infinite alternate ease-in-out; z-index: 1; }
 
-    @keyframes shuffle1 { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(-40px, 10px) rotate(-10deg); } }
-    @keyframes shuffle2 { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(35px, -5px) rotate(15deg); } }
-    @keyframes shuffle3 { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(-10px, -15px) rotate(5deg); } }
+    @keyframes swirl1 { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(-60px, -30px) rotate(-80deg); } }
+    @keyframes swirl2 { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(60px, -20px) rotate(120deg); } }
+    @keyframes swirl3 { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(-40px, 40px) rotate(-150deg); } }
+    @keyframes swirl4 { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(50px, 50px) rotate(70deg); } }
+    @keyframes swirl5 { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(0px, -60px) rotate(180deg); } }
 
     /* 結果エリア */
     .result-title { color: var(--color-primary); border-bottom: 2px solid var(--color-bg); padding-bottom: 10px; margin-bottom: 30px; }
@@ -137,7 +142,6 @@ import Layout from '../layouts/Layout.astro';
 </style>
 
 <script>
-    // 大アルカナ22枚のデータ
     const tarotDeck = [
         { id: 0, name: "愚者 (The Fool)", up: "自由、型破り、直感、ゼロからのスタート", rev: "無計画、軽率、現実逃避、宙ぶらりん" },
         { id: 1, name: "魔術師 (The Magician)", up: "創造、スキル、コミュニケーション、具現化", rev: "スランプ、準備不足、口先だけ、技術の悪用" },
@@ -172,7 +176,6 @@ import Layout from '../layouts/Layout.astro';
         const shufflingContainer = document.getElementById('shuffling-container');
         const resultSection = document.getElementById('tarot-result');
 
-        // ①「シャッフルを開始する」を押した時
         if (startBtn) {
             startBtn.addEventListener('click', () => {
                 if(drawContainer) drawContainer.classList.add('hidden');
@@ -180,7 +183,6 @@ import Layout from '../layouts/Layout.astro';
             });
         }
 
-        // ②「ストップ」を押した時
         if (stopBtn) {
             stopBtn.addEventListener('click', () => {
                 if(shufflingContainer) shufflingContainer.classList.add('hidden');
@@ -189,7 +191,6 @@ import Layout from '../layouts/Layout.astro';
             });
         }
 
-        // ③「もう一度引く」を押した時（リセット）
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
                 if(resultSection) resultSection.classList.add('hidden');
