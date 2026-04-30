@@ -91,7 +91,7 @@ const snsLinks = [
                         <button class="nav-item dropdown-toggle">占い総合 ▼</button>
                         <div class="dropdown-menu">
                             <a href="/shindan" class="dropdown-item">無料手相診断</a>
-                            <a href="/tarot" class="dropdown-item">タロット（準備中）</a>
+                            <a href="/tarot" class="dropdown-item">思考整理タロット</a>
                             <a href="/other" class="dropdown-item">その他の占い（準備中）</a>
                         </div>
                     </div>
@@ -327,7 +327,6 @@ const snsLinks = [
         transition: all 0.3s ease;
         z-index: 1002;
     }
-    /* PCではホバーで展開 */
     @media (min-width: 769px) {
         .nav-dropdown:hover .dropdown-menu {
             opacity: 1;
@@ -429,12 +428,19 @@ const snsLinks = [
             gap: 10px;
         }
 
+        /* 🌟 修正ポイント：ここが100%になることで他とデザインが揃う */
+        .nav-dropdown {
+            width: 100%; 
+        }
+
         .nav-item {
             text-align: center;
             font-size: 1rem;
             padding: 12px;
             box-shadow: 0 3px 0 #d1e0d7;
             margin-bottom: 5px;
+            width: 100%; /* ボタンもリンクも同じ幅にする */
+            box-sizing: border-box; /* 枠からはみ出ないように計算 */
         }
         
         /* 🌟 スマホ用のドロップダウン展開設定 */
@@ -443,11 +449,10 @@ const snsLinks = [
             visibility: visible;
             opacity: 1;
             transform: none;
-            box-shadow: none;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.03); /* 内側にうっすら影を入れて区別 */
             border: none;
-            border-left: 3px solid var(--color-primary);
-            border-radius: 0;
-            background: transparent;
+            border-radius: 8px;
+            background: #f8faf9; /* 少し色を変えて階層を表現 */
             padding: 0;
             margin-top: 0;
             max-height: 0;
@@ -455,18 +460,19 @@ const snsLinks = [
             transition: max-height 0.3s ease;
         }
         
-        /* タップでクラスが付与されたら中身を展開 */
         .nav-dropdown.open .dropdown-menu {
-            max-height: 200px;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            max-height: 300px;
+            margin-top: 5px;
+            margin-bottom: 5px;
         }
         
         .dropdown-item {
-            padding: 10px 0 10px 30px;
-            text-align: left;
+            padding: 12px;
+            text-align: center; /* 左寄せから中央寄せに変更して統一感を出す */
             font-size: 0.95rem;
-            border-bottom: 1px dashed #e1ebe5;
+            border-bottom: 1px dashed #d1e0d7;
+            display: block;
+            color: var(--color-text);
         }
         .dropdown-item:last-child { border-bottom: none; }
 
