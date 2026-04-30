@@ -8,6 +8,9 @@ const glossaryDbId = import.meta.env.NOTION_GLOSSARY_ID;
 const quizDbId = import.meta.env.NOTION_QUIZ_ID;
 const youtubeChannelId = import.meta.env.YOUTUBE_CHANNEL_ID || 'UC8FyvgMTWWN77utbwmtAX8w';
 
+// 🌟 AIのURL自動変換を回避するための変数（絶対に消さないでください）
+const ytBase = "https://www.you" + "tube.com";
+
 // プロパティを安全に取得する関数
 function getPlainText(prop: any) {
     if (!prop) return "";
@@ -75,11 +78,11 @@ if (randomQuiz.length > 0) {
     hqExplanation = getPlainText(q.properties['解説']);
 }
 
-// 4. YouTube最新動画（🌟ここのURLを正しいものに修正しました）
+// 4. YouTube最新動画（🌟 ダミーURL問題を回避）
 let latestVideos = [];
 try {
   if (youtubeChannelId && youtubeChannelId.startsWith('UC')) {
-    const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${youtubeChannelId}`;
+    const rssUrl = `${ytBase}/feeds/videos.xml?channel_id=${youtubeChannelId}`;
     const ytRes = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
     const ytData = await ytRes.json();
     if (ytData.status === 'ok') {
@@ -115,7 +118,7 @@ const mainVideo = {
         <section class="top-section youtube-section">
             <div class="section-header">
                 <h2 class="section-title">動画で学ぶ「論理的手相学」</h2>
-                <a href="https://www.youtube.com/@mayotesoh" target="_blank" rel="noopener noreferrer" class="view-all">チャンネル登録 →</a>
+                <a href={`${ytBase}/@mayotesoh`} target="_blank" rel="noopener noreferrer" class="view-all">チャンネル登録 →</a>
             </div>
             
             <div class="youtube-grid">
@@ -123,7 +126,7 @@ const mainVideo = {
                     <h3 class="yt-label">おすすめ動画</h3>
                     <div class="yt-item-card main-video-card">
                         <div class="iframe-wrapper">
-                            <iframe src={`https://www.youtube.com/embed/${mainVideo.id}`} title="YouTube video player" frameborder="0" allowfullscreen></iframe>
+                            <iframe src={`${ytBase}/embed/${mainVideo.id}`} title="YouTube video player" frameborder="0" allowfullscreen></iframe>
                         </div>
                         <div class="yt-info">
                             <span class="yt-title" title={mainVideo.title}>{mainVideo.title}</span>
@@ -151,7 +154,7 @@ const mainVideo = {
                                 return videoId ? (
                                     <div class="yt-item-card">
                                         <div class="iframe-wrapper-small">
-                                            <iframe src={`https://www.youtube.com/embed/${videoId}`} title="YouTube video player" frameborder="0" allowfullscreen></iframe>
+                                            <iframe src={`${ytBase}/embed/${videoId}`} title="YouTube video player" frameborder="0" allowfullscreen></iframe>
                                         </div>
                                         <div class="yt-info">
                                             {isShort && <span class="yt-badge">Shorts</span>}
