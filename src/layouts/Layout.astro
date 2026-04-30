@@ -191,7 +191,6 @@ const snsLinks = [
         color: #9dbfaf; 
     }
 
-    /* 🌟 タブの追従設定（完璧に機能します） */
     .sticky-nav-container {
         position: -webkit-sticky;
         position: sticky;
@@ -366,19 +365,30 @@ const snsLinks = [
             border-bottom: 1px solid #e1ebe5;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             
+            /* 🌟 修正ポイント：高さを十分に取り、はみ出た場合はスクロールさせる */
             max-height: 0;
-            overflow: hidden;
+            overflow-y: auto;
             transition: max-height 0.4s ease-in-out;
+            /* 画面の高さいっぱいまで広がるようにする（追従ヘッダーの分を引く） */
+            max-height: calc(100vh - 70px) !important;
+            display: none; /* 初期状態は非表示 */
         }
 
+        /* 🌟 アクティブ時に表示＆アニメーション */
         .nav-menu.active {
-            max-height: 500px; 
+            display: block;
+            animation: slideDown 0.3s ease forwards;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .nav-links {
             flex-direction: column;
             align-items: stretch;
-            padding: 20px 5%; 
+            padding: 20px 5% 40px; /* 下部に少し余裕を持たせる */
             gap: 15px;
         }
 
@@ -387,6 +397,8 @@ const snsLinks = [
             font-size: 1rem;
             padding: 12px;
             box-shadow: 0 3px 0 #d1e0d7;
+            /* スクロール時にタップしやすくするためマージンを調整 */
+            margin-bottom: 5px;
         }
         
         .top-bar-text {
