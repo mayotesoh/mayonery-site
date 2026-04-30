@@ -7,7 +7,7 @@ const blogDbId = import.meta.env.NOTION_BLOG_ID;
 const glossaryDbId = import.meta.env.NOTION_GLOSSARY_ID; 
 const quizDbId = import.meta.env.NOTION_QUIZ_ID;
 
-// 🌟 AIのURL自動変換を回避するための変数
+// AIのURL自動変換を回避するための変数
 const ytBase = "https://www.you" + "tube.com";
 
 function getPlainText(prop: any) {
@@ -81,8 +81,6 @@ const mainVideo = {
     id: "utx7ktMEzPE",
     title: "「時期」までピタリと当てる。プロの分析術『流年法』と悩みに向き合う応用方法【手相体験講座】"
 };
-
-// 🌟 最新動画のサーバー取得処理（ここでエラーになる）は削除し、下の<script>内に移動しました
 ---
 
 <Layout title="手相のマヨネリ | 根本解決の手相鑑定・自己分析ツール">
@@ -366,13 +364,15 @@ const mainVideo = {
 </style>
 
 <script>
-    // --- ホーム画面のクイズ用 ---
+    // 🌟 完全に純粋なJavaScriptに修正しました（TypeScriptの記述を全削除）
+    
+    // --- ホーム画面のクイズ処理 ---
     const container = document.getElementById('home-quiz-container');
     if (container) {
         const btns = container.querySelectorAll('.home-choice-btn');
-        const submitBtn = document.getElementById('home-quiz-submit') as HTMLButtonElement;
-        const resultBox = document.getElementById('home-quiz-result') as HTMLElement;
-        const mark = document.getElementById('home-result-mark') as HTMLElement;
+        const submitBtn = document.getElementById('home-quiz-submit');
+        const resultBox = document.getElementById('home-quiz-result');
+        const mark = document.getElementById('home-result-mark');
         const correctAns = container.getAttribute('data-correct') || '';
         
         let selectedValue = '';
@@ -382,41 +382,43 @@ const mainVideo = {
                 btns.forEach(b => b.classList.remove('selected'));
                 this.classList.add('selected');
                 selectedValue = this.getAttribute('data-number') || '';
-                submitBtn.disabled = false;
+                if(submitBtn) submitBtn.disabled = false;
             });
         });
 
-        submitBtn?.addEventListener('click', function() {
-            if (selectedValue === correctAns) {
-                mark.textContent = '⭕️';
-                mark.style.color = '#16a34a';
-            } else {
-                mark.textContent = '❌';
-                mark.style.color = '#ef4444';
-            }
-            resultBox.style.display = 'block';
-            this.style.display = 'none';
-            btns.forEach(b => (b as HTMLButtonElement).style.pointerEvents = 'none');
-        });
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function() {
+                if (selectedValue === correctAns) {
+                    if(mark) { mark.textContent = '⭕️'; mark.style.color = '#16a34a'; }
+                } else {
+                    if(mark) { mark.textContent = '❌'; mark.style.color = '#ef4444'; }
+                }
+                if(resultBox) resultBox.style.display = 'block';
+                this.style.display = 'none';
+                btns.forEach(b => b.style.pointerEvents = 'none');
+            });
+        }
     }
 
-    // --- 🌟 YouTube最新動画をブラウザ側で確実に取得する処理 ---
+    // --- YouTube最新動画の取得処理 ---
     const ytBaseUrl = "https://www.you" + "tube.com";
     const channelId = "UC8FyvgMTWWN77utbwmtAX8w";
     const mainVideoId = "utx7ktMEzPE";
-    const rssUrl = `${ytBaseUrl}/feeds/videos.xml?channel_id=${channelId}`;
-    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+    const rssUrl = ytBaseUrl + "/feeds/videos.xml?channel_id=" + channelId;
+    const apiUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
 
     fetch(apiUrl)
       .then(res => res.json())
       .then(data => {
+        const videoContainer = document.getElementById('latest-videos-container');
+        if (!videoContainer) return;
+
         if (data.status === 'ok') {
-          const videos = data.items.filter((item: any) => !item.link.includes(mainVideoId)).slice(0, 2);
-          const videoContainer = document.getElementById('latest-videos-container');
+          const videos = data.items.filter(item => !item.link.includes(mainVideoId)).slice(0, 2);
           
-          if (videoContainer && videos.length > 0) {
+          if (videos.length > 0) {
             let html = '';
-            videos.forEach((video: any) => {
+            videos.forEach(video => {
               let videoId = '';
               if (video.link.includes('v=')) {
                   videoId = video.link.split('v=')[1].split('&')[0];
@@ -427,7 +429,7 @@ const mainVideo = {
               }
               
               const isShort = video.link.includes('shorts/') || video.title.toLowerCase().includes('short') || video.title.includes('ショート');
-              const displayTitle = isShort && !video.title.includes('【ショート】') ? `【ショート】${video.title}` : video.title;
+              const displayTitle = isShort && !video.title.includes('【ショート】') ? '【ショート】' + video.title : video.title;
 
               html += `
                 <div class="yt-item-card">
@@ -442,8 +444,18 @@ const mainVideo = {
               `;
             });
             videoContainer.innerHTML = html;
+          } else {
+            videoContainer.innerHTML = '<div class="dummy-video-box"><p>最新動画が見つかりませんでした。</p></div>';
           }
+        } else {
+          // API制限などのエラー理由を表示
+          videoContainer.innerHTML = '<div class="dummy-video-box"><p style="color:#d97706; font-size:0.9rem;">動画の取得に失敗しました。<br>しばらく時間をおいてからリロードしてください。</p></div>';
         }
       })
-      .catch(err => console.error('YouTube最新動画の取得に失敗しました:', err));
+      .catch(err => {
+         const videoContainer = document.getElementById('latest-videos-container');
+         if(videoContainer) {
+             videoContainer.innerHTML = '<div class="dummy-video-box"><p>通信エラーが発生しました。</p></div>';
+         }
+      });
 </script>
