@@ -6,12 +6,10 @@ const apiKey = import.meta.env.NOTION_API_KEY;
 const blogDbId = import.meta.env.NOTION_BLOG_ID;
 const glossaryDbId = import.meta.env.NOTION_GLOSSARY_ID; 
 const quizDbId = import.meta.env.NOTION_QUIZ_ID;
-const youtubeChannelId = import.meta.env.YOUTUBE_CHANNEL_ID || 'UC8FyvgMTWWN77utbwmtAX8w';
 
-// 🌟 AIのURL自動変換を回避するための変数（絶対に消さないでください）
+// 🌟 AIのURL自動変換を回避するための変数
 const ytBase = "https://www.you" + "tube.com";
 
-// プロパティを安全に取得する関数
 function getPlainText(prop: any) {
     if (!prop) return "";
     if (prop.title && prop.title.length > 0) return prop.title[0]?.plain_text || "";
@@ -57,7 +55,7 @@ const recentPosts = allPosts
 const allGlossary = await fetchNotionData(glossaryDbId);
 const randomGlossary = allGlossary.sort(() => 0.5 - Math.random()).slice(0, 2);
 
-// 3. クイズ（ホーム画面用に選択肢や解説もすべて取得）
+// 3. クイズ
 const allQuiz = await fetchNotionData(quizDbId);
 const randomQuiz = allQuiz.sort(() => 0.5 - Math.random()).slice(0, 1);
 
@@ -78,25 +76,13 @@ if (randomQuiz.length > 0) {
     hqExplanation = getPlainText(q.properties['解説']);
 }
 
-// 4. YouTube最新動画（🌟 ダミーURL問題を回避）
-let latestVideos = [];
-try {
-  if (youtubeChannelId && youtubeChannelId.startsWith('UC')) {
-    const rssUrl = `${ytBase}/feeds/videos.xml?channel_id=${youtubeChannelId}`;
-    const ytRes = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
-    const ytData = await ytRes.json();
-    if (ytData.status === 'ok') {
-      latestVideos = ytData.items.filter((item: any) => !item.link.includes('utx7ktMEzPE')).slice(0, 2);
-    }
-  }
-} catch (error) {
-  console.error('YouTube最新動画エラー:', error);
-}
-
+// おすすめ動画（固定）
 const mainVideo = {
     id: "utx7ktMEzPE",
     title: "「時期」までピタリと当てる。プロの分析術『流年法』と悩みに向き合う応用方法【手相体験講座】"
 };
+
+// 🌟 最新動画のサーバー取得処理（ここでエラーになる）は削除し、下の<script>内に移動しました
 ---
 
 <Layout title="手相のマヨネリ | 根本解決の手相鑑定・自己分析ツール">
@@ -136,39 +122,11 @@ const mainVideo = {
                 
                 <div class="yt-sub">
                     <h3 class="yt-label">最新の動画</h3>
-                    {latestVideos.length > 0 ? (
-                        <div class="yt-sub-list">
-                            {latestVideos.map((video: any) => {
-                                let videoId = '';
-                                if (video.link.includes('v=')) {
-                                    videoId = video.link.split('v=')[1].split('&')[0];
-                                } else if (video.link.includes('shorts/')) {
-                                    videoId = video.link.split('shorts/')[1].split('?')[0];
-                                } else {
-                                    videoId = video.link.split('/').pop();
-                                }
-                                
-                                const isShort = video.link.includes('shorts/') || video.title.toLowerCase().includes('short') || video.title.includes('ショート');
-                                const displayTitle = isShort && !video.title.includes('【ショート】') ? `【ショート】${video.title}` : video.title;
-
-                                return videoId ? (
-                                    <div class="yt-item-card">
-                                        <div class="iframe-wrapper-small">
-                                            <iframe src={`${ytBase}/embed/${videoId}`} title="YouTube video player" frameborder="0" allowfullscreen></iframe>
-                                        </div>
-                                        <div class="yt-info">
-                                            {isShort && <span class="yt-badge">Shorts</span>}
-                                            <span class="yt-title" title={displayTitle}>{displayTitle}</span>
-                                        </div>
-                                    </div>
-                                ) : null;
-                            })}
-                        </div>
-                    ) : (
+                    <div class="yt-sub-list" id="latest-videos-container">
                         <div class="dummy-video-box">
                             <p>最新動画を読み込んでいます...</p>
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
         </section>
@@ -236,7 +194,6 @@ const mainVideo = {
             
             <div class="dict-grid">
                 
-                {/* 用語集カード（左側・2件） */}
                 <div class="glossary-column">
                     {randomGlossary.length > 0 ? (
                         randomGlossary.map((item: any) => {
@@ -256,7 +213,6 @@ const mainVideo = {
                     )}
                 </div>
                 
-                {/* ホーム画面直接完結型 クイズカード（右側・1件） */}
                 <div class="quiz-column">
                     {randomQuiz.length > 0 ? (
                         <div class="dict-card quiz-interactive-card" id="home-quiz-container" data-correct={hqCorrect}>
@@ -410,7 +366,7 @@ const mainVideo = {
 </style>
 
 <script>
-    // ホーム画面のクイズ用 クライアントサイドJavaScript
+    // --- ホーム画面のクイズ用 ---
     const container = document.getElementById('home-quiz-container');
     if (container) {
         const btns = container.querySelectorAll('.home-choice-btn');
@@ -421,18 +377,15 @@ const mainVideo = {
         
         let selectedValue = '';
 
-        // 選択肢クリック時の動作
         btns.forEach(btn => {
             btn.addEventListener('click', function() {
                 btns.forEach(b => b.classList.remove('selected'));
                 this.classList.add('selected');
                 selectedValue = this.getAttribute('data-number') || '';
-                
                 submitBtn.disabled = false;
             });
         });
 
-        // 答え合わせボタンクリック時の動作
         submitBtn?.addEventListener('click', function() {
             if (selectedValue === correctAns) {
                 mark.textContent = '⭕️';
@@ -441,13 +394,56 @@ const mainVideo = {
                 mark.textContent = '❌';
                 mark.style.color = '#ef4444';
             }
-
-            // 解説を表示し、ボタンを消す
             resultBox.style.display = 'block';
             this.style.display = 'none';
-
-            // 選択肢をこれ以上クリックできないようにする
             btns.forEach(b => (b as HTMLButtonElement).style.pointerEvents = 'none');
         });
     }
+
+    // --- 🌟 YouTube最新動画をブラウザ側で確実に取得する処理 ---
+    const ytBaseUrl = "https://www.you" + "tube.com";
+    const channelId = "UC8FyvgMTWWN77utbwmtAX8w";
+    const mainVideoId = "utx7ktMEzPE";
+    const rssUrl = `${ytBaseUrl}/feeds/videos.xml?channel_id=${channelId}`;
+    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+    fetch(apiUrl)
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'ok') {
+          const videos = data.items.filter((item: any) => !item.link.includes(mainVideoId)).slice(0, 2);
+          const videoContainer = document.getElementById('latest-videos-container');
+          
+          if (videoContainer && videos.length > 0) {
+            let html = '';
+            videos.forEach((video: any) => {
+              let videoId = '';
+              if (video.link.includes('v=')) {
+                  videoId = video.link.split('v=')[1].split('&')[0];
+              } else if (video.link.includes('shorts/')) {
+                  videoId = video.link.split('shorts/')[1].split('?')[0];
+              } else {
+                  videoId = video.link.split('/').pop();
+              }
+              
+              const isShort = video.link.includes('shorts/') || video.title.toLowerCase().includes('short') || video.title.includes('ショート');
+              const displayTitle = isShort && !video.title.includes('【ショート】') ? `【ショート】${video.title}` : video.title;
+
+              html += `
+                <div class="yt-item-card">
+                    <div class="iframe-wrapper-small">
+                        <iframe src="${ytBaseUrl}/embed/${videoId}" title="YouTube video player" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                    <div class="yt-info">
+                        ${isShort ? '<span class="yt-badge">Shorts</span>' : ''}
+                        <span class="yt-title" title="${displayTitle}">${displayTitle}</span>
+                    </div>
+                </div>
+              `;
+            });
+            videoContainer.innerHTML = html;
+          }
+        }
+      })
+      .catch(err => console.error('YouTube最新動画の取得に失敗しました:', err));
 </script>
