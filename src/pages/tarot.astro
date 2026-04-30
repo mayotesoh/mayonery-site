@@ -1,0 +1,203 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="思考整理タロット | 手相のマヨネリ">
+    <div class="page-container container">
+        <section class="tarot-header text-center">
+            <h1 class="main-title">思考整理タロット</h1>
+            <p class="sub-desc">
+                これは未来を「当てる」魔法ではありません。<br>
+                偶然出たカードのキーワードを「現状のパラメーター」として捉え、<br>
+                あなた自身の思考を客観的に分析・整理するためのツールです。
+            </p>
+        </section>
+
+        <section class="tarot-action text-center">
+            <div id="draw-container">
+                <p class="action-prompt">心の中で「今、整理したいテーマ」を一つ思い浮かべてください。</p>
+                <button id="draw-btn" class="btn-draw">
+                    <span class="btn-icon">🃏</span> カードを3枚引く
+                </button>
+            </div>
+            
+            <div id="loading-spinner" class="hidden">
+                <p class="shuffling-text">カードをシャッフルし、抽出しています...</p>
+                <div class="spinner"></div>
+            </div>
+        </section>
+
+        <section id="tarot-result" class="tarot-result hidden">
+            <h2 class="result-title text-center">展開結果</h2>
+            <div class="cards-grid">
+                <div class="card-slot">
+                    <h3 class="position-name">① 現状の立ち位置</h3>
+                    <div id="card-1" class="card-ui"></div>
+                    <div id="desc-1" class="card-desc"></div>
+                </div>
+                <div class="card-slot">
+                    <h3 class="position-name">② 向き合うべき課題</h3>
+                    <div id="card-2" class="card-ui"></div>
+                    <div id="desc-2" class="card-desc"></div>
+                </div>
+                <div class="card-slot">
+                    <h3 class="position-name">③ 具体的な対策</h3>
+                    <div id="card-3" class="card-ui"></div>
+                    <div id="desc-3" class="card-desc"></div>
+                </div>
+            </div>
+            
+            <div class="text-center reset-action">
+                <button id="reset-btn" class="btn-reset">もう一度引く</button>
+            </div>
+        </section>
+    </div>
+</Layout>
+
+<style>
+    .page-container { padding: 50px 15px 80px; max-width: 900px; margin: 0 auto; color: var(--color-text); }
+    .text-center { text-align: center; }
+
+    .tarot-header { margin-bottom: 40px; }
+    .main-title { color: var(--color-primary); font-size: 2.2rem; margin-bottom: 15px; }
+    .sub-desc { font-size: 1rem; line-height: 1.8; color: #555; }
+
+    .tarot-action { background: white; padding: 40px 20px; border-radius: 16px; border: 1px solid #e1ebe5; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 50px; }
+    .action-prompt { font-weight: bold; margin-bottom: 25px; color: var(--color-accent); font-size: 1.1rem; }
+    
+    .btn-draw { background: var(--color-primary); color: white; border: none; padding: 18px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 40px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 5px 15px rgba(78, 123, 103, 0.3); }
+    .btn-draw:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(78, 123, 103, 0.4); }
+    .btn-draw:active { transform: translateY(2px); box-shadow: 0 2px 5px rgba(78, 123, 103, 0.3); }
+    
+    .btn-reset { background: white; color: var(--color-text); border: 2px solid #ccc; padding: 10px 30px; font-size: 1rem; font-weight: bold; border-radius: 30px; cursor: pointer; transition: all 0.2s; margin-top: 30px; }
+    .btn-reset:hover { background: #f0f0f0; border-color: #aaa; }
+
+    .hidden { display: none !important; }
+
+    /* ローディングアニメーション */
+    .shuffling-text { color: var(--color-primary); font-weight: bold; margin-bottom: 15px; animation: blink 1s infinite alternate; }
+    @keyframes blink { from { opacity: 0.5; } to { opacity: 1; } }
+    .spinner { width: 40px; height: 40px; border: 4px solid #e1ebe5; border-top: 4px solid var(--color-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* 結果エリア */
+    .result-title { color: var(--color-primary); border-bottom: 2px solid var(--color-bg); padding-bottom: 10px; margin-bottom: 30px; }
+    .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    
+    .card-slot { display: flex; flex-direction: column; align-items: center; }
+    .position-name { font-size: 1rem; color: white; background: var(--color-accent); padding: 5px 15px; border-radius: 20px; margin-bottom: 15px; font-weight: bold; width: 100%; box-sizing: border-box; text-align: center; }
+    
+    /* カードのデザイン（画像がない間のプレースホルダー） */
+    .card-ui { width: 100%; aspect-ratio: 1 / 1.6; background: linear-gradient(135deg, #2b453a, var(--color-primary)); border-radius: 10px; border: 2px solid #d1e0d7; box-shadow: 0 5px 15px rgba(0,0,0,0.15); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 15px; box-sizing: border-box; text-align: center; transition: transform 0.5s ease; margin-bottom: 15px; position: relative; overflow: hidden; }
+    .card-ui::before { content: ''; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px; border: 1px dashed rgba(255,255,255,0.3); border-radius: 5px; pointer-events: none; }
+    
+    .card-num { font-size: 0.9rem; opacity: 0.8; font-family: serif; margin-bottom: 5px; }
+    .card-name-jp { font-size: 1.4rem; font-weight: bold; line-height: 1.2; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+    .card-rev-badge { background: #e63946; color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; margin-top: 10px; font-weight: bold; }
+    
+    .card-ui.reversed { transform: rotate(180deg); background: linear-gradient(135deg, #1f2937, #334155); border-color: #64748b; }
+    .card-ui.reversed > * { transform: rotate(180deg); }
+
+    .card-desc { font-size: 0.9rem; line-height: 1.6; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e1ebe5; width: 100%; box-sizing: border-box; flex-grow: 1; }
+    .keyword { font-weight: bold; color: var(--color-primary); display: block; margin-bottom: 8px; font-size: 1.05rem; }
+
+    /* スマホ対応 */
+    @media (max-width: 768px) {
+        .cards-grid { grid-template-columns: 1fr; gap: 40px; }
+        .card-ui { width: 60%; margin: 0 auto 15px; }
+        .main-title { font-size: 1.8rem; word-break: keep-all; }
+        .sub-desc { font-size: 0.95rem; text-align: left; }
+    }
+</style>
+
+<script>
+    // 🌟 大アルカナ22枚の論理的・分析的データ
+    const tarotDeck = [
+        { id: 0, name: "愚者 (The Fool)", up: "自由、型破り、直感、ゼロからのスタート", rev: "無計画、軽率、現実逃避、宙ぶらりん" },
+        { id: 1, name: "魔術師 (The Magician)", up: "創造、スキル、コミュニケーション、具現化", rev: "スランプ、準備不足、口先だけ、技術の悪用" },
+        { id: 2, name: "女教皇 (The High Priestess)", up: "直感、知性、冷静な判断、潜在意識", rev: "神経質、冷酷、表面的な理解、ヒステリー" },
+        { id: 3, name: "女帝 (The Empress)", up: "豊かさ、母性、受容、育成", rev: "過保護、怠惰、わがまま、依存" },
+        { id: 4, name: "皇帝 (The Emperor)", up: "責任、リーダーシップ、秩序、論理的構築", rev: "独裁、頑固、プレッシャー、未熟な管理" },
+        { id: 5, name: "教皇 (The Hierophant)", up: "伝統、ルール、教育、信頼できる助言", rev: "保守的、束縛、偏狭、悪習への固執" },
+        { id: 6, name: "恋人 (The Lovers)", up: "選択、調和、情熱、価値観の共有", rev: "誘惑、優柔不断、不和、目先の利益" },
+        { id: 7, name: "戦車 (The Chariot)", up: "前進、コントロール、克服、強い意志", rev: "暴走、挫折、自己中心、エネルギーの空回り" },
+        { id: 8, name: "力 (Strength)", up: "忍耐、精神力、自己受容、柔らかいコントロール", rev: "力不足、感情の爆発、自己嫌悪、強引さ" },
+        { id: 9, name: "隠者 (The Hermit)", up: "探求、内省、単独行動、深い理解", rev: "孤立、現実逃避、閉鎖的、情報の遮断" },
+        { id: 10, name: "運命の輪 (Wheel of Fortune)", up: "転換期、チャンス、サイクル、予測不能な変化", rev: "すれ違い、悪循環、タイミングの逃し、抗えない状況" },
+        { id: 11, name: "正義 (Justice)", up: "均衡、公平、論理的決断、原因と結果", rev: "不公平、偏見、優柔不断、感情論" },
+        { id: 12, name: "吊るされた男 (The Hanged Man)", up: "視点の転換、試練、自己犠牲、待機の時間", rev: "無駄な我慢、徒労、視点の固定、被害妄想" },
+        { id: 13, name: "死神 (Death)", up: "強制終了、手放す、抜本的なリセット", rev: "未練、ズルズル続く、変われない現状" },
+        { id: 14, name: "節制 (Temperance)", up: "ブレンド、適応、中庸、リソースの最適化", rev: "不摂生、妥協、アンバランス、消耗" },
+        { id: 15, name: "悪魔 (The Devil)", up: "執着、物質的欲望、抜け出せない習慣", rev: "しがらみからの解放、悪習を断つ、リセットの兆し" },
+        { id: 16, name: "塔 (The Tower)", up: "崩壊、想定外のトラブル、既存の枠組みの破壊", rev: "ジワジワとした崩壊、内輪揉め、避けられない変化" },
+        { id: 17, name: "星 (The Star)", up: "希望、インスピレーション、理想、明確なビジョン", rev: "理想が高すぎる、失望、見失う、非現実的" },
+        { id: 18, name: "月 (The Moon)", up: "不安、曖昧さ、見えないリスク、直感への依存", rev: "モヤモヤが晴れる、現実が見える、不安の解消" },
+        { id: 19, name: "太陽 (The Sun)", up: "成功、活力、クリアな状況、オープンな展開", rev: "エネルギー低下、延期、見掛け倒し" },
+        { id: 20, name: "審判 (Judgement)", up: "復活、最終決断、過去の清算、報い", rev: "再挑戦の失敗、過去に縛られる、決断の先送り" },
+        { id: 21, name: "世界 (The World)", up: "完成、統合、一つのサイクルの終わり", rev: "未完成、中途半端、スランプ、マンネリ" }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const drawBtn = document.getElementById('draw-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const drawContainer = document.getElementById('draw-container');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const resultSection = document.getElementById('tarot-result');
+
+        // カードを引く処理
+        drawBtn?.addEventListener('click', () => {
+            // UIの切り替え
+            drawContainer?.classList.add('hidden');
+            loadingSpinner?.classList.remove('hidden');
+
+            // シャッフル演出（1.5秒待つ）
+            setTimeout(() => {
+                loadingSpinner?.classList.add('hidden');
+                resultSection?.classList.remove('hidden');
+                displayCards();
+            }, 1500);
+        });
+
+        // リセット処理
+        resetBtn?.addEventListener('click', () => {
+            resultSection?.classList.add('hidden');
+            drawContainer?.classList.remove('hidden');
+            // スクロールを上に戻す
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        function displayCards() {
+            // 78枚(現在は22枚)からランダムに3枚抽出（重複なし）
+            let shuffled = [...tarotDeck].sort(() => 0.5 - Math.random());
+            let drawnCards = shuffled.slice(0, 3);
+
+            for (let i = 0; i < 3; i++) {
+                const card = drawnCards[i];
+                // 50%の確率で逆位置（true/false）
+                const isReversed = Math.random() >= 0.5;
+                
+                const cardEl = document.getElementById(`card-${i + 1}`);
+                const descEl = document.getElementById(`desc-${i + 1}`);
+                
+                if (cardEl && descEl) {
+                    // HTMLの生成（※画像が準備できるまでは、CSSで作ったプレースホルダーを表示します）
+                    const revBadge = isReversed ? `<span class="card-rev-badge">逆位置</span>` : '';
+                    cardEl.className = `card-ui ${isReversed ? 'reversed' : ''}`;
+                    cardEl.innerHTML = `
+                        <span class="card-num">${card.id}</span>
+                        <span class="card-name-jp">${card.name.split(" ")[0]}</span>
+                        ${revBadge}
+                    `;
+
+                    // 意味の表示
+                    const keyword = isReversed ? card.rev : card.up;
+                    const positionText = isReversed ? "逆位置" : "正位置";
+                    descEl.innerHTML = `
+                        <span class="keyword">【${positionText}】<br>${keyword}</span>
+                        <p style="margin:0; font-size:0.85rem; opacity:0.8;">このキーワードが、今のあなたの状況や課題にどう当てはまるか、論理的に分析してみましょう。</p>
+                    `;
+                }
+            }
+        }
+    });
+</script>
