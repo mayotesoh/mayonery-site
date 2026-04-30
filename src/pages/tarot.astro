@@ -16,14 +16,21 @@ import Layout from '../layouts/Layout.astro';
         <section class="tarot-action text-center">
             <div id="draw-container">
                 <p class="action-prompt">心の中で「今、整理したいテーマ」を一つ思い浮かべてください。</p>
-                <button id="draw-btn" class="btn-draw">
-                    <span class="btn-icon">🃏</span> カードを3枚引く
+                <button id="start-shuffle-btn" class="btn-draw">
+                    <span class="btn-icon">🃏</span> カードをシャッフルする
                 </button>
             </div>
             
-            <div id="loading-spinner" class="hidden">
-                <p class="shuffling-text">カードをシャッフルし、抽出しています...</p>
-                <div class="spinner"></div>
+            <div id="shuffling-container" class="hidden">
+                <div class="deck-animation">
+                    <div class="card-back anim-card1"></div>
+                    <div class="card-back anim-card2"></div>
+                    <div class="card-back anim-card3"></div>
+                </div>
+                <p class="shuffling-text">直感を信じて、あなたのタイミングでストップしてください。</p>
+                <button id="stop-shuffle-btn" class="btn-draw btn-stop">
+                    <span class="btn-icon">✋</span> ストップ（3枚引く）
+                </button>
             </div>
         </section>
 
@@ -62,23 +69,43 @@ import Layout from '../layouts/Layout.astro';
     .main-title { color: var(--color-primary); font-size: 2.2rem; margin-bottom: 15px; }
     .sub-desc { font-size: 1rem; line-height: 1.8; color: #555; }
 
-    .tarot-action { background: white; padding: 40px 20px; border-radius: 16px; border: 1px solid #e1ebe5; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 50px; }
+    .tarot-action { background: white; padding: 40px 20px; border-radius: 16px; border: 1px solid #e1ebe5; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 50px; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
     .action-prompt { font-weight: bold; margin-bottom: 25px; color: var(--color-accent); font-size: 1.1rem; }
     
     .btn-draw { background: var(--color-primary); color: white; border: none; padding: 18px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 40px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 5px 15px rgba(78, 123, 103, 0.3); }
     .btn-draw:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(78, 123, 103, 0.4); }
     .btn-draw:active { transform: translateY(2px); box-shadow: 0 2px 5px rgba(78, 123, 103, 0.3); }
     
+    /* ストップボタンの色を少し変えて目立たせる */
+    .btn-stop { background: #c2410c; box-shadow: 0 5px 15px rgba(194, 65, 12, 0.3); animation: pulse-stop 1.5s infinite; }
+    .btn-stop:hover { background: #9a3412; box-shadow: 0 8px 20px rgba(194, 65, 12, 0.4); }
+    @keyframes pulse-stop { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
     .btn-reset { background: white; color: var(--color-text); border: 2px solid #ccc; padding: 10px 30px; font-size: 1rem; font-weight: bold; border-radius: 30px; cursor: pointer; transition: all 0.2s; margin-top: 30px; }
     .btn-reset:hover { background: #f0f0f0; border-color: #aaa; }
 
     .hidden { display: none !important; }
 
-    /* ローディングアニメーション */
-    .shuffling-text { color: var(--color-primary); font-weight: bold; margin-bottom: 15px; animation: blink 1s infinite alternate; }
-    @keyframes blink { from { opacity: 0.5; } to { opacity: 1; } }
-    .spinner { width: 40px; height: 40px; border: 4px solid #e1ebe5; border-top: 4px solid var(--color-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    /* 🌟 シャッフルアニメーション用（仮の裏面デザイン） */
+    .shuffling-text { color: var(--color-text); font-weight: bold; margin-bottom: 25px; }
+    .deck-animation { position: relative; width: 120px; height: 180px; margin: 0 auto 30px; perspective: 1000px; }
+    
+    .card-back {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: repeating-linear-gradient(45deg, #2b453a, #2b453a 10px, #1d332a 10px, #1d332a 20px);
+        border: 4px solid #e5ede9; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        display: flex; justify-content: center; align-items: center;
+    }
+    .card-back::after { content: '✧'; font-size: 3rem; color: #e5ede9; opacity: 0.8; }
+    
+    /* 3枚のカードがバラバラに動くアニメーション */
+    .anim-card1 { animation: shuffle1 0.6s infinite alternate ease-in-out; z-index: 3; }
+    .anim-card2 { animation: shuffle2 0.7s infinite alternate ease-in-out reverse; z-index: 2; }
+    .anim-card3 { animation: shuffle3 0.5s infinite alternate ease-in-out; z-index: 1; }
+
+    @keyframes shuffle1 { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(-40px, 10px) rotate(-10deg); } }
+    @keyframes shuffle2 { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(35px, -5px) rotate(15deg); } }
+    @keyframes shuffle3 { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(-10px, -15px) rotate(5deg); } }
 
     /* 結果エリア */
     .result-title { color: var(--color-primary); border-bottom: 2px solid var(--color-bg); padding-bottom: 10px; margin-bottom: 30px; }
@@ -87,7 +114,6 @@ import Layout from '../layouts/Layout.astro';
     .card-slot { display: flex; flex-direction: column; align-items: center; }
     .position-name { font-size: 1rem; color: white; background: var(--color-accent); padding: 5px 15px; border-radius: 20px; margin-bottom: 15px; font-weight: bold; width: 100%; box-sizing: border-box; text-align: center; }
     
-    /* カードのデザイン（画像がない間のプレースホルダー） */
     .card-ui { width: 100%; aspect-ratio: 1 / 1.6; background: linear-gradient(135deg, #2b453a, var(--color-primary)); border-radius: 10px; border: 2px solid #d1e0d7; box-shadow: 0 5px 15px rgba(0,0,0,0.15); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 15px; box-sizing: border-box; text-align: center; transition: transform 0.5s ease; margin-bottom: 15px; position: relative; overflow: hidden; }
     .card-ui::before { content: ''; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px; border: 1px dashed rgba(255,255,255,0.3); border-radius: 5px; pointer-events: none; }
     
@@ -111,7 +137,7 @@ import Layout from '../layouts/Layout.astro';
 </style>
 
 <script>
-    // 🌟 大アルカナ22枚の論理的・分析的データ
+    // 大アルカナ22枚のデータ
     const tarotDeck = [
         { id: 0, name: "愚者 (The Fool)", up: "自由、型破り、直感、ゼロからのスタート", rev: "無計画、軽率、現実逃避、宙ぶらりん" },
         { id: 1, name: "魔術師 (The Magician)", up: "創造、スキル、コミュニケーション、具現化", rev: "スランプ、準備不足、口先だけ、技術の悪用" },
@@ -138,58 +164,60 @@ import Layout from '../layouts/Layout.astro';
     ];
 
     document.addEventListener('DOMContentLoaded', () => {
-        const drawBtn = document.getElementById('draw-btn');
+        const startBtn = document.getElementById('start-shuffle-btn');
+        const stopBtn = document.getElementById('stop-shuffle-btn');
         const resetBtn = document.getElementById('reset-btn');
+        
         const drawContainer = document.getElementById('draw-container');
-        const loadingSpinner = document.getElementById('loading-spinner');
+        const shufflingContainer = document.getElementById('shuffling-container');
         const resultSection = document.getElementById('tarot-result');
 
-        // カードを引く処理
-        drawBtn?.addEventListener('click', () => {
-            // UIの切り替え
-            drawContainer?.classList.add('hidden');
-            loadingSpinner?.classList.remove('hidden');
+        // ①「シャッフルを開始する」を押した時
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                if(drawContainer) drawContainer.classList.add('hidden');
+                if(shufflingContainer) shufflingContainer.classList.remove('hidden');
+            });
+        }
 
-            // シャッフル演出（1.5秒待つ）
-            setTimeout(() => {
-                loadingSpinner?.classList.add('hidden');
-                resultSection?.classList.remove('hidden');
+        // ②「ストップ」を押した時
+        if (stopBtn) {
+            stopBtn.addEventListener('click', () => {
+                if(shufflingContainer) shufflingContainer.classList.add('hidden');
+                if(resultSection) resultSection.classList.remove('hidden');
                 displayCards();
-            }, 1500);
-        });
+            });
+        }
 
-        // リセット処理
-        resetBtn?.addEventListener('click', () => {
-            resultSection?.classList.add('hidden');
-            drawContainer?.classList.remove('hidden');
-            // スクロールを上に戻す
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        // ③「もう一度引く」を押した時（リセット）
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                if(resultSection) resultSection.classList.add('hidden');
+                if(drawContainer) drawContainer.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
 
         function displayCards() {
-            // 78枚(現在は22枚)からランダムに3枚抽出（重複なし）
             let shuffled = [...tarotDeck].sort(() => 0.5 - Math.random());
             let drawnCards = shuffled.slice(0, 3);
 
             for (let i = 0; i < 3; i++) {
                 const card = drawnCards[i];
-                // 50%の確率で逆位置（true/false）
                 const isReversed = Math.random() >= 0.5;
                 
-                const cardEl = document.getElementById(`card-${i + 1}`);
-                const descEl = document.getElementById(`desc-${i + 1}`);
+                const cardEl = document.getElementById('card-' + (i + 1));
+                const descEl = document.getElementById('desc-' + (i + 1));
                 
                 if (cardEl && descEl) {
-                    // HTMLの生成（※画像が準備できるまでは、CSSで作ったプレースホルダーを表示します）
-                    const revBadge = isReversed ? `<span class="card-rev-badge">逆位置</span>` : '';
-                    cardEl.className = `card-ui ${isReversed ? 'reversed' : ''}`;
+                    const revBadge = isReversed ? '<span class="card-rev-badge">逆位置</span>' : '';
+                    cardEl.className = 'card-ui ' + (isReversed ? 'reversed' : '');
                     cardEl.innerHTML = `
                         <span class="card-num">${card.id}</span>
                         <span class="card-name-jp">${card.name.split(" ")[0]}</span>
                         ${revBadge}
                     `;
 
-                    // 意味の表示
                     const keyword = isReversed ? card.rev : card.up;
                     const positionText = isReversed ? "逆位置" : "正位置";
                     descEl.innerHTML = `
