@@ -1,4 +1,6 @@
 ---
+import { ClientRouter } from 'astro:transitions';
+
 export interface Props {
     title: string;
 }
@@ -39,6 +41,7 @@ const snsLinks = [
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <ClientRouter />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/favicon.png" />
     <title>{title}</title>
@@ -98,7 +101,7 @@ const snsLinks = [
         </div>
     </div>
 
-    <main>
+    <main transition:name="page-content" transition:animate="slide">
         <slot />
     </main>
 
@@ -114,16 +117,22 @@ const snsLinks = [
     </footer>
 
     <script>
-        const hamburgerBtn = document.getElementById('hamburger-btn');
-        const navMenu = document.getElementById('nav-menu');
+        function setupNavigationMenu() {
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const navMenu = document.getElementById('nav-menu');
+            if (!hamburgerBtn || !navMenu) return;
+            if (hamburgerBtn.dataset.menuBound === 'true') return;
 
-        // ハンバーガーメニューの開閉
-        if (hamburgerBtn && navMenu) {
             hamburgerBtn.addEventListener('click', () => {
                 hamburgerBtn.classList.toggle('active');
                 navMenu.classList.toggle('active');
             });
+
+            hamburgerBtn.dataset.menuBound = 'true';
         }
+
+        document.addEventListener('DOMContentLoaded', setupNavigationMenu);
+        document.addEventListener('astro:page-load', setupNavigationMenu);
     </script>
 </body>
 </html>
@@ -236,6 +245,25 @@ const snsLinks = [
     .footer-inner { text-align: center; }
     .footer-sns { display: flex; justify-content: center; gap: 30px; margin-bottom: 25px; }
     .copyright { font-size: 0.85rem; opacity: 0.8; margin: 0; }
+
+    /* ページ遷移をPCでも体感しやすい速度に調整 */
+    ::view-transition-old(page-content) {
+        animation: page-slide-out 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    ::view-transition-new(page-content) {
+        animation: page-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes page-slide-out {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(-34px); opacity: 0; }
+    }
+
+    @keyframes page-slide-in {
+        from { transform: translateX(34px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
 
     /* 🌟 スマホ用（横幅768px以下）の設定 */
     @media (max-width: 768px) {

@@ -400,38 +400,65 @@ const mainVideo = {
         }
     }
 
-    // --- YouTube最新動画の取得処理 ---
+    // --- YouTube最新動画の取得処理（rss2json / 通信・HTMLエラー時はビルド・実行を落とさない） ---
     const ytBaseUrl = "https://www.you" + "tube.com";
     const channelId = "UC8FyvgMTWWN77utbwmtAX8w";
     const mainVideoId = "utx7ktMEzPE";
     const rssUrl = ytBaseUrl + "/feeds/videos.xml?channel_id=" + channelId;
     const apiUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
 
-    fetch(apiUrl)
-      .then(res => res.json())
-      .then(data => {
+    /**
+     * rss2json が制限・障害で HTML を返す場合でも res.json() で落ちないよう、空配列を返す。
+     */
+    async function fetchLatestYoutubeItems(url, excludeVideoId, limit) {
+        try {
+            const res = await fetch(url);
+            if (!res.ok) return [];
+
+            const raw = await res.text();
+            let data;
+            try {
+                data = JSON.parse(raw);
+            } catch {
+                return [];
+            }
+
+            if (!data || data.status !== 'ok' || !Array.isArray(data.items)) return [];
+
+            return data.items.filter(
+                (item) => item && typeof item.link === 'string' && !item.link.includes(excludeVideoId)
+            ).slice(0, limit);
+        } catch {
+            return [];
+        }
+    }
+
+    (async function renderLatestYoutube() {
         const videoContainer = document.getElementById('latest-videos-container');
         if (!videoContainer) return;
 
-        if (data.status === 'ok') {
-          const videos = data.items.filter(item => !item.link.includes(mainVideoId)).slice(0, 2);
-          
-          if (videos.length > 0) {
-            let html = '';
-            videos.forEach(video => {
-              let videoId = '';
-              if (video.link.includes('v=')) {
-                  videoId = video.link.split('v=')[1].split('&')[0];
-              } else if (video.link.includes('shorts/')) {
-                  videoId = video.link.split('shorts/')[1].split('?')[0];
-              } else {
-                  videoId = video.link.split('/').pop();
-              }
-              
-              const isShort = video.link.includes('shorts/') || video.title.toLowerCase().includes('short') || video.title.includes('ショート');
-              const displayTitle = isShort && !video.title.includes('【ショート】') ? '【ショート】' + video.title : video.title;
+        const videos = await fetchLatestYoutubeItems(apiUrl, mainVideoId, 2);
 
-              html += `
+        if (videos.length > 0) {
+            let html = '';
+            videos.forEach((video) => {
+                let videoId = '';
+                if (video.link.includes('v=')) {
+                    videoId = video.link.split('v=')[1].split('&')[0];
+                } else if (video.link.includes('shorts/')) {
+                    videoId = video.link.split('shorts/')[1].split('?')[0];
+                } else {
+                    videoId = video.link.split('/').pop();
+                }
+
+                const title = typeof video.title === 'string' ? video.title : '';
+                const isShort =
+                    video.link.includes('shorts/') ||
+                    title.toLowerCase().includes('short') ||
+                    title.includes('ショート');
+                const displayTitle = isShort && !title.includes('【ショート】') ? '【ショート】' + title : title;
+
+                html += `
                 <div class="yt-item-card">
                     <div class="iframe-wrapper-small">
                         <iframe src="${ytBaseUrl}/embed/${videoId}" title="YouTube video player" frameborder="0" allowfullscreen></iframe>
@@ -444,18 +471,9 @@ const mainVideo = {
               `;
             });
             videoContainer.innerHTML = html;
-          } else {
-            videoContainer.innerHTML = '<div class="dummy-video-box"><p>最新動画が見つかりませんでした。</p></div>';
-          }
         } else {
-          // API制限などのエラー理由を表示
-          videoContainer.innerHTML = '<div class="dummy-video-box"><p style="color:#d97706; font-size:0.9rem;">動画の取得に失敗しました。<br>しばらく時間をおいてからリロードしてください。</p></div>';
+            videoContainer.innerHTML =
+                '<div class="dummy-video-box"><p style="color:#d97706; font-size:0.9rem;">最新動画を表示できませんでした。<br>APIの制限や通信状況の可能性があります。しばらくしてからリロードしてください。</p></div>';
         }
-      })
-      .catch(err => {
-         const videoContainer = document.getElementById('latest-videos-container');
-         if(videoContainer) {
-             videoContainer.innerHTML = '<div class="dummy-video-box"><p>通信エラーが発生しました。</p></div>';
-         }
-      });
+    })();
 </script>
