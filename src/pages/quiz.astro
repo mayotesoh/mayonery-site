@@ -1,18 +1,24 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { safeFetchJson } from '../lib/safeFetch';
 
 const apiKey = import.meta.env.NOTION_API_KEY;
 const quizDbId = import.meta.env.NOTION_QUIZ_ID;
 
-const response = await fetch(`https://api.notion.com/v1/databases/${quizDbId}/query`, {
-  method: 'POST',
-  headers: {
-    'Authorization': `Bearer ${apiKey}`,
-    'Notion-Version': '2022-06-28',
-    'Content-Type': 'application/json',
-  },
-});
-const data = await response.json();
+const data = (!apiKey || !quizDbId)
+  ? { results: [] }
+  : await safeFetchJson<{ results?: any[] }>(
+      `https://api.notion.com/v1/databases/${quizDbId}/query`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Notion-Version': '2022-06-28',
+          'Content-Type': 'application/json',
+        },
+      },
+      { results: [] }
+    );
 const questions = data.results || [];
 ---
 
@@ -82,130 +88,102 @@ const questions = data.results || [];
   </div>
 </Layout>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // 1. 裏側に隠しておいた全カードを取得
-    const allCards = Array.from(document.querySelectorAll('.question-card')) as HTMLElement[];
-    const quizApp = document.getElementById('quiz-app');
-    const resultScreen = document.getElementById('result-screen');
-    
-    if (allCards.length === 0 || !quizApp || !resultScreen) return;
+<script is:inline data-astro-rerun>
+(function () {
+  var quizApp = document.getElementById('quiz-app');
+  var resultScreen = document.getElementById('result-screen');
+  if (!quizApp || !resultScreen) return;
 
-    // 2. 配列をランダムにシャッフルする魔法
-    for (let i = allCards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [allCards[i], allCards[j]] = [allCards[j], allCards[i]];
+  var allCards = Array.from(document.querySelectorAll('.question-card'));
+  if (allCards.length === 0) return;
+
+  resultScreen.classList.add('hidden');
+
+  // シャッフル
+  for (var i = allCards.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = allCards[i]; allCards[i] = allCards[j]; allCards[j] = tmp;
+  }
+
+  var MAX_QUESTIONS = 10;
+  var selectedCards = allCards.slice(0, MAX_QUESTIONS);
+  var totalQuestions = selectedCards.length;
+
+  allCards.forEach(function (card) { card.remove(); });
+
+  selectedCards.forEach(function (card, index) {
+    card.setAttribute('data-index', String(index));
+    var header = card.querySelector('.q-header');
+    if (header) header.innerHTML = '問題 <span class="current-q">' + (index + 1) + '</span> / ' + totalQuestions;
+    var nextBtn = card.querySelector('.next-btn');
+    if (nextBtn) {
+      nextBtn.setAttribute('data-next', String(index + 1));
+      nextBtn.textContent = (index + 1 === totalQuestions) ? '結果を見る →' : '次の問題へ →';
     }
+    quizApp.insertBefore(card, resultScreen);
+  });
 
-    // 3. 上から最大10問だけを抽出（Notionの問題が10問以下の場合は全部）
-    const MAX_QUESTIONS = 10;
-    const selectedCards = allCards.slice(0, MAX_QUESTIONS);
-    const totalQuestions = selectedCards.length;
+  if (selectedCards.length > 0) selectedCards[0].style.display = 'block';
 
-    // 4. 一旦すべてのカードを画面から完全に消し去る
-    allCards.forEach(card => card.remove());
+  var finalTotalEl = document.getElementById('final-total');
+  if (finalTotalEl) finalTotalEl.textContent = String(totalQuestions);
 
-    // 5. 選ばれた10問だけを綺麗に書き直して配置する
-    selectedCards.forEach((card, index) => {
-      // インデックス番号をセット
-      card.setAttribute('data-index', index.toString());
-      
-      // ヘッダーの文字をセット (例: 問題 1 / 10)
-      const header = card.querySelector('.q-header');
-      if (header) {
-        header.innerHTML = `問題 <span class="current-q">${index + 1}</span> / ${totalQuestions}`;
-      }
-      
-      // 次へボタンの設定
-      const nextBtn = card.querySelector('.next-btn');
-      if (nextBtn) {
-        nextBtn.setAttribute('data-next', (index + 1).toString());
-        nextBtn.textContent = (index + 1 === totalQuestions) ? '結果を見る →' : '次の問題へ →';
-      }
-      
-      // 結果画面の手前にカードを挿入
-      quizApp.insertBefore(card, resultScreen);
-    });
+  var currentScore = 0;
 
-    // 6. 抽出した1問目だけを表示する
-    if (selectedCards.length > 0) {
-      selectedCards[0].style.display = 'block';
-    }
-    
-    // 結果画面の分母も設定しておく
-    const finalTotalEl = document.getElementById('final-total');
-    if (finalTotalEl) finalTotalEl.textContent = totalQuestions.toString();
+  document.querySelectorAll('.option-btn').forEach(function (button) {
+    button.addEventListener('click', function (e) {
+      var btn = e.currentTarget;
+      var card = btn.closest('.question-card');
+      if (!card || card.classList.contains('answered')) return;
+      card.classList.add('answered');
 
-    // ----------------------------------------------------
-    // ここから下は、選ばれた問題に対するクリックイベントの設定
-    // ----------------------------------------------------
-    let currentScore = 0;
+      var selected = btn.getAttribute('data-choice');
+      var correct = btn.getAttribute('data-answer');
+      var expArea = card.querySelector('.explanation-area');
+      var badge = card.querySelector('.result-badge');
 
-    document.querySelectorAll('.option-btn').forEach(button => {
-      button.addEventListener('click', (e) => {
-        const btn = e.currentTarget as HTMLButtonElement;
-        const card = btn.closest('.question-card') as HTMLElement;
-        
-        if (card.classList.contains('answered')) return;
-        card.classList.add('answered');
-
-        const selected = btn.getAttribute('data-choice');
-        const correct = btn.getAttribute('data-answer');
-        const expArea = card.querySelector('.explanation-area') as HTMLElement;
-        const badge = card.querySelector('.result-badge') as HTMLElement;
-
-        card.querySelectorAll('.option-btn').forEach(b => {
-          if(b !== btn) (b as HTMLElement).style.opacity = '0.6';
-        });
-
-        if (selected === correct) {
-          btn.classList.add('correct');
-          badge.innerHTML = '<span class="icon correct-icon">⭕</span> 正解！';
-          badge.className = 'result-badge correct-badge';
-          currentScore++;
-        } else {
-          btn.classList.add('wrong');
-          badge.innerHTML = '<span class="icon wrong-icon">❌</span> 不正解...';
-          badge.className = 'result-badge wrong-badge';
-          const correctBtn = card.querySelector(`.option-btn[data-choice="${correct}"]`);
-          if (correctBtn) correctBtn.classList.add('correct');
-        }
-
-        expArea.classList.remove('hidden');
+      card.querySelectorAll('.option-btn').forEach(function (b) {
+        if (b !== btn) b.style.opacity = '0.6';
       });
-    });
 
-    document.querySelectorAll('.next-btn').forEach(button => {
-      button.addEventListener('click', (e) => {
-        const btn = e.currentTarget as HTMLButtonElement;
-        const nextIndex = parseInt(btn.getAttribute('data-next') || '0');
-        const currentCard = btn.closest('.question-card') as HTMLElement;
-        
-        currentCard.style.display = 'none'; 
-        
-        const nextCard = document.querySelector(`.question-card[data-index="${nextIndex}"]`) as HTMLElement;
-        if (nextCard) {
-          nextCard.style.display = 'block'; 
-        } else {
-          resultScreen.classList.remove('hidden');
-          const scoreNumber = document.getElementById('score-number');
-          const scoreMessage = document.getElementById('score-message');
-          
-          if (scoreNumber && scoreMessage) {
-            scoreNumber.textContent = currentScore.toString();
-            const percentage = currentScore / totalQuestions;
-            if (percentage === 1) {
-              scoreMessage.textContent = '完璧です！素晴らしい手相リテラシーです！';
-            } else if (percentage >= 0.5) {
-              scoreMessage.textContent = '良いペースです！さらに理解を深めましょう！';
-            } else {
-              scoreMessage.textContent = '伸びしろがあります！用語集や講座を活用してみてくださいね。';
-            }
-          }
-        }
-      });
+      if (selected === correct) {
+        btn.classList.add('correct');
+        if (badge) { badge.innerHTML = '<span class="icon correct-icon">⭕</span> 正解！'; badge.className = 'result-badge correct-badge'; }
+        currentScore++;
+      } else {
+        btn.classList.add('wrong');
+        if (badge) { badge.innerHTML = '<span class="icon wrong-icon">❌</span> 不正解...'; badge.className = 'result-badge wrong-badge'; }
+        var correctBtn = card.querySelector('.option-btn[data-choice="' + correct + '"]');
+        if (correctBtn) correctBtn.classList.add('correct');
+      }
+
+      if (expArea) expArea.classList.remove('hidden');
     });
   });
+
+  document.querySelectorAll('.next-btn').forEach(function (button) {
+    button.addEventListener('click', function (e) {
+      var btn = e.currentTarget;
+      var nextIndex = parseInt(btn.getAttribute('data-next') || '0');
+      var currentCard = btn.closest('.question-card');
+      if (currentCard) currentCard.style.display = 'none';
+
+      var nextCard = document.querySelector('.question-card[data-index="' + nextIndex + '"]');
+      if (nextCard) {
+        nextCard.style.display = 'block';
+      } else {
+        resultScreen.classList.remove('hidden');
+        var scoreNumber = document.getElementById('score-number');
+        var scoreMessage = document.getElementById('score-message');
+        if (scoreNumber) scoreNumber.textContent = String(currentScore);
+        if (scoreMessage) {
+          var pct = currentScore / totalQuestions;
+          scoreMessage.textContent = pct === 1 ? '完璧です！素晴らしい手相リテラシーです！' : pct >= 0.5 ? '良いペースです！さらに理解を深めましょう！' : '伸びしろがあります！用語集や講座を活用してみてくださいね。';
+        }
+      }
+    });
+  });
+})();
 </script>
 
 <style>

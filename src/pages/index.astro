@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { safeFetchJson } from '../lib/safeFetch';
 
 // .env / GitHub Secrets から読み込み
 const apiKey = import.meta.env.NOTION_API_KEY;
@@ -19,17 +20,20 @@ function getPlainText(prop: any) {
 }
 
 async function fetchNotionData(databaseId: string) {
-  if (!databaseId) return [];
+  if (!apiKey || !databaseId) return [];
   try {
-    const res = await fetch(`https://api.notion.com/v1/databases/${databaseId}/query`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Notion-Version': '2022-06-28',
-        'Content-Type': 'application/json',
-      }
-    });
-    const data = await res.json();
+    const data = await safeFetchJson<{ results?: any[] }>(
+      `https://api.notion.com/v1/databases/${databaseId}/query`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Notion-Version': '2022-06-28',
+          'Content-Type': 'application/json',
+        }
+      },
+      { results: [] }
+    );
     return data.results || [];
   } catch (err) {
     console.error(`Notion API 通信エラー (${databaseId})`, err);
@@ -363,117 +367,77 @@ const mainVideo = {
     }
 </style>
 
-<script>
-    // 🌟 完全に純粋なJavaScriptに修正しました（TypeScriptの記述を全削除）
-    
-    // --- ホーム画面のクイズ処理 ---
-    const container = document.getElementById('home-quiz-container');
+<script is:inline data-astro-rerun>
+(function () {
+    // --- ホーム画面のミニクイズ ---
+    var container = document.getElementById('home-quiz-container');
     if (container) {
-        const btns = container.querySelectorAll('.home-choice-btn');
-        const submitBtn = document.getElementById('home-quiz-submit');
-        const resultBox = document.getElementById('home-quiz-result');
-        const mark = document.getElementById('home-result-mark');
-        const correctAns = container.getAttribute('data-correct') || '';
-        
-        let selectedValue = '';
+        var btns = container.querySelectorAll('.home-choice-btn');
+        var submitBtn = document.getElementById('home-quiz-submit');
+        var resultBox = document.getElementById('home-quiz-result');
+        var mark = document.getElementById('home-result-mark');
+        var correctAns = container.getAttribute('data-correct') || '';
+        var selectedValue = '';
 
-        btns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                btns.forEach(b => b.classList.remove('selected'));
+        btns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                btns.forEach(function (b) { b.classList.remove('selected'); });
                 this.classList.add('selected');
                 selectedValue = this.getAttribute('data-number') || '';
-                if(submitBtn) submitBtn.disabled = false;
+                if (submitBtn) submitBtn.disabled = false;
             });
         });
 
         if (submitBtn) {
-            submitBtn.addEventListener('click', function() {
-                if (selectedValue === correctAns) {
-                    if(mark) { mark.textContent = '⭕️'; mark.style.color = '#16a34a'; }
-                } else {
-                    if(mark) { mark.textContent = '❌'; mark.style.color = '#ef4444'; }
+            submitBtn.addEventListener('click', function () {
+                if (mark) {
+                    mark.textContent = selectedValue === correctAns ? '⭕️' : '❌';
+                    mark.style.color = selectedValue === correctAns ? '#16a34a' : '#ef4444';
                 }
-                if(resultBox) resultBox.style.display = 'block';
+                if (resultBox) resultBox.style.display = 'block';
                 this.style.display = 'none';
-                btns.forEach(b => b.style.pointerEvents = 'none');
+                btns.forEach(function (b) { b.style.pointerEvents = 'none'; });
             });
         }
     }
 
-    // --- YouTube最新動画の取得処理（rss2json / 通信・HTMLエラー時はビルド・実行を落とさない） ---
-    const ytBaseUrl = "https://www.you" + "tube.com";
-    const channelId = "UC8FyvgMTWWN77utbwmtAX8w";
-    const mainVideoId = "utx7ktMEzPE";
-    const rssUrl = ytBaseUrl + "/feeds/videos.xml?channel_id=" + channelId;
-    const apiUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
+    // --- YouTube最新動画の取得 ---
+    var ytBase = 'https://www.you' + 'tube.com';
+    var channelId = 'UC8FyvgMTWWN77utbwmtAX8w';
+    var mainVideoId = 'utx7ktMEzPE';
+    var rssUrl = ytBase + '/feeds/videos.xml?channel_id=' + channelId;
+    var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl);
 
-    /**
-     * rss2json が制限・障害で HTML を返す場合でも res.json() で落ちないよう、空配列を返す。
-     */
-    async function fetchLatestYoutubeItems(url, excludeVideoId, limit) {
-        try {
-            const res = await fetch(url);
-            if (!res.ok) return [];
-
-            const raw = await res.text();
-            let data;
-            try {
-                data = JSON.parse(raw);
-            } catch {
-                return [];
-            }
-
-            if (!data || data.status !== 'ok' || !Array.isArray(data.items)) return [];
-
-            return data.items.filter(
-                (item) => item && typeof item.link === 'string' && !item.link.includes(excludeVideoId)
-            ).slice(0, limit);
-        } catch {
-            return [];
-        }
+    var vc = document.getElementById('latest-videos-container');
+    if (vc) {
+        fetch(apiUrl)
+            .then(function (res) { return res.ok ? res.text() : Promise.reject(); })
+            .then(function (raw) {
+                var data;
+                try { data = JSON.parse(raw); } catch (e) { return; }
+                if (!data || data.status !== 'ok' || !Array.isArray(data.items)) return;
+                var videos = data.items.filter(function (item) {
+                    return item && typeof item.link === 'string' && !item.link.includes(mainVideoId);
+                }).slice(0, 2);
+                if (videos.length === 0) return;
+                var html = '';
+                videos.forEach(function (video) {
+                    var videoId = '';
+                    if (video.link.includes('v=')) {
+                        videoId = video.link.split('v=')[1].split('&')[0];
+                    } else if (video.link.includes('shorts/')) {
+                        videoId = video.link.split('shorts/')[1].split('?')[0];
+                    } else {
+                        videoId = video.link.split('/').pop();
+                    }
+                    var title = typeof video.title === 'string' ? video.title : '';
+                    var isShort = video.link.includes('shorts/') || title.toLowerCase().includes('short') || title.includes('ショート');
+                    var displayTitle = isShort && !title.includes('【ショート】') ? '【ショート】' + title : title;
+                    html += '<div class="yt-item-card"><div class="iframe-wrapper-small"><iframe src="' + ytBase + '/embed/' + videoId + '" title="YouTube video player" frameborder="0" allowfullscreen></iframe></div><div class="yt-info">' + (isShort ? '<span class="yt-badge">Shorts</span>' : '') + '<span class="yt-title" title="' + displayTitle + '">' + displayTitle + '</span></div></div>';
+                });
+                vc.innerHTML = html;
+            })
+            .catch(function () {});
     }
-
-    (async function renderLatestYoutube() {
-        const videoContainer = document.getElementById('latest-videos-container');
-        if (!videoContainer) return;
-
-        const videos = await fetchLatestYoutubeItems(apiUrl, mainVideoId, 2);
-
-        if (videos.length > 0) {
-            let html = '';
-            videos.forEach((video) => {
-                let videoId = '';
-                if (video.link.includes('v=')) {
-                    videoId = video.link.split('v=')[1].split('&')[0];
-                } else if (video.link.includes('shorts/')) {
-                    videoId = video.link.split('shorts/')[1].split('?')[0];
-                } else {
-                    videoId = video.link.split('/').pop();
-                }
-
-                const title = typeof video.title === 'string' ? video.title : '';
-                const isShort =
-                    video.link.includes('shorts/') ||
-                    title.toLowerCase().includes('short') ||
-                    title.includes('ショート');
-                const displayTitle = isShort && !title.includes('【ショート】') ? '【ショート】' + title : title;
-
-                html += `
-                <div class="yt-item-card">
-                    <div class="iframe-wrapper-small">
-                        <iframe src="${ytBaseUrl}/embed/${videoId}" title="YouTube video player" frameborder="0" allowfullscreen></iframe>
-                    </div>
-                    <div class="yt-info">
-                        ${isShort ? '<span class="yt-badge">Shorts</span>' : ''}
-                        <span class="yt-title" title="${displayTitle}">${displayTitle}</span>
-                    </div>
-                </div>
-              `;
-            });
-            videoContainer.innerHTML = html;
-        } else {
-            videoContainer.innerHTML =
-                '<div class="dummy-video-box"><p style="color:#d97706; font-size:0.9rem;">最新動画を表示できませんでした。<br>APIの制限や通信状況の可能性があります。しばらくしてからリロードしてください。</p></div>';
-        }
-    })();
+})();
 </script>

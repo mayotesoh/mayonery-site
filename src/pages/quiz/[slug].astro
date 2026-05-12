@@ -1,22 +1,26 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import { safeFetchJson } from '../../lib/safeFetch';
 
 // 🌟 全クイズのURLパスを自動生成する処理
 export async function getStaticPaths() {
     const apiKey = import.meta.env.NOTION_API_KEY;
     const quizDbId = import.meta.env.NOTION_QUIZ_ID;
 
-    if (!quizDbId) return [];
+    if (!apiKey || !quizDbId) return [];
 
-    const response = await fetch(`https://api.notion.com/v1/databases/${quizDbId}/query`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Notion-Version': '2022-06-28',
-            'Content-Type': 'application/json',
-        },
-    });
-    const data = await response.json();
+    const data = await safeFetchJson<{ results?: any[] }>(
+      `https://api.notion.com/v1/databases/${quizDbId}/query`,
+      {
+          method: 'POST',
+          headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Notion-Version': '2022-06-28',
+              'Content-Type': 'application/json',
+          },
+      },
+      { results: [] }
+    );
     const allQuizzes = data.results || [];
 
     return allQuizzes.map((quiz: any) => {
@@ -129,49 +133,34 @@ const choices = [choice1, choice2, choice3, choice4].filter(c => c !== "");
     .btn-back:hover { background: var(--color-primary); color: white; }
 </style>
 
-<script>
-    // ブラウザ側で動く、答え合わせのJavaScript
-    const choiceBtns = document.querySelectorAll('.choice-btn');
-    const showAnswerBtn = document.getElementById('show-answer-btn') as HTMLButtonElement;
-    const explanationArea = document.getElementById('explanation-area') as HTMLElement;
-    const resultMark = document.getElementById('result-mark') as HTMLElement;
-    
-    let selectedNumber = '';
+<script is:inline data-astro-rerun>
+(function () {
+    var choiceBtns = document.querySelectorAll('.choice-btn');
+    var showAnswerBtn = document.getElementById('show-answer-btn');
+    var explanationArea = document.getElementById('explanation-area');
+    var resultMark = document.getElementById('result-mark');
 
-    // 選択肢をクリックした時の処理
-    choiceBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            // 他の選択肢の選択状態を解除
-            choiceBtns.forEach(b => b.classList.remove('selected'));
-            // クリックしたものを選択状態に
+    if (!showAnswerBtn || !explanationArea || !resultMark) return;
+
+    var selectedNumber = '';
+
+    choiceBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            choiceBtns.forEach(function (b) { b.classList.remove('selected'); });
             this.classList.add('selected');
-            
             selectedNumber = this.getAttribute('data-number') || '';
-            
-            // ボタンを活性化
             showAnswerBtn.disabled = false;
             showAnswerBtn.textContent = '答え合わせをする！';
         });
     });
 
-    // 答え合わせボタンをクリックした時の処理
-    showAnswerBtn?.addEventListener('click', function() {
-        const correctAnswer = explanationArea.getAttribute('data-correct');
-        
-        // 正誤判定
-        if (selectedNumber === correctAnswer) {
-            resultMark.textContent = '⭕️';
-            resultMark.className = 'result-mark correct';
-        } else {
-            resultMark.textContent = '❌';
-            resultMark.className = 'result-mark incorrect';
-        }
-
-        // 解説エリアを表示して、ボタンを隠す
+    showAnswerBtn.addEventListener('click', function () {
+        var correctAnswer = explanationArea.getAttribute('data-correct');
+        resultMark.textContent = selectedNumber === correctAnswer ? '⭕️' : '❌';
+        resultMark.className = 'result-mark ' + (selectedNumber === correctAnswer ? 'correct' : 'incorrect');
         explanationArea.style.display = 'block';
         this.style.display = 'none';
-        
-        // 選択肢をこれ以上押せないようにする
-        choiceBtns.forEach(b => (b as HTMLButtonElement).style.pointerEvents = 'none');
+        choiceBtns.forEach(function (b) { b.style.pointerEvents = 'none'; });
     });
+})();
 </script>
