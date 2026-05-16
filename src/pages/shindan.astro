@@ -312,8 +312,9 @@ import Layout from '../layouts/Layout.astro';
         background-color: white;
         border-radius: 16px;
         padding: 40px 30px;
-        box-shadow: 0 10px 30px rgba(92, 74, 64, 0.08);
-        border: 1px solid #eee;
+        box-shadow: 0 10px 30px rgba(78, 123, 103, 0.1);
+        border: 1px solid #d1e0d7;
+        border-top: 5px solid var(--color-primary);
         width: 100%;       /* 枠いっぱいに広げる */
         overflow: hidden;  /* 🌟 魔法２：枠からはみ出したものは強制的に切り捨てる（隠す） */
     }
@@ -322,7 +323,7 @@ import Layout from '../layouts/Layout.astro';
     .sub-title { color: var(--color-accent); font-weight: bold; font-size: 1.1rem; margin-bottom: 30px; }
     .desc-box { background-color: var(--color-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; color: var(--color-text); line-height: 1.6; }
 
-    .progress-container { background-color: #eee; height: 8px; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+    .progress-container { background-color: #d1e0d7; height: 8px; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
     .progress-bar { background-color: var(--color-accent); height: 100%; transition: width 0.4s ease; }
 
     .question-header { margin-bottom: 30px; }
@@ -384,7 +385,7 @@ import Layout from '../layouts/Layout.astro';
 
     /* ボタン類 */
     .btn-primary { background-color: var(--color-primary); color: white; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 30px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(92, 74, 64, 0.3); }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(78, 123, 103, 0.35); }
     .btn-secondary { background-color: white; color: var(--color-text); border: 2px solid #ccc; padding: 12px 30px; font-weight: bold; border-radius: 30px; cursor: pointer; transition: all 0.2s; }
     .btn-secondary:hover { border-color: var(--color-primary); color: var(--color-primary); }
     .btn-text { background: none; border: none; color: #888; cursor: pointer; font-weight: bold; text-decoration: underline; }
