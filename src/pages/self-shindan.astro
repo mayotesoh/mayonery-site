@@ -427,20 +427,23 @@ import Layout from '../layouts/Layout.astro';
   }
 
   @media (max-width: 860px) {
-    /* レイアウトのフレックスを解除して通常のブロック配置に */
+    /* 縦並びのフレックスボックスにして、要素の順序を制御 */
     .ssw-layout { 
-      display: block; 
+      display: flex; 
+      flex-direction: column;
       padding: 0;
+      gap: 0;
     }
 
-    /* プレビュー（手相画像）を画面上部に完全に固定 */
+    /* プレビュー（手相画像）を上部に追従（Sticky）させる */
     .ssw-preview {
-      position: fixed;
-      top: 70px;
-      left: 0;
-      width: 100%;
-      height: 40vh;
+      order: -1;
+      position: -webkit-sticky;
+      position: sticky;
+      top: 65px;
       z-index: 100;
+      height: 45vh;
+      min-height: 250px;
       background: #ffffff;
       border-radius: 0;
       border-left: none;
@@ -451,7 +454,7 @@ import Layout from '../layouts/Layout.astro';
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 
-    /* 手の画像を固定枠の高さに綺麗にフィットさせる */
+    /* 手の画像サイズ調整 */
     .ssw-palm-svg {
       height: 100%;
       max-height: 100%;
@@ -460,16 +463,18 @@ import Layout from '../layouts/Layout.astro';
       margin: 0 auto;
     }
 
-    /* 凡例をコンパクトに調整 */
+    /* 凡例をコンパクトに */
     .ssw-legend {
       margin-top: 0.4rem;
       gap: 0.8rem;
     }
     .ssw-leg { font-size: 0.65rem; }
 
-    /* スライダー側（パネル）が、固定された手相画像の下からスタートするようにトップに大きな余白を空ける */
+    /* スライダー側の「固定(sticky)」を解除して通常スクロールに */
     .ssw-panel { 
-      margin-top: calc(40vh + 70px);
+      order: 1;
+      position: static;
+      margin-top: 0;
       border: none;
       border-radius: 0;
       box-shadow: none;
