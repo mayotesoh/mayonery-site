@@ -90,7 +90,15 @@ const snsLinks = [
                     <a href="/about" class="nav-item">自己紹介</a>
                     <a href="/blog" class="nav-item">ブログ</a>
                     
-                    <a href="/shindan" class="nav-item">無料手相診断</a>
+                    <div class="nav-dropdown" id="shindan-dropdown">
+                        <button class="nav-item" id="shindan-dropdown-btn" aria-haspopup="true" aria-expanded="false">
+                            無料診断 <span class="dropdown-arrow">▾</span>
+                        </button>
+                        <div class="dropdown-menu" role="menu">
+                            <a href="/shindan" class="dropdown-item">📋 無料手相診断</a>
+                            <a href="/self-shindan" class="dropdown-item">🔮 セルフ手相診断機</a>
+                        </div>
+                    </div>
 
                     <a href="/glossary" class="nav-item">手相用語集</a>
                     <a href="/quiz" class="nav-item">手相クイズ</a>
@@ -131,8 +139,32 @@ const snsLinks = [
             hamburgerBtn.dataset.menuBound = 'true';
         }
 
-        document.addEventListener('DOMContentLoaded', setupNavigationMenu);
-        document.addEventListener('astro:page-load', setupNavigationMenu);
+        function setupDropdown() {
+            const btn = document.getElementById('shindan-dropdown-btn');
+            const dropdown = document.getElementById('shindan-dropdown');
+            if (!btn || !dropdown) return;
+            if (btn.dataset.dropdownBound === 'true') return;
+
+            btn.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768) {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('open');
+                    btn.setAttribute('aria-expanded', dropdown.classList.contains('open'));
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!dropdown.contains(e.target)) {
+                    dropdown.classList.remove('open');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            btn.dataset.dropdownBound = 'true';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { setupNavigationMenu(); setupDropdown(); });
+        document.addEventListener('astro:page-load', () => { setupNavigationMenu(); setupDropdown(); });
     </script>
 </body>
 </html>
@@ -240,6 +272,9 @@ const snsLinks = [
     
     .dropdown-item { display: block; padding: 10px 20px; color: var(--color-text); text-decoration: none; font-size: 0.9rem; font-weight: bold; transition: background 0.2s, color 0.2s; }
     .dropdown-item:hover { background-color: var(--color-bg); color: var(--color-primary); }
+    .dropdown-arrow { display: inline-block; font-style: normal; transition: transform 0.25s ease; font-size: 0.75em; margin-left: 2px; }
+    .nav-dropdown.open .dropdown-arrow { transform: rotate(180deg); }
+    @media (min-width: 769px) { .nav-dropdown:hover .dropdown-arrow { transform: rotate(180deg); } }
 
     .site-footer { background-color: var(--color-primary); color: white; padding: 40px 0 20px; margin-top: 60px; }
     .footer-inner { text-align: center; }
