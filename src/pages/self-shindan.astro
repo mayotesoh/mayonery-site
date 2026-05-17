@@ -561,30 +561,43 @@ import Layout from '../layouts/Layout.astro';
   .ssw input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 28px; height: 28px; border-radius: 50%;
-    border: 3px solid #ffffff; cursor: grab;
+    border: 3px solid #ffffff;
+    cursor: grab;
     transition: transform 0.12s, box-shadow 0.12s;
   }
-  .ssw input[type=range]::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.2); }
+  .ssw input[type=range]::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.15); }
   .ssw input[type=range]::-moz-range-track { height: 6px; border-radius: 3px; border: none; }
   .ssw input[type=range]::-moz-range-thumb {
     width: 28px; height: 28px; border-radius: 50%; border: 3px solid #ffffff; cursor: grab;
   }
 
-  /* トラック色はJSが動的に上書きするため、初期値として薄い背景を設定 */
-  .ssw-hl input[type=range] { background: linear-gradient(to right, #d9467d 50%, rgba(0,0,0,0.1) 50%); }
-  .ssw-hl input[type=range]::-webkit-slider-thumb { background: var(--ssw-heart); box-shadow: 0 0 8px rgba(217,70,125,0.5); }
+  /* トラック：全体均一色（左右の優劣なし） */
+  .ssw-hl input[type=range] { background: rgba(217, 70, 125, 0.3); }
+  .ssw-hl input[type=range]::-webkit-slider-thumb {
+    background: var(--ssw-heart);
+    box-shadow: 0 0 0 4px rgba(217, 70, 125, 0.2), 0 2px 6px rgba(217, 70, 125, 0.4);
+  }
   .ssw-hl .ssw-sval { color: var(--ssw-heart); background: rgba(217,70,125,0.1); }
 
-  .ssw-hl2 input[type=range] { background: linear-gradient(to right, #2b6cb0 50%, rgba(0,0,0,0.1) 50%); }
-  .ssw-hl2 input[type=range]::-webkit-slider-thumb { background: var(--ssw-head); box-shadow: 0 0 8px rgba(43,108,176,0.5); }
+  .ssw-hl2 input[type=range] { background: rgba(43, 108, 176, 0.3); }
+  .ssw-hl2 input[type=range]::-webkit-slider-thumb {
+    background: var(--ssw-head);
+    box-shadow: 0 0 0 4px rgba(43, 108, 176, 0.2), 0 2px 6px rgba(43, 108, 176, 0.4);
+  }
   .ssw-hl2 .ssw-sval { color: var(--ssw-head); background: rgba(43,108,176,0.1); }
 
-  .ssw-ll input[type=range] { background: linear-gradient(to right, #4e7b67 50%, rgba(0,0,0,0.1) 50%); }
-  .ssw-ll input[type=range]::-webkit-slider-thumb { background: var(--ssw-life); box-shadow: 0 0 8px rgba(78,123,103,0.5); }
+  .ssw-ll input[type=range] { background: rgba(78, 123, 103, 0.3); }
+  .ssw-ll input[type=range]::-webkit-slider-thumb {
+    background: var(--ssw-life);
+    box-shadow: 0 0 0 4px rgba(78, 123, 103, 0.2), 0 2px 6px rgba(78, 123, 103, 0.4);
+  }
   .ssw-ll .ssw-sval { color: var(--ssw-life); background: rgba(78,123,103,0.1); }
 
-  .ssw-hd input[type=range] { background: linear-gradient(to right, #d97706 50%, rgba(0,0,0,0.1) 50%); }
-  .ssw-hd input[type=range]::-webkit-slider-thumb { background: var(--ssw-hand); box-shadow: 0 0 8px rgba(217,119,6,0.5); }
+  .ssw-hd input[type=range] { background: rgba(217, 119, 6, 0.3); }
+  .ssw-hd input[type=range]::-webkit-slider-thumb {
+    background: var(--ssw-hand);
+    box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.2), 0 2px 6px rgba(217, 119, 6, 0.4);
+  }
   .ssw-hd .ssw-sval { color: var(--ssw-hand); background: rgba(217,119,6,0.1); }
 
   /* Reset button */
@@ -772,20 +785,6 @@ import Layout from '../layouts/Layout.astro';
     return `M ${sX},${sY} C ${cp1X},${cp1Y} ${cp2X},${cp2Y} ${eX},${eY}`;
   }
 
-  const SLIDER_COLORS = {
-    s1: '#d9467d', s2: '#d9467d', s3: '#d9467d',
-    s4: '#2b6cb0', s5: '#2b6cb0', s6: '#2b6cb0',
-    s7: '#4e7b67', s8: '#4e7b67', s9: '#4e7b67',
-    s10: '#d97706', s11: '#d97706'
-  };
-
-  function updateTrackColor(id) {
-    const el = sliders[id];
-    const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
-    const color = SLIDER_COLORS[id];
-    el.style.background = `linear-gradient(to right, ${color} ${pct}%, rgba(0,0,0,0.1) ${pct}%)`;
-  }
-
   function update() {
     document.getElementById('heart-line').setAttribute('d', heartPath());
     document.getElementById('head-line').setAttribute('d', headPath());
@@ -796,7 +795,6 @@ import Layout from '../layouts/Layout.astro';
     document.querySelector('.ssw-palm-svg').style.transform = '';
     IDS.forEach((id, i) => {
       document.getElementById('v' + (i + 1)).textContent = sliders[id].value;
-      updateTrackColor(id);
     });
   }
 
