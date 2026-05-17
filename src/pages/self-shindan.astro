@@ -353,6 +353,18 @@ import Layout from '../layouts/Layout.astro';
     #ssw-result-body .donut-inner { width: 106px; height: 106px; }
   }
 
+  /* ★ スマホ時の診断結果ポップアップ調整（ヘッダー被り防止） */
+  @media (max-width: 860px) {
+    #ssw-result-panel {
+      padding: 85px 1rem 1.5rem !important;
+      align-items: flex-start !important;
+    }
+    .ssw-result-inner {
+      max-height: 100% !important;
+      margin: 0 auto;
+    }
+  }
+
   /* ★ スマホ画面固定用のグローバルスタイル */
   @media (max-width: 860px) {
     body { 
