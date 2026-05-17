@@ -459,44 +459,44 @@ import Layout from '../layouts/Layout.astro';
       background: var(--color-bg);
     }
 
-    /* 上部：手相プレビュー（強制的に高さの38%に固定。順序を上に） */
+    /* 上部：手相プレビュー（高さの22%に縮小） */
     .ssw-preview {
-      order: 1; /* ★スライダーより上に配置 */
-      flex: 0 0 38%;
-      height: 38%;
+      order: 1;
+      flex: 0 0 22%;
+      height: 22%;
       width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 10px;
+      padding: 4px 8px;
       background: var(--color-bg);
       border: none;
       border-bottom: 2px solid #d1e0d7;
       border-radius: 0;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
       z-index: 10;
-      overflow: hidden; /* 画像がはみ出すのを防ぐ */
+      overflow: hidden;
     }
 
     /* SVG画像を枠内に確実に収める */
     .ssw-palm-svg {
-      width: 100%;
       height: 100%;
+      width: auto;
+      max-width: 100%;
       display: block;
     }
-    
+
     .ssw-legend { display: none; }
 
-    /* 下部：スライダー（残りの62%・順序を下に） */
+    /* 下部：スライダー（残りの78%） */
     .ssw-panel {
-      order: 2; /* ★プレビューの下に配置 */
+      order: 2;
       flex: 1;
-      height: 62%;
       width: 100%;
-      overflow-y: auto; /* ここだけスクロール可能 */
-      -webkit-overflow-scrolling: touch; /* iOSのスクロールを滑らかに */
-      overscroll-behavior-y: contain; /* スクロール連鎖を防止 */
-      padding: 15px 15px 120px; /* 一番下までスクロールできるように余白を多めに */
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      padding: 12px 15px 120px;
       background: #ffffff;
       margin: 0;
       border: none;
