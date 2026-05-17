@@ -430,31 +430,33 @@ import Layout from '../layouts/Layout.astro';
     /* 1. タイトル周りを非表示 */
     .ssw-hero { display: none; }
 
-    /* 2. ツール全体を画面の高さに固定 */
+    /* 2. ツール全体を「画面に完全固定(fixed)」してネイティブアプリ化する */
     .ssw-layout { 
+      position: fixed;
+      top: 65px;
+      left: 0;
+      right: 0;
+      bottom: 0;
       display: flex; 
       flex-direction: column;
-      height: calc(100vh - 65px);
-      height: calc(100dvh - 65px);
       padding: 0;
       margin: 0;
-      gap: 0;
+      z-index: 100;
+      background: var(--color-bg);
     }
 
-    /* 3. 手相画像エリアを 32% に縮小 */
+    /* 3. 手相画像エリアを 32vh に固定 */
     .ssw-preview {
       order: -1;
-      flex: 0 0 32%;
-      height: 32%;
-      position: relative;
-      top: 0;
-      z-index: 10;
+      flex: 0 0 32vh;
+      height: 32vh;
       background: #ffffff;
       border-radius: 0;
       border: none;
       border-bottom: 1px solid var(--ssw-border);
-      padding: 0.2rem;
+      padding: 0.5rem;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      z-index: 10;
     }
 
     /* 手の画像を枠内に収める */
@@ -466,28 +468,26 @@ import Layout from '../layouts/Layout.astro';
       margin: 0 auto;
     }
 
-    /* 操作エリアを広くするため、スマホ時は凡例を非表示に */
+    /* 凡例非表示 */
     .ssw-legend { display: none; }
 
-    /* 4. スライダーパネルを 68% に拡大 */
+    /* 4. スライダーパネルを残りの空間すべてに割り当てて内部スクロール */
     .ssw-panel { 
       order: 1;
       flex: 1;
-      height: 68%;
       overflow-y: auto;
-      position: relative;
-      top: 0;
+      -webkit-overflow-scrolling: touch;
       margin: 0;
       border: none;
       border-radius: 0;
       box-shadow: none;
-      padding: 1rem 1rem 5rem;
+      padding: 1rem 1rem 6rem;
     }
 
-    /* 5. スマホ時のみスライダーの隙間を詰める */
-    .ssw-srow { margin-bottom: 0.5rem; }
-    .ssw-sec-head { margin-bottom: 0.6rem; margin-top: 0.5rem; }
-    .ssw-divider { margin: 0.6rem 0; }
+    /* 5. スライダーの隙間を限界まで詰める */
+    .ssw-srow { margin-bottom: 0.4rem; }
+    .ssw-sec-head { margin-bottom: 0.5rem; margin-top: 0.5rem; }
+    .ssw-divider { margin: 0.5rem 0; }
   }
 
   .ssw-sec-head {
