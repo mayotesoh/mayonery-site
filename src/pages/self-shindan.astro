@@ -351,6 +351,16 @@ import Layout from '../layouts/Layout.astro';
     #ssw-result-body .donut-chart { width: 140px; height: 140px; }
     #ssw-result-body .donut-inner { width: 106px; height: 106px; }
   }
+
+  @media (max-width: 860px) {
+    body { 
+      overflow: hidden !important; 
+      overscroll-behavior-y: none;
+    }
+    .site-footer { 
+      display: none !important; 
+    }
+  }
 </style>
 
 <style>
@@ -427,64 +437,64 @@ import Layout from '../layouts/Layout.astro';
   }
 
   @media (max-width: 860px) {
-    /* 1. タイトル周りを非表示 */
+    /* タイトル非表示 */
     .ssw-hero { display: none; }
 
-    /* 2. ツール全体を「画面に完全固定(fixed)」してネイティブアプリ化する */
-    .ssw-layout { 
+    /* ツール全体を画面に完全に貼り付ける */
+    .ssw-layout {
       position: fixed;
-      top: 65px;
+      top: 60px;
       left: 0;
-      right: 0;
-      bottom: 0;
-      display: flex; 
+      width: 100vw;
+      height: calc(100dvh - 60px);
+      display: flex;
       flex-direction: column;
-      padding: 0;
       margin: 0;
-      z-index: 100;
+      padding: 0;
+      z-index: 1000;
       background: var(--color-bg);
     }
 
-    /* 3. 手相画像エリアを 32vh に固定 */
+    /* 上部：手相プレビュー（高さの35%に固定） */
     .ssw-preview {
-      order: -1;
-      flex: 0 0 32vh;
-      height: 32vh;
-      background: #ffffff;
-      border-radius: 0;
+      flex: 0 0 35%;
+      height: 35%;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      background: var(--color-bg);
       border: none;
-      border-bottom: 1px solid var(--ssw-border);
-      padding: 0.5rem;
+      border-bottom: 2px solid #d1e0d7;
+      border-radius: 0;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       z-index: 10;
     }
 
-    /* 手の画像を枠内に収める */
+    /* SVG画像を枠からはみ出させない */
     .ssw-palm-svg {
       height: 100%;
-      max-height: 100%;
-      width: auto;
-      display: block;
-      margin: 0 auto;
+      width: 100%;
+      object-fit: contain;
     }
-
-    /* 凡例非表示 */
     .ssw-legend { display: none; }
 
-    /* 4. スライダーパネルを残りの空間すべてに割り当てて内部スクロール */
-    .ssw-panel { 
-      order: 1;
+    /* 下部：スライダー（残りの65%） */
+    .ssw-panel {
       flex: 1;
+      height: 65%;
+      width: 100%;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      padding: 15px 15px 120px;
+      background: #ffffff;
       margin: 0;
       border: none;
       border-radius: 0;
-      box-shadow: none;
-      padding: 1rem 1rem 6rem;
     }
 
-    /* 5. スライダーの隙間を限界まで詰める */
     .ssw-srow { margin-bottom: 0.4rem; }
     .ssw-sec-head { margin-bottom: 0.5rem; margin-top: 0.5rem; }
     .ssw-divider { margin: 0.5rem 0; }
