@@ -193,24 +193,6 @@ import Layout from '../layouts/Layout.astro';
         <h2 class="ssw-result-title">手相診断レポート</h2>
         <p class="ssw-result-sub">手相に刻まれた特徴から読み取れる、あなたの性質の傾向です。どちらが優れているということはありません。</p>
         <div id="ssw-result-body"></div>
-        <div class="ssw-share-area">
-          <div class="ssw-share-title">＼ グラフを保存してシェアしよう ／</div>
-          <p style="font-size:0.75rem; color:var(--ssw-muted); margin-bottom:1rem;">画像を保存してから、SNSボタンでテキストと一緒に投稿してください📸</p>
-          <div class="ssw-share-buttons">
-            <button id="save-image-btn" class="ssw-share-btn" style="background:var(--color-primary); border:none; cursor:pointer;">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-              画像を保存
-            </button>
-            <a id="share-x" href="#" target="_blank" rel="noopener noreferrer" class="ssw-share-btn x">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.006 3.916H5.078z"/></svg>
-              ポスト
-            </a>
-            <a id="share-line" href="#" target="_blank" rel="noopener noreferrer" class="ssw-share-btn line">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 3C5.373 3 0 7.425 0 12.882c0 2.457 1.134 4.685 3.032 6.402.137.28.384.814.186 1.838-.073.376-.356 1.734-.482 2.302-.132.597-.245 1.107 1.102.54 1.347-.566 5.166-2.585 6.938-3.805A12.756 12.756 0 0 0 12 22.764c6.627 0 12-4.425 12-9.882C24 7.425 18.627 3 12 3z"/></svg>
-              送る
-            </a>
-          </div>
-        </div>
         <button class="ssw-result-close" id="result-close">再診断する（閉じる）</button>
       </div>
     </div>
@@ -260,43 +242,6 @@ import Layout from '../layouts/Layout.astro';
     margin: 0 0 2.5rem;
     text-align: center;
   }
-  /* シェアエリア */
-  .ssw-share-area {
-    margin: 2rem 0 1.5rem;
-    padding: 1.2rem;
-    background: rgba(78, 123, 103, 0.06);
-    border: 1px solid rgba(78, 123, 103, 0.2);
-    border-radius: 12px;
-    text-align: center;
-  }
-  .ssw-share-title {
-    font-size: 0.95rem;
-    font-weight: bold;
-    color: var(--color-primary);
-    margin-bottom: 0.4rem;
-  }
-  .ssw-share-buttons {
-    display: flex;
-    gap: 0.6rem;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .ssw-share-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.55rem 1.1rem;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: bold;
-    color: #ffffff;
-    text-decoration: none;
-    transition: opacity 0.2s, transform 0.15s;
-  }
-  .ssw-share-btn:hover { opacity: 0.85; transform: translateY(-1px); }
-  .ssw-share-btn.x    { background: #000000; }
-  .ssw-share-btn.line { background: #06c755; }
-
   .ssw-result-close {
     display: block;
     width: 100%;
@@ -739,8 +684,6 @@ import Layout from '../layouts/Layout.astro';
   .ssw-leg-bar { width: 22px; height: 3px; border-radius: 2px; }
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlQA/bWs909/R1mO0cTf2w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
 <script is:inline data-astro-rerun>
 (function () {
   'use strict';
@@ -1087,50 +1030,10 @@ import Layout from '../layouts/Layout.astro';
        <div class="quad-section">${donutHtml}</div>`;
 
     document.getElementById('ssw-result-panel').classList.remove('ssw-result-hidden');
-
-    // シェアリンクを診断結果に合わせて更新
-    const shareText = encodeURIComponent(`セルフ手相診断機で手相を診断しました！\nhttps://mayonery.jp/self-shindan/`);
-    document.getElementById('share-x').href = `https://twitter.com/intent/tweet?text=${shareText}`;
-    document.getElementById('share-line').href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent('https://mayonery.jp/self-shindan/')}`;
   });
 
   document.getElementById('result-close').addEventListener('click', () => {
     document.getElementById('ssw-result-panel').classList.add('ssw-result-hidden');
-  });
-
-  // 画像保存ボタン
-  document.getElementById('save-image-btn').addEventListener('click', function(e) {
-    e.preventDefault();
-    const btn = this;
-    const originalHTML = btn.innerHTML;
-    btn.innerHTML = '生成中...⏳';
-    btn.style.opacity = '0.7';
-
-    const targetNode = document.getElementById('ssw-result-body');
-
-    html2canvas(targetNode, {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      useCORS: true
-    }).then(canvas => {
-      const link = document.createElement('a');
-      link.download = 'マヨネリ手相診断結果.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-
-      btn.innerHTML = '保存完了！✅';
-      setTimeout(() => {
-        btn.innerHTML = originalHTML;
-        btn.style.opacity = '1';
-      }, 3000);
-    }).catch(err => {
-      console.error('画像生成に失敗しました:', err);
-      btn.innerHTML = 'エラー❌';
-      setTimeout(() => {
-        btn.innerHTML = originalHTML;
-        btn.style.opacity = '1';
-      }, 3000);
-    });
   });
 
   update();
