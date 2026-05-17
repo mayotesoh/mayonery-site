@@ -156,7 +156,7 @@ import Layout from '../layouts/Layout.astro';
       </aside>
 
       <div class="ssw-preview">
-        <svg class="ssw-palm-svg" viewBox="0 0 625 777" xmlns="http://www.w3.org/2000/svg">
+        <svg class="ssw-palm-svg" viewBox="0 0 625 777" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
           <defs>
             <radialGradient id="palmFillSsw" cx="50%" cy="54%" r="54%">
               <stop offset="0%"   stop-color="rgba(78, 123, 103, 0.08)" />
@@ -197,7 +197,8 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
 
-  </div></Layout>
+  </div>
+</Layout>
 
 <style is:global>
   /* Result panel overlay (Light Mode) */
@@ -352,6 +353,7 @@ import Layout from '../layouts/Layout.astro';
     #ssw-result-body .donut-inner { width: 106px; height: 106px; }
   }
 
+  /* ★ スマホ画面固定用のグローバルスタイル */
   @media (max-width: 860px) {
     body { 
       overflow: hidden !important; 
@@ -424,6 +426,7 @@ import Layout from '../layouts/Layout.astro';
     margin: 1.8rem auto 0;
     padding: 0 1.5rem;
   }
+
   /* ── Panel ── */
   .ssw-panel {
     background: var(--ssw-surface);
@@ -436,17 +439,18 @@ import Layout from '../layouts/Layout.astro';
     box-shadow: 0 4px 15px rgba(78, 123, 103, 0.05); /* ほんのり緑の影 */
   }
 
+  /* ★ スマホ版の完全アプリ化レイアウト */
   @media (max-width: 860px) {
     /* タイトル非表示 */
     .ssw-hero { display: none; }
-
+    
     /* ツール全体を画面に完全に貼り付ける */
     .ssw-layout {
       position: fixed;
-      top: 60px;
+      top: 60px; /* サイトのヘッダーの高さ。隙間があれば微調整してください */
       left: 0;
       width: 100vw;
-      height: calc(100dvh - 60px);
+      height: calc(100dvh - 60px); /* 画面サイズに厳密に合わせる */
       display: flex;
       flex-direction: column;
       margin: 0;
@@ -455,10 +459,11 @@ import Layout from '../layouts/Layout.astro';
       background: var(--color-bg);
     }
 
-    /* 上部：手相プレビュー（高さの35%に固定） */
+    /* 上部：手相プレビュー（強制的に高さの38%に固定。順序を上に） */
     .ssw-preview {
-      flex: 0 0 35%;
-      height: 35%;
+      order: 1; /* ★スライダーより上に配置 */
+      flex: 0 0 38%;
+      height: 38%;
       width: 100%;
       display: flex;
       align-items: center;
@@ -470,31 +475,35 @@ import Layout from '../layouts/Layout.astro';
       border-radius: 0;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       z-index: 10;
+      overflow: hidden; /* 画像がはみ出すのを防ぐ */
     }
 
-    /* SVG画像を枠からはみ出させない */
+    /* SVG画像を枠内に確実に収める */
     .ssw-palm-svg {
-      height: 100%;
       width: 100%;
-      object-fit: contain;
+      height: 100%;
+      display: block;
     }
+    
     .ssw-legend { display: none; }
 
-    /* 下部：スライダー（残りの65%） */
+    /* 下部：スライダー（残りの62%・順序を下に） */
     .ssw-panel {
+      order: 2; /* ★プレビューの下に配置 */
       flex: 1;
-      height: 65%;
+      height: 62%;
       width: 100%;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: contain;
-      padding: 15px 15px 120px;
+      overflow-y: auto; /* ここだけスクロール可能 */
+      -webkit-overflow-scrolling: touch; /* iOSのスクロールを滑らかに */
+      overscroll-behavior-y: contain; /* スクロール連鎖を防止 */
+      padding: 15px 15px 120px; /* 一番下までスクロールできるように余白を多めに */
       background: #ffffff;
       margin: 0;
       border: none;
       border-radius: 0;
+      position: static;
     }
-
+    
     .ssw-srow { margin-bottom: 0.4rem; }
     .ssw-sec-head { margin-bottom: 0.5rem; margin-top: 0.5rem; }
     .ssw-divider { margin: 0.5rem 0; }
@@ -571,7 +580,7 @@ import Layout from '../layouts/Layout.astro';
   .ssw-hd input[type=range]::-webkit-slider-thumb { background: var(--ssw-hand); box-shadow: 0 0 6px rgba(217,119,6,0.4); }
   .ssw-hd .ssw-sval { color: var(--ssw-hand); background: rgba(217,119,6,0.1); }
 
-  /* Reset button (メインサイトのナビボタンと同じ装飾) */
+  /* Reset button */
   .ssw-reset-btn {
     display: block; width: 100%; margin-top: 1.25rem;
     padding: 0.6rem 1rem; 
@@ -593,7 +602,7 @@ import Layout from '../layouts/Layout.astro';
   .ssw-diagnose-btn {
     display: block; width: 100%; margin-top: 0.85rem;
     padding: 0.85rem 1rem;
-    background: var(--color-primary); /* メインカラーのベタ塗り */
+    background: var(--color-primary);
     border: none;
     border-radius: 12px;
     color: #ffffff; font-size: 0.9rem; font-weight: bold;
@@ -609,7 +618,7 @@ import Layout from '../layouts/Layout.astro';
   }
   .ssw-diagnose-btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
 
-  /* ── Preview Panel (ライトモード) ── */
+  /* ── Preview Panel (PC Light Mode) ── */
   .ssw-preview {
     background: #ffffff;
     border: 1px solid var(--ssw-border);

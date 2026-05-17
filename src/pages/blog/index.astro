@@ -1,22 +1,27 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import { safeFetchJson } from '../../lib/safeFetch';
 
 const apiKey = import.meta.env.NOTION_API_KEY;
 const databaseId = import.meta.env.NOTION_BLOG_ID;
 
-const response = await fetch(`https://api.notion.com/v1/databases/${databaseId}/query`, {
-  method: 'POST',
-  headers: {
-    'Authorization': `Bearer ${apiKey}`,
-    'Notion-Version': '2022-06-28',
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    sorts: [{ property: '日付', direction: 'descending' }]
-  })
-});
-
-const data = await response.json();
+const data = (!apiKey || !databaseId)
+  ? { results: [] }
+  : await safeFetchJson<{ results?: any[] }>(
+      `https://api.notion.com/v1/databases/${databaseId}/query`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Notion-Version': '2022-06-28',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sorts: [{ property: '日付', direction: 'descending' }]
+        })
+      },
+      { results: [] }
+    );
 const allPosts = data.results || [];
 
 const posts = allPosts.filter((post: any) => {
