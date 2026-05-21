@@ -1031,6 +1031,72 @@ import Layout from '../layouts/Layout.astro';
     return s;
   }
 
+  // ── 2人用：対極軸ギャップメーター ──
+  function buildPairBipolarSvg(yVals, pVals) {
+    const W = 600, rowH = 38;
+    const H = RESULT_DATA.length * rowH + 70;
+    const CX = W / 2, trackW = 180, trackLeft = CX - trackW / 2;
+    let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;display:block;margin:0 auto;">`;
+
+    s += `<circle cx="${CX - 50}" cy="20" r="7" fill="#2b6cb0" stroke="#fff" stroke-width="1.5"/>`;
+    s += `<text x="${CX - 35}" y="24" fill="var(--color-text)" font-size="12" font-weight="bold">あなたの手相</text>`;
+    s += `<circle cx="${CX + 50}" cy="20" r="7" fill="#d9467d" stroke="#fff" stroke-width="1.5"/>`;
+    s += `<text x="${CX + 65}" y="24" fill="var(--color-text)" font-size="12" font-weight="bold">お相手の手相</text>`;
+
+    RESULT_DATA.forEach((item, i) => {
+      const yVal = yVals[i], pVal = pVals[i], y = 60 + i * rowH;
+      s += `<text x="${trackLeft - 15}" y="${y + 4}" text-anchor="end" fill="var(--color-text)" font-size="13" font-weight="600">${item.l}</text>`;
+      s += `<text x="${trackLeft + trackW + 15}" y="${y + 4}" text-anchor="start" fill="var(--color-text)" font-size="13" font-weight="600">${item.r}</text>`;
+      s += `<rect x="${trackLeft}" y="${y - 2}" width="${trackW}" height="4" rx="2" fill="rgba(0,0,0,0.06)"/>`;
+      s += `<line x1="${CX}" y1="${y - 6}" x2="${CX}" y2="${y + 6}" stroke="rgba(0,0,0,0.15)" stroke-width="2"/>`;
+
+      const yDotX = trackLeft + (yVal / 100) * trackW;
+      const pDotX = trackLeft + (pVal / 100) * trackW;
+
+      s += `<line x1="${yDotX}" y1="${y}" x2="${pDotX}" y2="${y}" stroke="#7a9487" stroke-width="6" opacity="0.3" stroke-linecap="round"/>`;
+      s += `<circle cx="${yDotX}" cy="${y}" r="6" fill="#2b6cb0" stroke="#ffffff" stroke-width="1.5"/>`;
+      s += `<circle cx="${pDotX}" cy="${y}" r="6" fill="#d9467d" stroke="#ffffff" stroke-width="1.5"/>`;
+    });
+    s += `</svg>`;
+    return s;
+  }
+
+  // ── 2人用：性格マトリクス ──
+  function buildPairQuadrant(yX, yY, pX, pY) {
+    const W = 380, H = 380, CX = 190, CY = 190, QR = 145;
+    const ydx = (CX + yX / 50 * QR).toFixed(1), ydy = (CY - yY / 50 * QR).toFixed(1);
+    const pdx = (CX + pX / 50 * QR).toFixed(1), pdy = (CY - pY / 50 * QR).toFixed(1);
+
+    let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+    ['0.25','0.5','0.75'].forEach(f => {
+      s += `<circle cx="${CX}" cy="${CY}" r="${(QR * f).toFixed(1)}" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="1"/>`;
+    });
+    s += `<circle cx="${CX}" cy="${CY}" r="${QR}" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1.2"/>`;
+    s += `<line x1="${CX-QR}" y1="${CY}" x2="${CX+QR}" y2="${CY}" stroke="rgba(0,0,0,0.15)" stroke-width="1.2"/>`;
+    s += `<line x1="${CX}" y1="${CY-QR}" x2="${CX}" y2="${CY+QR}" stroke="rgba(0,0,0,0.15)" stroke-width="1.2"/>`;
+
+    const ql = [
+      { x: CX+QR-6, y: CY-QR+14, anchor: 'end',   t: 'Visionary', col: '#d9467d' },
+      { x: CX-QR+6, y: CY-QR+14, anchor: 'start', t: 'Creator',   col: '#2b6cb0' },
+      { x: CX-QR+6, y: CY+QR-8,  anchor: 'start', t: 'Analyst',   col: '#4e7b67' },
+      { x: CX+QR-6, y: CY+QR-8,  anchor: 'end',   t: 'Promoter',  col: '#d97706' },
+    ];
+    ql.forEach(q => { s += `<text x="${q.x}" y="${q.y}" text-anchor="${q.anchor}" fill="${q.col}" font-size="11" opacity="0.8" font-weight="700">${q.t}</text>`; });
+    s += `<text x="${CX}" y="${CY-QR-10}" text-anchor="middle" fill="var(--color-text)" font-size="10" opacity="0.6">精神的・直感</text>`;
+    s += `<text x="${CX}" y="${CY+QR+18}" text-anchor="middle" fill="var(--color-text)" font-size="10" opacity="0.6">現実的・論理</text>`;
+    s += `<text x="${CX+QR+6}" y="${CY+4}" text-anchor="start" fill="var(--color-text)" font-size="10" opacity="0.6">動的</text>`;
+    s += `<text x="${CX-QR-6}" y="${CY+4}" text-anchor="end"   fill="var(--color-text)" font-size="10" opacity="0.6">静的</text>`;
+
+    s += `<line x1="${ydx}" y1="${ydy}" x2="${pdx}" y2="${pdy}" stroke="#7a9487" stroke-width="2" opacity="0.5" stroke-dasharray="5,5"/>`;
+
+    s += `<circle cx="${ydx}" cy="${ydy}" r="12" fill="#2b6cb0" opacity="0.2"/>`;
+    s += `<circle cx="${ydx}" cy="${ydy}" r="6" fill="#2b6cb0" stroke="#fff" stroke-width="1.5"/>`;
+    s += `<circle cx="${pdx}" cy="${pdy}" r="12" fill="#d9467d" opacity="0.2"/>`;
+    s += `<circle cx="${pdx}" cy="${pdy}" r="6" fill="#d9467d" stroke="#fff" stroke-width="1.5"/>`;
+    s += `</svg>`;
+    return s;
+  }
+
   document.getElementById('diagnose-btn').addEventListener('click', () => {
     document.querySelector('.ssw-result-title').textContent = "手相診断レポート";
     document.querySelector('.ssw-result-sub').textContent = "手相に刻まれた特徴から読み取れる、あなたの性質の傾向です。どちらが優れているということはありません。";
@@ -1196,7 +1262,18 @@ import Layout from '../layouts/Layout.astro';
     if (score < 0) score = 0;
     if (score > 100) score = 100;
 
-    const pairHtml = `
+    const yVals = RESULT_DATA.map(item => Number(y[item.id]));
+    const pVals = RESULT_DATA.map(item => Number(p[item.id]));
+
+    const yX = ((y.s1 + y.s3 + y.s4 + y.s7 + y.s8 + y.s9) / 6) - 50;
+    const yY = ((y.s2 + (100 - y.s5) + (100 - y.s6) + y.s10 + (100 - y.s11)) / 5) - 50;
+    const pX = ((p.s1 + p.s3 + p.s4 + p.s7 + p.s8 + p.s9) / 6) - 50;
+    const pY = ((p.s2 + (100 - p.s5) + (100 - p.s6) + p.s10 + (100 - p.s11)) / 5) - 50;
+
+    const pairBipolarSvg = buildPairBipolarSvg(yVals, pVals);
+    const pairQuadSvg = buildPairQuadrant(yX, yY, pX, pY);
+
+    let pairHtml = `
       <div class="result-section">
         <div class="pair-score-wrap">
           <div class="pair-score-label">長期的なパートナーシップ相性</div>
@@ -1209,6 +1286,19 @@ import Layout from '../layouts/Layout.astro';
         <div class="summary-box"><p>${textHead}</p></div>
         <h3 class="result-heading">ライフスタイル・活動</h3>
         <div class="summary-box"><p>${textLife}</p></div>
+      </div>
+    `;
+
+    pairHtml += `
+      <div class="result-section">
+        <h3 class="result-heading">価値観のギャップ分析</h3>
+        <p style="font-size:0.8rem; color:#7a9487; text-align:center; margin-bottom:1rem;">太い線が短いほど価値観が似ており、長いほどギャップがあります。</p>
+        <div style="margin:1.5rem 0 0;">${pairBipolarSvg}</div>
+      </div>
+      <div class="quad-section">
+        <h3 class="result-heading" style="border:none; margin-bottom:0.5rem;">二人の性格ポジション</h3>
+        <p style="font-size:0.8rem; color:#7a9487; text-align:center; margin-bottom:1rem;">距離が近いほど似た者同士、遠いほど異なる役割を持っています。</p>
+        <div class="quad-wrap">${pairQuadSvg}</div>
       </div>
     `;
 
