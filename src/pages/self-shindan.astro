@@ -15,6 +15,14 @@ import Layout from '../layouts/Layout.astro';
 
       <aside class="ssw-panel">
 
+        <div class="ssw-tabs">
+          <button class="ssw-tab active" id="tab-you">自分の手相</button>
+          <button class="ssw-tab" id="tab-partner">相手の手相</button>
+        </div>
+        <div class="ssw-share-wrap">
+          <button class="ssw-url-share-btn" id="share-btn">自分の手相URLをコピーして相手に送る</button>
+        </div>
+
         <div class="ssw-sec-head" style="color:var(--ssw-heart)">感情線（Heart Line）</div>
 
         <div class="ssw-srow ssw-hl">
@@ -630,6 +638,60 @@ import Layout from '../layouts/Layout.astro';
   }
   .ssw-reset-btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
 
+  /* ── タブ切替 ── */
+  .ssw-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+    background: rgba(78, 123, 103, 0.07);
+    border-radius: 12px;
+    padding: 4px;
+  }
+  .ssw-tab {
+    flex: 1;
+    padding: 9px 0;
+    border: none;
+    border-radius: 9px;
+    font-size: 0.88rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    background: transparent;
+    color: var(--color-text);
+    opacity: 0.55;
+    transition: background 0.18s, opacity 0.18s, box-shadow 0.18s;
+  }
+  .ssw-tab.active {
+    background: #ffffff;
+    opacity: 1;
+    box-shadow: 0 2px 8px rgba(78, 123, 103, 0.18);
+    color: var(--color-primary);
+  }
+
+  /* ── URL共有ボタン ── */
+  .ssw-share-wrap {
+    margin-bottom: 14px;
+  }
+  .ssw-url-share-btn {
+    display: block;
+    width: 100%;
+    padding: 9px 12px;
+    background: transparent;
+    border: 1.5px dashed rgba(78, 123, 103, 0.5);
+    border-radius: 9px;
+    color: var(--color-primary);
+    font-size: 0.8rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.18s, border-color 0.18s;
+  }
+  .ssw-url-share-btn:hover {
+    background: rgba(78, 123, 103, 0.08);
+    border-color: var(--color-primary);
+  }
+
   /* Diagnose button */
   .ssw-diagnose-btn {
     display: block; width: 100%; margin-top: 0.85rem;
@@ -706,7 +768,19 @@ import Layout from '../layouts/Layout.astro';
   const IDS = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11'];
   const sliders = {};
   IDS.forEach(id => { sliders[id] = document.getElementById(id); });
-  const t = id => parseInt(sliders[id].value, 10) / 100;
+
+  // ── 2人分の状態管理 ──
+  const initVals = () => Object.fromEntries(IDS.map(id => [id, 50]));
+  const state = { you: initVals(), partner: initVals() };
+  let currentTab = 'you';
+
+  // スライダーDOMに現在のタブのstateを反映
+  function applyStateToSliders(tab) {
+    IDS.forEach(id => { sliders[id].value = state[tab][id]; });
+  }
+
+  // state[currentTab] から読む（描画関数はすべてこれ経由）
+  const t = id => state[currentTab][id] / 100;
 
   const ORIG_PATH = 'M109.255 636C133.255 693.5 167.97 715.5 198.47 744C228.971 772.5 312.47 776.5 351.47 776.5C390.47 776.5 488.47 775.5 522.97 744C557.47 712.5 571.97 663.5 577.47 591.5C582.97 519.5 583.47 409 583.47 409C583.47 409 659.47 169.5 604.47 148.5C549.47 127.5 494.47 352.5 494.47 352.5C494.47 352.5 560.97 70 494.47 54C427.97 38 395.47 331.5 395.47 331.5C395.47 331.5 422.47 0.5 351.47 0.5C280.47 0.5 287.47 331.5 287.47 331.5C287.47 331.5 258.47 43.9885 189.971 54C121.471 64.0115 183.471 347 183.471 347C183.471 347 189.971 364 189.971 415.5C189.971 467 183.471 538 183.471 538C183.471 538 51.4705 352 9.47048 409C-32.5295 466 85.2548 578.5 109.255 636Z';
 
@@ -810,12 +884,31 @@ import Layout from '../layouts/Layout.astro';
     });
   }
 
-  IDS.forEach(id => sliders[id].addEventListener('input', update));
+  // スライダー操作 → state に保存 → 再描画
+  IDS.forEach(id => {
+    sliders[id].addEventListener('input', () => {
+      state[currentTab][id] = parseInt(sliders[id].value, 10);
+      update();
+    });
+  });
 
+  // リセット（現在のタブのみ）
   document.getElementById('reset-btn').addEventListener('click', () => {
-    IDS.forEach(id => { sliders[id].value = 50; });
+    IDS.forEach(id => { state[currentTab][id] = 50; });
+    applyStateToSliders(currentTab);
     update();
   });
+
+  // タブ切替
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('tab-you').classList.toggle('active', tab === 'you');
+    document.getElementById('tab-partner').classList.toggle('active', tab === 'partner');
+    applyStateToSliders(tab);
+    update();
+  }
+  document.getElementById('tab-you').addEventListener('click', () => switchTab('you'));
+  document.getElementById('tab-partner').addEventListener('click', () => switchTab('partner'));
 
   /* ─── Diagnosis (Light Mode Matched) ─── */
   const RESULT_DATA = [
@@ -933,7 +1026,8 @@ import Layout from '../layouts/Layout.astro';
   }
 
   document.getElementById('diagnose-btn').addEventListener('click', () => {
-    const vals = RESULT_DATA.map(item => Number(document.getElementById(item.id).value));
+    // 診断は常に「自分」のデータを使用（後続プロンプトで相性診断に拡張予定）
+    const vals = RESULT_DATA.map(item => state.you[item.id]);
     const chartSvg   = buildSpider(vals);
     const bipolarSvg = buildBipolarSvg(vals);
 
@@ -1047,6 +1141,35 @@ import Layout from '../layouts/Layout.astro';
   document.getElementById('result-close').addEventListener('click', () => {
     document.getElementById('ssw-result-panel').classList.add('ssw-result-hidden');
   });
+
+  // ── URL生成：自分のデータを ?p= パラメータにエンコードしてコピー ──
+  document.getElementById('share-btn').addEventListener('click', () => {
+    const encoded = IDS.map(id => state.you[id]).join('-');
+    const url = location.origin + location.pathname + '?p=' + encoded;
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById('share-btn');
+      const orig = btn.textContent;
+      btn.textContent = 'コピーしました！✅';
+      setTimeout(() => { btn.textContent = orig; }, 2500);
+    }).catch(() => {
+      prompt('このURLをコピーしてください', url);
+    });
+  });
+
+  // ── URL読み込み：?p= があれば partner に読み込み、you タブで開始 ──
+  (function loadFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const p = params.get('p');
+    if (!p) return;
+    const nums = p.split('-').map(n => {
+      const v = parseInt(n, 10);
+      return isNaN(v) ? 50 : Math.min(100, Math.max(0, v));
+    });
+    if (nums.length !== IDS.length) return;
+    IDS.forEach((id, i) => { state.partner[id] = nums[i]; });
+    // 相手のデータを読み込んだので you タブで開始（ユーザーが自分を入力できる状態）
+    switchTab('you');
+  })();
 
   update();
 })();
