@@ -161,6 +161,7 @@ import Layout from '../layouts/Layout.astro';
 
         <button class="ssw-reset-btn" id="reset-btn">すべてリセット</button>
         <button class="ssw-diagnose-btn" id="diagnose-btn">この手相を診断する</button>
+        <button class="ssw-diagnose-btn" id="diagnose-pair-btn" style="margin-top:0.85rem; background:linear-gradient(135deg, #d9467d, #2b6cb0);">二人の相性を診断する</button>
       </aside>
 
       <div class="ssw-preview">
@@ -712,6 +713,11 @@ import Layout from '../layouts/Layout.astro';
   }
   .ssw-diagnose-btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
 
+  /* ── 相性診断専用スコア表示 ── */
+  .pair-score-wrap { text-align: center; margin: 1rem 0 2rem; background: rgba(78, 123, 103, 0.05); border: 1px solid #d1e0d7; border-radius: 16px; padding: 2rem 1rem; }
+  .pair-score-num { font-size: 4.5rem; font-weight: 800; color: var(--color-primary); line-height: 1; margin: 0.5rem 0; font-family: system-ui; }
+  .pair-score-label { font-size: 0.85rem; color: #7a9487; font-weight: bold; letter-spacing: 0.15em; }
+
   /* ── Preview Panel (PC Light Mode) ── */
   .ssw-preview {
     background: #ffffff;
@@ -1026,6 +1032,8 @@ import Layout from '../layouts/Layout.astro';
   }
 
   document.getElementById('diagnose-btn').addEventListener('click', () => {
+    document.querySelector('.ssw-result-title').textContent = "手相診断レポート";
+    document.querySelector('.ssw-result-sub').textContent = "手相に刻まれた特徴から読み取れる、あなたの性質の傾向です。どちらが優れているということはありません。";
     // 診断は常に「自分」のデータを使用（後続プロンプトで相性診断に拡張予定）
     const vals = RESULT_DATA.map(item => state.you[item.id]);
     const chartSvg   = buildSpider(vals);
@@ -1135,6 +1143,78 @@ import Layout from '../layouts/Layout.astro';
        </div>
        <div class="quad-section">${donutHtml}</div>`;
 
+    document.getElementById('ssw-result-panel').classList.remove('ssw-result-hidden');
+  });
+
+  document.getElementById('diagnose-pair-btn').addEventListener('click', () => {
+    const y = state.you;
+    const p = state.partner;
+    let score = 100;
+
+    let textHeart = "";
+    let textHead = "";
+    let textLife = "";
+
+    // ── 感情線・対人の相性 ──
+    const diffS2 = Math.abs(y.s2 - p.s2);
+    if (diffS2 > 30) { score -= 15; textHeart += "愛情の熱量（感情線の長さ）にギャップがあり、片方が寂しさを感じやすいかもしれません。お互いの愛情表現の重さが違うことを理解し、歩み寄る工夫が必要です。"; }
+    else { textHeart += "愛情の熱量が近く、お互いに同じくらいの気持ちの強さで向き合える心地よい相性です。"; }
+
+    if (y.s3 < 40 && p.s3 < 40) { score -= 10; textHeart += "お互いに感情を表に出すのが苦手（まっすぐ・下向き）なため、不満を溜め込んで爆発させないよう、意識的に話し合う時間を作りましょう。"; }
+    else {
+      const diffS3 = Math.abs(y.s3 - p.s3);
+      if (diffS3 > 30) textHeart += "感情表現のストレートさに違いがあります。言葉足らずや言い過ぎによるすれ違いに気をつけてください。";
+      else textHeart += "感情表現のペースも似ており、スムーズでフラットなコミュニケーションが取れます。";
+    }
+
+    if (Math.abs(y.s1 - p.s1) <= 25) textHeart += "根本的なキャラクターや空気感（陽キャ・陰キャのテンション）も合っており、自然体でいられます。";
+
+    // ── 頭脳線・手形（価値観）の相性 ──
+    const diffS5 = Math.abs(y.s5 - p.s5);
+    if (diffS5 > 30) { score -= 10; textHead += "物事を決断するスピード（思考時間）に差があります。相手のペースを急かしたり、逆に遅すぎるとイライラしないよう理解が必要です。"; }
+    else { textHead += "決断のスピード感が似ており、一緒に物事を進める上でストレスが少ないでしょう。"; }
+
+    const diffS6 = Math.abs(y.s6 - p.s6);
+    const diffS10 = Math.abs(y.s10 - p.s10);
+    if (diffS6 > 30 || diffS10 > 30) { score -= 10; textHead += "現実重視か精神・ロマン重視かといった根本の価値観が異なるため、意見が対立した際は互いの視点（現実的解決か、感情的共感か）を尊重し合う必要があります。"; }
+    else { textHead += "現実的か精神的かという価値観の土台が一致しており、深い部分で共感し合えます。"; }
+
+    if (y.s4 > 60 && p.s4 > 60) { score -= 10; textHead += "ただし、お互いに直感的で感情的になりやすい面があるため、衝突した時は着地点が見つかりにくくなる傾向があります。どちらかが冷静になるよう心がけてください。"; }
+
+    // ── 生命線（ライフスタイル）の相性 ──
+    const diffS9 = Math.abs(y.s9 - p.s9);
+    if (diffS9 > 30) { score -= 10; textLife += "休日の過ごし方（インドア派かアウトドア派か）に違いがあります。どちらかが無理して合わせすぎないよう、それぞれの時間も楽しむ配慮が必要です。"; }
+    else { textLife += "休日の過ごし方や環境への適応力が似ており、一緒に過ごす時間がとても充実します。"; }
+
+    const diffS8 = Math.abs(y.s8 - p.s8);
+    if (diffS8 > 30) { score -= 10; textLife += "持っているバイタリティ（活動のエネルギー）に差があるため、活動的な側が相手を疲れさせないようペース配分に気を配りましょう。"; }
+    else { textLife += "持っているエネルギー量が同程度なので、無理なく同じペースで日常を楽しめます。"; }
+
+    const diffS7 = Math.abs(y.s7 - p.s7);
+    if (diffS7 > 30) { textLife += "衝動の強さには違いがありますが、これがかえってマンネリを防ぎ、お互いに新鮮な刺激を与え合える良いスパイスになっています。"; score += 5; }
+
+    if (score < 0) score = 0;
+    if (score > 100) score = 100;
+
+    const pairHtml = `
+      <div class="result-section">
+        <div class="pair-score-wrap">
+          <div class="pair-score-label">長期的なパートナーシップ相性</div>
+          <div class="pair-score-num">${score}<span style="font-size:1.5rem;">%</span></div>
+          <p style="font-size:0.8rem; color:#7a9487; margin-top:0.5rem; line-height:1.5;">※このスコアはお互いの価値観の共有度と、一緒にいる際の「不快感の少なさ」を表しています。</p>
+        </div>
+        <h3 class="result-heading">感情・コミュニケーション</h3>
+        <div class="summary-box"><p>${textHeart}</p></div>
+        <h3 class="result-heading">思考・価値観</h3>
+        <div class="summary-box"><p>${textHead}</p></div>
+        <h3 class="result-heading">ライフスタイル・活動</h3>
+        <div class="summary-box"><p>${textLife}</p></div>
+      </div>
+    `;
+
+    document.getElementById('ssw-result-body').innerHTML = pairHtml;
+    document.querySelector('.ssw-result-title').textContent = "二人の相性診断レポート";
+    document.querySelector('.ssw-result-sub').textContent = "手相の差分から読み解く、二人が長く一緒にいるための取扱説明書です。";
     document.getElementById('ssw-result-panel').classList.remove('ssw-result-hidden');
   });
 
