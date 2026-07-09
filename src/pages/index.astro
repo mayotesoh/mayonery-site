@@ -10,6 +10,8 @@ const quizDbId = import.meta.env.NOTION_QUIZ_ID;
 
 // AIのURL自動変換を回避するための変数
 const ytBase = "https://www.you" + "tube.com";
+// 埋め込みはプライバシー強化ドメイン（Firefoxのトラッキング防止でブロックされにくい）
+const ytEmbedBase = "https://www.you" + "tube-nocookie.com";
 
 function getPlainText(prop: any) {
     if (!prop) return "";
@@ -154,7 +156,7 @@ const latestVideos = (await fetchLatestVideos())
                     <h3 class="yt-label">おすすめ動画</h3>
                     <div class="yt-item-card main-video-card">
                         <div class="iframe-wrapper">
-                            <iframe src={`${ytBase}/embed/${mainVideo.id}`} title="YouTube video player" frameborder="0" allowfullscreen></iframe>
+                            <iframe src={`${ytEmbedBase}/embed/${mainVideo.id}`} title="YouTube video player" frameborder="0" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                         </div>
                         <div class="yt-info">
                             <span class="yt-title" title={mainVideo.title}>{mainVideo.title}</span>
@@ -168,7 +170,7 @@ const latestVideos = (await fetchLatestVideos())
                         {latestVideos.length > 0 ? latestVideos.map((v) => (
                             <div class="yt-item-card">
                                 <div class="iframe-wrapper-small">
-                                    <iframe src={`${ytBase}/embed/${v.id}`} title="YouTube video player" frameborder="0" allowfullscreen></iframe>
+                                    <iframe src={`${ytEmbedBase}/embed/${v.id}`} title="YouTube video player" frameborder="0" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                                 </div>
                                 <div class="yt-info">
                                     {v.isShort && <span class="yt-badge">Shorts</span>}

@@ -140,10 +140,10 @@ const blocks = blocksData.results || [];
                         const url = block.video?.external?.url || block.bookmark?.url;
                         if(url && url.includes('youtube.com/watch?v=')){
                             const videoId = url.split('v=')[1]?.split('&')[0];
-                            const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                            const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}`;
                             return (
                                 <div class="youtube-wrapper">
-                                    <iframe src={embedUrl} title="YouTube video player" frameborder="0" allowfullscreen></iframe>
+                                    <iframe src={embedUrl} title="YouTube video player" frameborder="0" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                                 </div>
                             );
                         }
