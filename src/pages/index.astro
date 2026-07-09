@@ -85,6 +85,43 @@ const mainVideo = {
     id: "utx7ktMEzPE",
     title: "「時期」までピタリと当てる。プロの分析術『流年法』と悩みに向き合う応用方法【手相体験講座】"
 };
+
+// 最新の動画：ビルド時にYouTube公式RSSを直接取得（第三者サービス非依存で安定）
+const channelId = "UC8FyvgMTWWN77utbwmtAX8w";
+
+function decodeEntities(s: string) {
+  return s
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").replace(/&#x27;/gi, "'");
+}
+
+async function fetchLatestVideos() {
+  try {
+    const res = await fetch(`${ytBase}/feeds/videos.xml?channel_id=${channelId}`);
+    if (!res.ok) return [];
+    const xml = await res.text();
+    const entries = xml.split('<entry>').slice(1);
+    return entries
+      .map((e) => {
+        const id = (e.match(/<yt:videoId>([^<]+)<\/yt:videoId>/) || [])[1] || '';
+        const rawTitle = (e.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || '';
+        return { id, title: decodeEntities(rawTitle).trim() };
+      })
+      .filter((v) => v.id);
+  } catch (err) {
+    console.error('YouTube RSS 取得失敗', err);
+    return [];
+  }
+}
+
+const latestVideos = (await fetchLatestVideos())
+  .filter((v) => v.id !== mainVideo.id)
+  .slice(0, 2)
+  .map((v) => {
+    const isShort = /ショート|short/i.test(v.title);
+    const displayTitle = isShort && !v.title.includes('【ショート】') ? '【ショート】' + v.title : v.title;
+    return { ...v, isShort, displayTitle };
+  });
 ---
 
 <Layout title="手相のマヨネリ | 根本解決の手相鑑定・自己分析ツール">
@@ -128,9 +165,21 @@ const mainVideo = {
                 <div class="yt-sub">
                     <h3 class="yt-label">最新の動画</h3>
                     <div class="yt-sub-list" id="latest-videos-container">
-                        <div class="dummy-video-box">
-                            <p>最新動画を読み込んでいます...</p>
-                        </div>
+                        {latestVideos.length > 0 ? latestVideos.map((v) => (
+                            <div class="yt-item-card">
+                                <div class="iframe-wrapper-small">
+                                    <iframe src={`${ytBase}/embed/${v.id}`} title="YouTube video player" frameborder="0" allowfullscreen></iframe>
+                                </div>
+                                <div class="yt-info">
+                                    {v.isShort && <span class="yt-badge">Shorts</span>}
+                                    <span class="yt-title" title={v.displayTitle}>{v.displayTitle}</span>
+                                </div>
+                            </div>
+                        )) : (
+                            <div class="dummy-video-box">
+                                <p>最新動画は<a href={`${ytBase}/@mayotesoh`} target="_blank" rel="noopener noreferrer">YouTubeチャンネル</a>でご覧いただけます。</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -406,43 +455,7 @@ const mainVideo = {
         }
     }
 
-    // --- YouTube最新動画の取得 ---
-    var ytBase = 'https://www.you' + 'tube.com';
-    var channelId = 'UC8FyvgMTWWN77utbwmtAX8w';
-    var mainVideoId = 'utx7ktMEzPE';
-    var rssUrl = ytBase + '/feeds/videos.xml?channel_id=' + channelId;
-    var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl);
-
-    var vc = document.getElementById('latest-videos-container');
-    if (vc) {
-        fetch(apiUrl)
-            .then(function (res) { return res.ok ? res.text() : Promise.reject(); })
-            .then(function (raw) {
-                var data;
-                try { data = JSON.parse(raw); } catch (e) { return; }
-                if (!data || data.status !== 'ok' || !Array.isArray(data.items)) return;
-                var videos = data.items.filter(function (item) {
-                    return item && typeof item.link === 'string' && !item.link.includes(mainVideoId);
-                }).slice(0, 2);
-                if (videos.length === 0) return;
-                var html = '';
-                videos.forEach(function (video) {
-                    var videoId = '';
-                    if (video.link.includes('v=')) {
-                        videoId = video.link.split('v=')[1].split('&')[0];
-                    } else if (video.link.includes('shorts/')) {
-                        videoId = video.link.split('shorts/')[1].split('?')[0];
-                    } else {
-                        videoId = video.link.split('/').pop();
-                    }
-                    var title = typeof video.title === 'string' ? video.title : '';
-                    var isShort = video.link.includes('shorts/') || title.toLowerCase().includes('short') || title.includes('ショート');
-                    var displayTitle = isShort && !title.includes('【ショート】') ? '【ショート】' + title : title;
-                    html += '<div class="yt-item-card"><div class="iframe-wrapper-small"><iframe src="' + ytBase + '/embed/' + videoId + '" title="YouTube video player" frameborder="0" allowfullscreen></iframe></div><div class="yt-info">' + (isShort ? '<span class="yt-badge">Shorts</span>' : '') + '<span class="yt-title" title="' + displayTitle + '">' + displayTitle + '</span></div></div>';
-                });
-                vc.innerHTML = html;
-            })
-            .catch(function () {});
-    }
+    // 最新動画はビルド時にサーバー側（フロントマターの fetchLatestVideos）で静的取得する。
+    // 実行時の第三者RSS変換サービスへのアクセスを廃止し、リンク切れを解消。
 })();
 </script>

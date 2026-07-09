@@ -1,0 +1,315 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { safeFetchJson } from '../lib/safeFetch';
+import { LINE_OFFICIAL_URL } from '../consts';
+
+const apiKey = import.meta.env.NOTION_API_KEY;
+const kouzaDbId = import.meta.env.NOTION_KOUZA_ID;
+
+const data = (!apiKey || !kouzaDbId)
+  ? { results: [] }
+  : await safeFetchJson<{ results?: any[] }>(
+      `https://api.notion.com/v1/databases/${kouzaDbId}/query`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Notion-Version': '2022-06-28',
+          'Content-Type': 'application/json',
+        },
+      },
+      { results: [] }
+    );
+
+const allKouza = data.results || [];
+
+const publicKouza = allKouza.filter((post: any) => {
+  const status = post.properties['ステータス']?.status?.name || post.properties['ステータス']?.select?.name || '';
+  const levels = post.properties['レベル']?.multi_select?.map((t: any) => t.name) || [];
+  return status === '公開' && !levels.includes('プロ');
+});
+
+const proKouza = allKouza.filter((post: any) => {
+  const status = post.properties['ステータス']?.status?.name || post.properties['ステータス']?.select?.name || '';
+  const levels = post.properties['レベル']?.multi_select?.map((t: any) => t.name) || [];
+  return status === '公開' && levels.includes('プロ');
+});
+---
+
+<Layout title="ご予約・お問い合わせ | 手相のマヨネリ">
+  <div class="page-container container">
+
+    <header class="page-header text-center">
+      <h1 class="page-title">ご予約・お問い合わせ</h1>
+      <p class="page-desc">
+        手相鑑定・講座・添削のご予約は、公式LINEから承っております。<br>
+        ご希望のサービスを選んで、お気軽にご連絡ください。
+      </p>
+    </header>
+
+    <section class="section line-guide">
+      <div class="line-guide-box">
+        <h2>📱 公式LINEで予約する流れ</h2>
+        <ol>
+          <li>下のボタンから公式LINEを友だち追加</li>
+          <li>メニューから「鑑定について」または「鑑定予約」をタップ</li>
+          <li>「鑑定」と送ると、事前カウンセリングが始まります</li>
+          <li>ご希望のサービス名と日程の希望をお送りください</li>
+        </ol>
+        <a href={LINE_OFFICIAL_URL} target="_blank" rel="noopener noreferrer" class="btn-primary line-btn">
+          公式LINEを追加する
+        </a>
+      </div>
+    </section>
+
+    <section class="section" id="kantei">
+      <h2 class="section-title">手相鑑定</h2>
+      <div class="service-detail-card">
+        <div class="service-detail-body">
+          <p class="service-summary">「丘」から読み解く論理的な手相鑑定。オンライン（Zoom）にて、あなたの設計を分析します。</p>
+          <div class="price-highlight">
+            <span>基本鑑定 30分</span>
+            <strong>¥4,000</strong>
+            <span class="price-note">（10分延長 ¥1,000）</span>
+          </div>
+          <ul class="feature-list">
+            <li>オンライン鑑定（Zoom）</li>
+            <li>オプション：流年鑑定 / 鑑定書 / 録画</li>
+          </ul>
+          <div class="action-links">
+            <a href="/kantei/" class="btn-secondary">鑑定メニューの詳細を見る</a>
+            <a href={LINE_OFFICIAL_URL} target="_blank" rel="noopener noreferrer" class="btn-line-sm">LINEで「鑑定」と送る</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="kouza">
+      <h2 class="section-title">手相講座</h2>
+      <p class="section-desc text-center">論理的・客観的に手相を学べる講座です。ご希望の講座名をLINEでお送りください。</p>
+
+      {publicKouza.length > 0 ? (
+        <div class="booking-grid">
+          {publicKouza.map((item: any) => {
+            const title = item.properties['タイトル']?.title[0]?.plain_text || '無題';
+            const summary = item.properties['概要']?.rich_text[0]?.plain_text || '';
+            const price = item.properties['価格']?.rich_text[0]?.plain_text || '';
+            const slug = item.properties['URLスラッグ']?.rich_text[0]?.plain_text || item.id;
+
+            return (
+              <div class="booking-card">
+                <h3>{title}</h3>
+                {price && <div class="card-price">{price}</div>}
+                {summary && <p>{summary}</p>}
+                <div class="card-actions">
+                  <a href={`/kouza/${slug}/`} class="detail-link">詳細を見る →</a>
+                  <span class="line-hint">LINEで「講座 {title}」と送る</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p class="text-center empty-msg">講座情報を読み込めませんでした。<a href="/kouza/">講座一覧</a>をご覧ください。</p>
+      )}
+
+      <div class="text-center section-link">
+        <a href="/kouza/" class="btn-secondary">講座一覧を見る</a>
+      </div>
+    </section>
+
+    <section class="section" id="tensaku">
+      <h2 class="section-title">プロ向け・添削サービス</h2>
+      <p class="section-desc text-center">占い師・講師向けの添削・プロ講座です。</p>
+
+      {proKouza.length > 0 ? (
+        <div class="booking-grid">
+          {proKouza.map((item: any) => {
+            const title = item.properties['タイトル']?.title[0]?.plain_text || '無題';
+            const summary = item.properties['概要']?.rich_text[0]?.plain_text || '';
+            const slug = item.properties['URLスラッグ']?.rich_text[0]?.plain_text || item.id;
+
+            return (
+              <div class="booking-card pro">
+                <span class="pro-badge">プロ向け</span>
+                <h3>{title}</h3>
+                {summary && <p>{summary}</p>}
+                <div class="card-actions">
+                  <a href={`/kouza/${slug}/`} class="detail-link">詳細を見る →</a>
+                  <span class="line-hint">LINEで「添削 {title}」と送る</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p class="text-center empty-msg"><a href="/tensaku/">プロ向けサービス</a>の詳細をご覧ください。</p>
+      )}
+    </section>
+
+    <section class="section flow-section">
+      <h2 class="section-title">ご予約から鑑定まで</h2>
+      <div class="flow-steps">
+        <div class="step">
+          <div class="step-icon">1</div>
+          <h4>公式LINEで連絡</h4>
+          <p>「鑑定」「講座」など、ご希望のキーワードをお送りください。</p>
+        </div>
+        <div class="step">
+          <div class="step-icon">2</div>
+          <h4>日程調整</h4>
+          <p>ご希望日時を伺い、確定します。鑑定の場合は両手の写真もお送りください。</p>
+        </div>
+        <div class="step">
+          <div class="step-icon">3</div>
+          <h4>当日</h4>
+          <p>Zoom（または対面）にて鑑定・講座を実施します。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">よくある質問</h2>
+      <div class="faq-container">
+        <div class="faq-item">
+          <div class="faq-q"><span>Q.</span>予約はどこからすればいいですか？</div>
+          <div class="faq-a"><span>A.</span>公式LINEからがスムーズです。上の「公式LINEを追加する」ボタンから友だち追加し、「鑑定」または講座名をお送りください。</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Q.</span>LINEで用語を調べられますか？</div>
+          <div class="faq-a"><span>A.</span>はい。「感情線」など用語名を送ると、定義と用語集ページへのリンクが返ってきます。メニューの「用語を調べる」からもご利用いただけます。</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Q.</span>初めての鑑定で不安です。</div>
+          <div class="faq-a"><span>A.</span>LINEで「鑑定」と送ると、事前カウンセリングでご不安や気になるテーマをお伺いします。鑑定の流れもご案内しますので、お気軽にどうぞ。</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="cta-section text-center">
+      <p class="cta-text">手相用語がすぐ調べられる公式LINE</p>
+      <p class="cta-sub">用語検索・クイズ・鑑定案内が使えます</p>
+      <a href={LINE_OFFICIAL_URL} target="_blank" rel="noopener noreferrer" class="btn-primary line-btn">
+        公式LINEを追加する
+      </a>
+    </div>
+
+  </div>
+</Layout>
+
+<style>
+  .page-container { padding: 50px 15px; max-width: 1000px; margin: 0 auto; min-height: 70vh; }
+  .page-header { margin-bottom: 50px; }
+  .page-title { color: var(--color-primary); font-size: 2.5rem; margin-bottom: 15px; }
+  .page-desc { color: var(--color-text); font-size: 1.1rem; line-height: 1.7; }
+  .section { margin-bottom: 80px; }
+  .section-title { text-align: center; color: var(--color-primary); font-size: 1.8rem; margin-bottom: 30px; border-bottom: 2px solid var(--color-bg); padding-bottom: 15px; }
+  .section-desc { color: #666; margin-bottom: 30px; line-height: 1.6; }
+  .text-center { text-align: center; }
+
+  .line-guide-box {
+    background: white;
+    border: 2px solid var(--color-primary);
+    border-radius: 16px;
+    padding: 35px 30px;
+    text-align: center;
+  }
+  .line-guide-box h2 { color: var(--color-primary); margin-bottom: 20px; font-size: 1.3rem; }
+  .line-guide-box ol { text-align: left; max-width: 520px; margin: 0 auto 30px; line-height: 1.9; color: #555; }
+
+  .service-detail-card {
+    background: white;
+    border-radius: 16px;
+    padding: 35px;
+    box-shadow: 0 8px 25px rgba(78, 123, 103, 0.1);
+    border-top: 6px solid var(--color-primary);
+  }
+  .service-summary { color: #555; line-height: 1.8; margin-bottom: 20px; }
+  .price-highlight {
+    background: var(--color-bg);
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .price-highlight strong { font-size: 2rem; color: var(--color-primary); }
+  .price-note { color: #666; font-size: 0.95rem; }
+  .feature-list { margin-bottom: 25px; padding-left: 1.2rem; color: #555; line-height: 1.8; }
+
+  .action-links { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+
+  .booking-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-bottom: 25px;
+  }
+  .booking-card {
+    background: white;
+    border: 1px solid #e1ebe5;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    position: relative;
+  }
+  .booking-card.pro { border-color: var(--color-accent); }
+  .pro-badge {
+    display: inline-block;
+    background: var(--color-accent);
+    color: white;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+  .booking-card h3 { color: var(--color-primary); margin-bottom: 10px; font-size: 1.15rem; }
+  .card-price { font-weight: bold; color: var(--color-accent); margin-bottom: 10px; }
+  .booking-card p { color: #666; font-size: 0.92rem; line-height: 1.6; margin-bottom: 15px; }
+  .card-actions { border-top: 1px solid #eee; padding-top: 15px; }
+  .detail-link { color: var(--color-accent); font-weight: bold; text-decoration: none; display: block; margin-bottom: 8px; }
+  .line-hint { font-size: 0.85rem; color: #888; }
+
+  .flow-section { background: var(--color-bg); padding: 40px; border-radius: 16px; }
+  .flow-steps { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; }
+  .step { flex: 1; min-width: 200px; background: white; padding: 30px 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+  .step-icon { width: 40px; height: 40px; background: var(--color-primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1.2rem; margin: 0 auto 15px; }
+  .step h4 { margin-bottom: 10px; color: var(--color-text); }
+  .step p { font-size: 0.9rem; color: #666; line-height: 1.6; }
+
+  .faq-container { display: flex; flex-direction: column; gap: 15px; }
+  .faq-item { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+  .faq-q { font-weight: bold; color: var(--color-text); font-size: 1.05rem; margin-bottom: 12px; display: flex; gap: 10px; }
+  .faq-q span { color: var(--color-primary); }
+  .faq-a { color: #555; line-height: 1.7; display: flex; gap: 10px; font-size: 0.95rem; }
+  .faq-a span { color: var(--color-accent); font-weight: bold; }
+
+  .cta-section { padding: 50px 20px; background: white; border-radius: 16px; border: 2px solid var(--color-primary); }
+  .cta-text { margin-bottom: 8px; font-weight: bold; font-size: 1.3rem; color: var(--color-text); }
+  .cta-sub { margin-bottom: 25px; color: #666; }
+
+  .btn-primary, .btn-secondary, .btn-line-sm {
+    display: inline-block;
+    padding: 14px 32px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 30px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover, .btn-secondary:hover, .btn-line-sm:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.12); }
+  .line-btn, .btn-line-sm { background-color: #06C755; color: white; }
+  .btn-line-sm { padding: 12px 24px; font-size: 0.95rem; }
+  .btn-secondary { background: white; color: var(--color-primary); border: 2px solid var(--color-primary); }
+  .empty-msg { color: #888; }
+  .section-link { margin-top: 20px; }
+
+  @media (max-width: 768px) {
+    .page-title { font-size: 2rem; }
+    .action-links { flex-direction: column; align-items: center; }
+  }
+</style>

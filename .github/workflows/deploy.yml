@@ -4,6 +4,9 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+  schedule:
+    # 毎日 06:00 JST（21:00 UTC）に再ビルド。最新動画・用語集などを自動更新。
+    - cron: '0 21 * * *'
 
 permissions:
   contents: read

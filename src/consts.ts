@@ -3,3 +3,6 @@
 
 export const SITE_TITLE = 'マヨネリ手相・思考録';
 export const SITE_DESCRIPTION = '従来とは異なる「地丘」からのアプローチで、運命の根本を見つめ直す手相学。';
+
+export const SITE_URL = 'https://mayonery.jp';
+export const LINE_OFFICIAL_URL = 'https://lin.ee/W5EO3gZ';

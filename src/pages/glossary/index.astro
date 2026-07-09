@@ -28,7 +28,14 @@ async function fetchGlossary() {
     }
 }
 
-const terms = await fetchGlossary();
+const allTerms = await fetchGlossary();
+
+// 「下書き」ステータスの用語はサイトに表示しない（AI自動生成の未公開分を隠す）
+// ※ プロパティ未設定（既存の用語）は従来どおり表示される安全設計
+const terms = allTerms.filter((t: any) => {
+  const status = t.properties['公開ステータス']?.status?.name || t.properties['公開ステータス']?.select?.name || '';
+  return status !== '下書き';
+});
 
 // カテゴリー一覧を取得
 const categories = [...new Set(terms.flatMap((t: any) => {
@@ -59,26 +66,38 @@ const kanaRows = ['あ行', 'か行', 'さ行', 'た行', 'な行', 'は行', '�
         <div class="index-group">
           <span class="index-label">カテゴリー：</span>
           <div class="filter-buttons">
-            <button class="filter-btn active" data-filter-type="all">すべて</button>
+            <button class="filter-btn cat-btn active" data-cat="all">すべて</button>
             {categories.map((cat: any) => (
-              <button class="filter-btn" data-filter-type="category" data-filter-val={cat}>{cat}</button>
+              <button class="filter-btn cat-btn" data-cat={cat}>{cat}</button>
             ))}
           </div>
         </div>
 
         <div class="index-group">
-          <span class="index-label">五十音順：</span>
+          <span class="index-label">五十音：</span>
           <div class="filter-buttons">
+            <button class="filter-btn kana-btn active" data-kana="all">すべて</button>
             {kanaRows.map((row) => (
-              <button class="filter-btn" data-filter-type="kana" data-filter-val={row}>{row}</button>
+              <button class="filter-btn kana-btn" data-kana={row}>{row}</button>
             ))}
+          </div>
+        </div>
+
+        <div class="index-group">
+          <span class="index-label">並び替え：</span>
+          <div class="filter-buttons">
+            <select id="glossary-sort" class="sort-select">
+              <option value="default">登録順</option>
+              <option value="kana">五十音順（あ→わ）</option>
+              <option value="category">カテゴリー順</option>
+            </select>
           </div>
         </div>
       </div>
     </div>
 
     <div class="terms-grid" id="terms-grid">
-      {terms.length > 0 ? terms.map((term: any) => {
+      {terms.length > 0 ? terms.map((term: any, i: number) => {
         const name = term.properties['名前']?.title[0]?.plain_text || term.properties['タイトル']?.title[0]?.plain_text || '';
         const catObj = term.properties['カテゴリー']?.select?.name || term.properties['カテゴリー']?.multi_select?.[0]?.name;
         const category = catObj || '未分類';
@@ -87,7 +106,7 @@ const kanaRows = ['あ行', 'か行', 'さ行', 'た行', 'な行', 'は行', '�
         const slug = term.properties['URLスラッグ']?.rich_text?.[0]?.plain_text || term.id;
         
         return (
-          <a href={`/glossary/${slug}`} class="term-link-wrapper" data-name={name} data-reading={reading} data-category={category}>
+          <a href={`/glossary/${slug}`} class="term-link-wrapper" data-index={i} data-name={name} data-reading={reading} data-category={category}>
             <article class="term-card">
               <div class="term-header">
                 <span class="category-tag">{category}</span>
@@ -114,80 +133,99 @@ const kanaRows = ['あ行', 'か行', 'さ行', 'た行', 'な行', 'は行', '�
 </Layout>
 
 <script>
-  const searchInput = document.getElementById('glossary-search') as HTMLInputElement;
-  const cards = document.querySelectorAll('.term-link-wrapper');
+  const searchInput = document.getElementById('glossary-search') as HTMLInputElement | null;
+  const sortSelect = document.getElementById('glossary-sort') as HTMLSelectElement | null;
+  const grid = document.getElementById('terms-grid');
   const noResults = document.getElementById('no-results');
-  const filterBtns = document.querySelectorAll('.filter-btn');
-  
-  // スマホ用開閉ボタンの要素を取得
+  const catBtns = Array.from(document.querySelectorAll('.cat-btn'));
+  const kanaBtns = Array.from(document.querySelectorAll('.kana-btn'));
+  const cards = Array.from(document.querySelectorAll('.term-link-wrapper')) as HTMLElement[];
+
   const filterToggleBtn = document.getElementById('mobile-filter-toggle');
   const indexSection = document.getElementById('filter-index-section');
 
   const kanaMap: Record<string, RegExp> = {
-    'あ行': /^[あ-お]/, 'か行': /^[か-こが-ご]/, 'さ行': /^[さ-そざ-ぞ]/,
-    'た行': /^[た-とだ-ど]/, 'な行': /^[な-の]/, 'は行': /^[は-ほば-ぼぱ-ぽ]/,
-    'ま行': /^[ま-も]/, 'や行': /^[や-よ]/, 'ら行': /^[ら-ろ]/, 'わ行': /^[わ-ん]/,
+    'あ行': /^[ぁ-おゔ]/, 'か行': /^[か-ごゕゖ]/, 'さ行': /^[さ-ぞ]/,
+    'た行': /^[た-ど]/, 'な行': /^[な-の]/, 'は行': /^[は-ぽ]/,
+    'ま行': /^[ま-も]/, 'や行': /^[ゃ-よ]/, 'ら行': /^[ら-ろ]/, 'わ行': /^[ゎ-ん]/,
   };
 
-  function filterTerms() {
-    const query = searchInput.value.toLowerCase().trim();
-    const activeBtn = document.querySelector('.filter-btn.active') as HTMLElement;
-    const filterType = activeBtn?.getAttribute('data-filter-type');
-    const filterVal = activeBtn?.getAttribute('data-filter-val');
-    let visibleCount = 0;
+  // 現在の絞り込み状態（カテゴリーと五十音は併用可）
+  let activeCat = 'all';
+  let activeKana = 'all';
 
-    cards.forEach((card) => {
-      const htmlCard = card as HTMLElement;
-      const name = htmlCard.getAttribute('data-name')?.toLowerCase() || '';
-      const reading = htmlCard.getAttribute('data-reading') || ''; 
-      const category = htmlCard.getAttribute('data-category') || '';
-      const matchSearch = name.includes(query) || reading.includes(query);
-      
-      let matchButton = true;
-      if (filterType === 'category') { matchButton = (category === filterVal); } 
-      else if (filterType === 'kana') { const regex = kanaMap[filterVal!]; matchButton = regex ? regex.test(reading) : false; }
+  function apply() {
+    const query = (searchInput?.value || '').toLowerCase().trim();
 
-      if (matchSearch && matchButton) {
-        htmlCard.style.display = 'block';
-        visibleCount++;
-      } else {
-        htmlCard.style.display = 'none';
-      }
+    // 1) 絞り込み
+    const visible = cards.filter((card) => {
+      const name = (card.dataset.name || '').toLowerCase();
+      const reading = card.dataset.reading || '';
+      const category = card.dataset.category || '';
+      const okSearch = !query || name.includes(query) || reading.includes(query);
+      const okCat = activeCat === 'all' || category === activeCat;
+      const okKana = activeKana === 'all' || (kanaMap[activeKana] ? kanaMap[activeKana].test(reading) : false);
+      return okSearch && okCat && okKana;
     });
-    if (visibleCount === 0) { noResults?.classList.remove('hidden'); } 
-    else { noResults?.classList.add('hidden'); }
+
+    // 2) 並び替え
+    const sort = sortSelect?.value || 'default';
+    if (sort === 'kana') {
+      visible.sort((a, b) => (a.dataset.reading || '').localeCompare(b.dataset.reading || '', 'ja'));
+    } else if (sort === 'category') {
+      visible.sort((a, b) =>
+        (a.dataset.category || '').localeCompare(b.dataset.category || '', 'ja') ||
+        (a.dataset.reading || '').localeCompare(b.dataset.reading || '', 'ja'));
+    } else {
+      visible.sort((a, b) => Number(a.dataset.index) - Number(b.dataset.index));
+    }
+
+    // 3) 反映（非表示にしてから、表示分を並び順どおり再配置）
+    cards.forEach((c) => { c.style.display = 'none'; });
+    visible.forEach((c) => { c.style.display = 'block'; grid?.appendChild(c); });
+
+    if (noResults) noResults.classList.toggle('hidden', visible.length > 0);
   }
 
-  // 検索窓での入力時
-  searchInput?.addEventListener('input', filterTerms);
+  function setActive(btns: Element[], target: Element) {
+    btns.forEach((b) => b.classList.remove('active'));
+    target.classList.add('active');
+  }
 
-  // フィルターボタンクリック時
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      const target = e.currentTarget as HTMLElement;
-      target.classList.add('active');
-      filterTerms();
+  searchInput?.addEventListener('input', apply);
+  sortSelect?.addEventListener('change', apply);
 
-      // 🌟 スマホで展開中にボタンを押したら、自動的にメニューを閉じる
-      if (window.innerWidth <= 768 && indexSection && indexSection.classList.contains('active')) {
-          indexSection.classList.remove('active');
-          if (filterToggleBtn) filterToggleBtn.innerHTML = '絞り込み・並び替え ▼';
-      }
-    });
-  });
+  catBtns.forEach((btn) => btn.addEventListener('click', () => {
+    activeCat = (btn as HTMLElement).dataset.cat || 'all';
+    setActive(catBtns, btn);
+    apply();
+    closeMobileMenu();
+  }));
 
-  // 🌟 スマホ用：開閉ボタンのクリックイベント
+  kanaBtns.forEach((btn) => btn.addEventListener('click', () => {
+    activeKana = (btn as HTMLElement).dataset.kana || 'all';
+    setActive(kanaBtns, btn);
+    apply();
+    closeMobileMenu();
+  }));
+
+  function closeMobileMenu() {
+    if (window.innerWidth <= 768 && indexSection && indexSection.classList.contains('active')) {
+      indexSection.classList.remove('active');
+      if (filterToggleBtn) filterToggleBtn.innerHTML = '絞り込み・並び替え ▼';
+    }
+  }
+
   if (filterToggleBtn && indexSection) {
-      filterToggleBtn.addEventListener('click', () => {
-          indexSection.classList.toggle('active');
-          if (indexSection.classList.contains('active')) {
-              filterToggleBtn.innerHTML = '絞り込み・並び替え ▲';
-          } else {
-              filterToggleBtn.innerHTML = '絞り込み・並び替え ▼';
-          }
-      });
+    filterToggleBtn.addEventListener('click', () => {
+      indexSection.classList.toggle('active');
+      filterToggleBtn.innerHTML = indexSection.classList.contains('active')
+        ? '絞り込み・並び替え ▲' : '絞り込み・並び替え ▼';
+    });
   }
+
+  // 初期表示
+  apply();
 </script>
 
 <style>
@@ -209,6 +247,7 @@ const kanaRows = ['あ行', 'か行', 'さ行', 'た行', 'な行', 'は行', '�
   .filter-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
   .filter-btn { background-color: white; border: 1px solid #ccc; color: var(--color-text); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap; }
   .filter-btn.active { background-color: var(--color-primary); color: white; border-color: var(--color-primary); font-weight: bold; }
+  .sort-select { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--color-primary); background: white; color: var(--color-primary); font-weight: bold; font-size: 0.9rem; cursor: pointer; outline: none; }
   
   .terms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
   .term-link-wrapper { text-decoration: none; color: inherit; display: block; }

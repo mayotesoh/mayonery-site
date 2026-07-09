@@ -22,3 +22,13 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# 講座の文字起こし（非公開・サイトに載せない。GASはGoogleドライブ側から読む）
+public/文字起こし/
+
+# GAS（LINEトークン等の秘密情報を含むため、公開リポジトリには載せない）
+gas/
+
+# Python cache
+__pycache__/
+*.pyc

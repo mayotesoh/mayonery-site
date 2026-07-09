@@ -1,5 +1,6 @@
 ---
 import { ClientRouter } from 'astro:transitions';
+import { LINE_OFFICIAL_URL } from '../consts';
 
 export interface Props {
     title: string;
@@ -30,7 +31,7 @@ const snsLinks = [
     },
     { 
         name: '公式LINE', 
-        url: 'https://lin.ee/W5EO3gZ', 
+        url: LINE_OFFICIAL_URL, 
         icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C5.373 3 0 7.425 0 12.882c0 2.457 1.134 4.685 3.032 6.402.137.28.384.814.186 1.838-.073.376-.356 1.734-.482 2.302-.132.597-.245 1.107 1.102.54 1.347-.566 5.166-2.585 6.938-3.805A12.756 12.756 0 0 0 12 22.764c6.627 0 12-4.425 12-9.882C24 7.425 18.627 3 12 3z"/></svg>' 
     }
 ];
@@ -103,6 +104,7 @@ const snsLinks = [
                     <a href="/glossary" class="nav-item">手相用語集</a>
                     <a href="/quiz" class="nav-item">手相クイズ</a>
                     <a href="/service" class="nav-item">提供サービス</a>
+                    <a href="/yoyaku" class="nav-item nav-item-accent">予約</a>
                     <a href="/gakkai" class="nav-item">手相学会</a> 
                 </div>
             </nav>
@@ -246,6 +248,9 @@ const snsLinks = [
     .nav-item::after { content: ''; position: absolute; bottom: 8px; left: 50%; width: 0; height: 3px; background-color: var(--color-primary); transition: all 0.3s ease; transform: translateX(-50%); border-radius: 2px; opacity: 0; }
     .nav-item:hover { color: var(--color-primary); transform: translateY(-2px); box-shadow: 0 6px 0 #d1e0d7, 0 8px 15px rgba(78, 123, 103, 0.12); }
     .nav-item:hover::after { width: 50%; opacity: 1; }
+    .nav-item-accent { background-color: var(--color-primary); color: white !important; }
+    .nav-item-accent:hover { background-color: var(--color-accent); color: white !important; }
+    .nav-item-accent::after { display: none; }
     .nav-item:active { transform: translateY(4px); box-shadow: 0 0 0 #d1e0d7, 0 2px 4px rgba(78, 123, 103, 0.05); }
 
     /* PC用ドロップダウンの設定 */

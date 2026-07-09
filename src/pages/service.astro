@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { LINE_OFFICIAL_URL } from '../consts';
 ---
 
 <Layout title="提供サービス | 手相のマヨネリ">
@@ -8,6 +9,7 @@ import Layout from '../layouts/Layout.astro';
         <header class="page-header text-center">
             <h1 class="page-title">提供サービス</h1>
             <p class="page-desc">あなたの目的や段階に合わせて、論理的手相学をフル活用するためのサービスをご用意しています。</p>
+            <a href="/yoyaku/" class="yoyaku-banner">📅 ご予約・お問い合わせはこちら</a>
         </header>
 
         <section class="service-section">
@@ -35,6 +37,9 @@ import Layout from '../layouts/Layout.astro';
                     <a href="/kantei" class="s-link">鑑定メニューを見る →</a>
                 </div>
 
+            </div>
+            <div class="text-center service-yoyaku">
+                <a href="/yoyaku/" class="yoyaku-link">鑑定・講座の予約ページへ →</a>
             </div>
         </section>
 
@@ -68,6 +73,10 @@ import Layout from '../layouts/Layout.astro';
     .page-header { margin-bottom: 60px; }
     .page-title { font-size: 2.2rem; color: var(--color-primary); margin-bottom: 15px; }
     .page-desc { font-size: 1.1rem; color: #555; line-height: 1.6; }
+    .yoyaku-banner { display: inline-block; margin-top: 20px; padding: 12px 28px; background: var(--color-primary); color: white; text-decoration: none; border-radius: 30px; font-weight: bold; transition: transform 0.2s; }
+    .yoyaku-banner:hover { transform: translateY(-2px); }
+    .service-yoyaku { margin-top: 25px; }
+    .yoyaku-link { color: var(--color-accent); font-weight: bold; text-decoration: none; border-bottom: 2px solid var(--color-accent); }
     .service-section { margin-bottom: 70px; }
     .section-title { font-size: 1.5rem; color: var(--color-accent); border-bottom: 2px solid #e1ebe5; padding-bottom: 10px; margin-bottom: 30px; }
     .service-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }

@@ -24,7 +24,11 @@ export async function getStaticPaths() {
       },
       { results: [] }
     );
-    const terms = data.results || [];
+    const terms = (data.results || []).filter((t: any) => {
+      // 「下書き」ステータスの用語はページを生成しない
+      const status = t.properties['公開ステータス']?.status?.name || t.properties['公開ステータス']?.select?.name || '';
+      return status !== '下書き';
+    });
 
     return terms.map((term: any) => {
       const slug = term.properties['URLスラッグ']?.rich_text?.[0]?.plain_text || term.id;
@@ -47,6 +51,7 @@ const reading = term.properties['読み']?.rich_text?.[0]?.plain_text || '';
 const catObj = term.properties['カテゴリー']?.select?.name || term.properties['カテゴリー']?.multi_select?.[0]?.name;
 const category = catObj || '未分類';
 const meaning = term.properties['意味']?.rich_text?.[0]?.plain_text || '';
+const hillEnergy = term.properties['丘のエネルギー']?.rich_text?.[0]?.plain_text || '';
 
 // 🌟 本文（ブロック）の取得
 const apiKey = import.meta.env.NOTION_API_KEY;
@@ -79,6 +84,12 @@ const blocks = blocksData.results || [];
             </div>
             <h1 class="term-title">{name}</h1>
             {meaning && <div class="term-summary-box"><p>{meaning}</p></div>}
+            {hillEnergy && (
+              <div class="hill-energy-box">
+                <span class="hill-energy-label">丘のエネルギー</span>
+                <p>{hillEnergy}</p>
+              </div>
+            )}
         </header>
 
         <div class="post-content">
@@ -140,6 +151,10 @@ const blocks = blocksData.results || [];
     
     .term-summary-box { background-color: var(--color-bg); border-left: 4px solid var(--color-accent); padding: 15px 20px; border-radius: 0 8px 8px 0; margin-bottom: 30px;}
     .term-summary-box p { margin: 0; font-weight: bold; color: var(--color-text); font-size: 1.1rem; line-height: 1.5; }
+
+    .hill-energy-box { background-color: #fff; border: 1px solid var(--color-primary); border-radius: 8px; padding: 15px 20px; margin-bottom: 30px; }
+    .hill-energy-label { display: inline-block; font-size: 0.75rem; font-weight: bold; color: white; background: var(--color-primary); padding: 3px 10px; border-radius: 4px; margin-bottom: 8px; }
+    .hill-energy-box p { margin: 0; color: var(--color-text); line-height: 1.7; }
 
     .post-content { font-size: 1.1rem; line-height: 1.8; color: var(--color-text); }
     .post-content p { margin-bottom: 1.5em; }

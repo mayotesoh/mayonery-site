@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { LINE_OFFICIAL_URL } from '../consts';
 ---
 
 <Layout title="手相鑑定 | 手相のマヨネリ">
@@ -135,7 +136,8 @@ import Layout from '../layouts/Layout.astro';
 
         <div class="cta-section text-center">
             <p class="cta-text">ご予約・お問い合わせは公式LINEより承っております。</p>
-            <a href="https://lin.ee/W5EO3gZ" target="_blank" rel="noopener noreferrer" class="btn-primary line-btn">
+            <a href="/yoyaku/" class="btn-primary btn-reserve">予約ページを見る</a>
+            <a href={LINE_OFFICIAL_URL} target="_blank" rel="noopener noreferrer" class="btn-primary line-btn">
                 公式LINEで予約する
             </a>
         </div>
@@ -209,10 +211,11 @@ import Layout from '../layouts/Layout.astro';
     .faq-a span { color: var(--color-accent); font-weight: bold; }
 
     /* CTA (予約ボタン) */
-    .cta-section { padding: 50px 20px; background: white; border-radius: 16px; border: 2px solid var(--color-primary); }
-    .cta-text { margin-bottom: 25px; font-weight: bold; font-size: 1.2rem; color: var(--color-text); }
+    .cta-section { padding: 50px 20px; background: white; border-radius: 16px; border: 2px solid var(--color-primary); display: flex; flex-direction: column; align-items: center; gap: 15px; }
+    .cta-text { margin-bottom: 10px; font-weight: bold; font-size: 1.2rem; color: var(--color-text); }
     .btn-primary { display: inline-block; padding: 16px 50px; font-size: 1.2rem; font-weight: bold; border-radius: 30px; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
     .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+    .btn-reserve { background-color: var(--color-primary); color: white; }
     .line-btn { background-color: #06C755; color: white; }
     .text-center { text-align: center; }
 
