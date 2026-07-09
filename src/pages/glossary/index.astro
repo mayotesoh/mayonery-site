@@ -8,23 +8,33 @@ const glossaryId = import.meta.env.NOTION_GLOSSARY_ID;
 // Notionから用語集データを取得
 async function fetchGlossary() {
     if (!apiKey || !glossaryId) return [];
+    let results: any[] = [];
+    let cursor: string | undefined = undefined;
     try {
-        const data = await safeFetchJson<{ results?: any[] }>(
-          `https://api.notion.com/v1/databases/${glossaryId}/query`,
-          {
-              method: 'POST',
-              headers: {
-                  'Authorization': `Bearer ${apiKey}`,
-                  'Notion-Version': '2022-06-28',
-                  'Content-Type': 'application/json',
+        for (let i = 0; i < 20; i++) {
+            const body: any = { page_size: 100 };
+            if (cursor) body.start_cursor = cursor;
+            const data = await safeFetchJson<{ results?: any[]; has_more?: boolean; next_cursor?: string }>(
+              `https://api.notion.com/v1/databases/${glossaryId}/query`,
+              {
+                  method: 'POST',
+                  headers: {
+                      'Authorization': `Bearer ${apiKey}`,
+                      'Notion-Version': '2022-06-28',
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(body),
               },
-          },
-          { results: [] }
-        );
-        return data.results || [];
+              { results: [] }
+            );
+            results = results.concat(data.results || []);
+            if (!data.has_more || !data.next_cursor) break;
+            cursor = data.next_cursor;
+        }
+        return results;
     } catch (e) {
         console.error(e);
-        return [];
+        return results;
     }
 }
 
