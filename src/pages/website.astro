@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { LINE_OFFICIAL_URL } from '../consts';
 
 // 会員価格（fortunelabo会員向け）を表示するかどうか。false にすると一般価格だけになります。
-const SHOW_MEMBER_PRICE = true;
+const SHOW_MEMBER_PRICE = false;
 
 const plans = [
     {
@@ -153,7 +153,7 @@ const yen = (n: number) => `¥${n.toLocaleString('ja-JP')}`;
                             </div>
                             <div class="plan-price">
                                 <div class="p-main">
-                                    <span class="p-label">一般</span>
+                                    {SHOW_MEMBER_PRICE && <span class="p-label">一般</span>}
                                     <span class="p-yen">{yen(p.price)}</span>
                                 </div>
                                 {SHOW_MEMBER_PRICE && (
@@ -194,11 +194,19 @@ const yen = (n: number) => `¥${n.toLocaleString('ja-JP')}`;
             </div>
 
             <div class="example-box">
-                <p>
-                    <strong>お支払い例</strong>：スタンダード（5ページ）を会員価格でご依頼の場合<br>
-                    70,000円 ＋ ドメイン6,000円 ＋ 維持費12,000円 ＝ <strong class="total">88,000円</strong>
-                    <span class="ex-note">（＋ドメイン代の実費 年1,500円前後）</span>
-                </p>
+                {SHOW_MEMBER_PRICE ? (
+                    <p>
+                        <strong>お支払い例</strong>：スタンダード（5ページ）を会員価格でご依頼の場合<br />
+                        70,000円 ＋ ドメイン6,000円 ＋ 維持費12,000円 ＝ <strong class="total">88,000円</strong>
+                        <span class="ex-note">（＋ドメイン代の実費 年1,500円前後）</span>
+                    </p>
+                ) : (
+                    <p>
+                        <strong>お支払い例</strong>：スタンダード（5ページ）をご依頼の場合<br />
+                        100,000円 ＋ ドメイン8,000円 ＋ 維持費12,000円 ＝ <strong class="total">120,000円</strong>
+                        <span class="ex-note">（＋ドメイン代の実費 年1,500円前後）</span>
+                    </p>
+                )}
             </div>
         </section>
 
