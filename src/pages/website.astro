@@ -100,6 +100,21 @@ const flow = [
     { no: '05', title: '公開', text: 'ドメインをつないで公開。更新の仕方もお伝えします。' },
 ];
 
+
+const works = [
+    {
+        name: '松山 倫子 さま',
+        catchcopy: '働く選択肢を、もっと自由に。',
+        url: 'https://nori-norico.com/',
+        host: 'nori-norico.com',
+        img: '/works/nori-norico',
+        alt: '松山倫子さんのホームページ「働く選択肢を、もっと自由に。」トップページ',
+        pages: '6ページ ＋ ブログ',
+        structure: 'ホーム／事業内容（3事業・個別ページつき）／プロフィール／占い師 凰凛／活動報告／お問い合わせ',
+        tags: ['フルプラン相当', 'Notionブログ連携', '独自ドメイン', '公式LINE導線', 'スマホ対応'],
+        desc: '占いコミュニティ・テレアポ・営業代行と、活動が3つに分かれている方のサイト。事業ごとにページを分けながら、「働く選択肢を、もっと自由に。」という一本の軸でまとめました。活動報告はNotionに書くだけで増える形。お問い合わせフォームは置かず、公式LINEに一本化しています。',
+    },
+];
 const yen = (n: number) => `¥${n.toLocaleString('ja-JP')}`;
 ---
 
@@ -134,6 +149,61 @@ const yen = (n: number) => `¥${n.toLocaleString('ja-JP')}`;
                     <p>まず1ページから始めて、活動に合わせてページを足していきたい方。</p>
                 </div>
             </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">制作事例</h2>
+            <p class="lead text-center">実際にお作りして、公開されているサイトです。</p>
+
+            <div class="works-list">
+                {works.map((w) => (
+                    <article class="work-card">
+                        <a
+                            class="work-shot"
+                            href={w.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`${w.name}のサイトを新しいタブで開く`}
+                        >
+                            <span class="browser-bar">
+                                <i></i><i></i><i></i>
+                                <span class="browser-url">{w.host}</span>
+                            </span>
+                            <picture>
+                                <source srcset={`${w.img}.webp`} type="image/webp" />
+                                <img
+                                    src={`${w.img}.jpg`}
+                                    alt={w.alt}
+                                    width="1280"
+                                    height="900"
+                                    loading="lazy"
+                                    decoding="async"
+                                />
+                            </picture>
+                        </a>
+                        <div class="work-body">
+                            <span class="work-pages">{w.pages}</span>
+                            <h3 class="work-name">{w.name}</h3>
+                            <p class="work-catch">「{w.catchcopy}」</p>
+                            <p class="work-desc">{w.desc}</p>
+                            <dl class="work-meta">
+                                <dt>構成</dt>
+                                <dd>{w.structure}</dd>
+                            </dl>
+                            <ul class="work-tags">
+                                {w.tags.map((t) => <li>{t}</li>)}
+                            </ul>
+                            <a class="work-link" href={w.url} target="_blank" rel="noopener noreferrer">
+                                サイトを見る →
+                            </a>
+                        </div>
+                    </article>
+                ))}
+            </div>
+
+            <p class="note text-center">
+                掲載の可否はご本人と相談のうえ決めています。事例に載せたくない場合は載せません。
+            </p>
         </section>
 
         <section class="section">
@@ -501,6 +571,96 @@ const yen = (n: number) => `¥${n.toLocaleString('ja-JP')}`;
     .notes-card strong { color: var(--color-text); }
     .tax { font-size: 0.82rem !important; color: #7d968b !important; }
 
+
+    /* 制作事例 */
+    .works-list { display: grid; gap: 24px; margin-top: 30px; }
+    .work-card {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+        background: #fff;
+        border: 1px solid #e1ebe5;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 14px rgba(78, 123, 103, 0.06);
+    }
+    .work-shot {
+        display: flex;
+        flex-direction: column;
+        background: #eef4f1;
+        text-decoration: none;
+        border-right: 1px solid #e1ebe5;
+    }
+    .browser-bar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 14px;
+        background: #e4ede8;
+        border-bottom: 1px solid #d6e3db;
+    }
+    .browser-bar i { width: 8px; height: 8px; border-radius: 50%; background: #c3d3ca; }
+    .browser-url {
+        margin-left: 8px;
+        font-size: 0.72rem;
+        color: #6d857b;
+        background: #fff;
+        border-radius: 999px;
+        padding: 3px 14px;
+    }
+    .work-shot picture { flex: 1; display: flex; align-items: center; min-height: 0; }
+    .work-shot img {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 100%;
+        object-fit: contain;
+        transition: opacity 0.2s;
+    }
+    .work-shot:hover img { opacity: 0.9; }
+
+    .work-body { padding: 28px 30px; }
+    .work-pages {
+        display: inline-block;
+        font-size: 0.72rem;
+        color: var(--color-accent);
+        background: #eaf3ee;
+        border-radius: 999px;
+        padding: 4px 13px;
+    }
+    .work-name { font-size: 1.15rem; color: var(--color-primary); margin: 13px 0 6px; }
+    .work-catch { font-size: 0.95rem; font-weight: bold; color: var(--color-text); margin: 0 0 14px; }
+    .work-desc { font-size: 0.88rem; color: #5b7268; line-height: 1.9; margin: 0 0 18px; }
+    .work-meta { margin: 0 0 16px; font-size: 0.82rem; line-height: 1.8; }
+    .work-meta dt { font-weight: bold; color: var(--color-accent); }
+    .work-meta dd { margin: 3px 0 0; color: #6d857b; }
+    .work-tags { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0 0 22px; }
+    .work-tags li {
+        font-size: 0.75rem;
+        color: var(--color-primary);
+        border: 1px solid #cfe0d6;
+        border-radius: 999px;
+        padding: 4px 11px;
+    }
+    .work-link {
+        display: inline-block;
+        background-color: var(--color-primary);
+        color: #fff;
+        text-decoration: none;
+        padding: 11px 26px;
+        border-radius: 999px;
+        font-weight: bold;
+        font-size: 0.88rem;
+        box-shadow: 0 4px 0 #3c6253;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .work-link:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #3c6253; }
+
+    @media (max-width: 820px) {
+        .work-card { grid-template-columns: 1fr; }
+        .work-shot { border-right: none; border-bottom: 1px solid #e1ebe5; }
+        .work-shot img { max-height: none; }
+        .work-body { padding: 24px 22px; }
+    }
     /* CTA */
     .cta-section {
         background: #eaf3ee;

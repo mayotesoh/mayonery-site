@@ -5,8 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
   schedule:
-    # 毎日 06:00 JST（21:00 UTC）に再ビルド。最新動画・用語集などを自動更新。
-    - cron: '0 21 * * *'
+    # 毎時00分に再ビルド。Notion（用語集・ブログ・クイズ）と最新動画を自動更新。
+    # ※GitHub Actions の schedule は混雑時に数分〜十数分遅れることがあります。
+    - cron: '0 * * * *'
 
 permissions:
   contents: read
