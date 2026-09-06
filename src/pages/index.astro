@@ -48,7 +48,11 @@ const allPosts = await fetchNotionData(blogDbId);
 const recentPosts = allPosts
   .filter((post: any) => {
     const status = post.properties['ステータス']?.status?.name || post.properties['ステータス']?.select?.name || '';
-    return status === '公開';
+    if (status !== '公開') return false;
+    // 予約投稿：日付が未来の記事は非表示
+    const dateStr = post.properties['日付']?.date?.start;
+    if (dateStr && new Date(dateStr).getTime() > Date.now()) return false;
+    return true;
   })
   .sort((a: any, b: any) => {
     const dateA = new Date(a.properties['日付']?.date?.start || 0).getTime();

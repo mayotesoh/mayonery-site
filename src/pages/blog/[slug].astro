@@ -30,7 +30,11 @@ export async function getStaticPaths() {
 
     const blogPosts = allResults.filter((post: any) => {
       const status = post.properties['ステータス']?.status?.name || post.properties['ステータス']?.select?.name || '';
-      return status === '公開';
+      if (status !== '公開') return false;
+      // 予約投稿：日付が未来の記事は、その日時が来るまで公開しない
+      const dateStr = post.properties['日付']?.date?.start;
+      if (dateStr && new Date(dateStr).getTime() > Date.now()) return false;
+      return true;
     });
 
     return blogPosts.map((post: any) => {
