@@ -17,6 +17,8 @@ const data = (!apiKey || !kouzaDbId)
           'Notion-Version': '2022-06-28',
           'Content-Type': 'application/json',
         },
+        // 「表示順」の小さい順に並べる（Notion側で並べ替えできるように）
+        body: JSON.stringify({ sorts: [{ property: '表示順', direction: 'ascending' }] }),
       },
       { results: [] }
     );
