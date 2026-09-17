@@ -378,3 +378,20 @@
 
   .lp-footer__inner { flex-direction: column; gap: 8px; }
 }
+
+/* ---------- サイトへの戻り道（ヘッダー右・フッター） 2026-09-18 ---------- */
+.lp-header__right { display: flex; align-items: center; gap: 20px; }
+.lp-header__nav { display: flex; gap: 16px; font-size: 13px; }
+.lp-header__nav a { color: var(--lp-muted); text-decoration: none; }
+.lp-header__nav a:hover { color: var(--lp-green); text-decoration: underline; text-underline-offset: 4px; }
+.lp-header__right .lp-header__title { padding-left: 20px; border-left: 1px solid var(--lp-line); }
+.lp-footer__inner { align-items: center; gap: 12px 24px; flex-wrap: wrap; }
+.lp-footer__brand { font-weight: 700; letter-spacing: .06em; }
+.lp-footer__nav { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.lp-footer__nav a:hover { text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 768px) {
+  .lp-header__right .lp-header__title { display: none; }
+  .lp-header__nav { gap: 14px; font-size: 12px; }
+  .lp-footer__inner { align-items: flex-start; }
+  .lp-footer__nav { gap: 8px 16px; }
+}

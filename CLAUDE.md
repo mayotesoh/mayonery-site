@@ -39,3 +39,13 @@
 
 ## メモリについて
 - 過去メモは `C:\Users\mayonery\.claude\projects\C--Users-mayonery-------mayonery-site\memory\` にコピー済み（`mayonery-architecture.md` / `gemini-quota-gotcha.md`）
+
+## 講座LP（2026-09-18 公開）
+- `public/lp/honkouza/`（手相本講座・深緑）／`public/lp/tesou-video/`（全7章セット・藍）／`public/lp/session/`（鑑定攻略セッション・栗）。**Astroを通さない静的HTML**。CSSは `lp-` 接頭辞、共通の style.css＋ページ別CSS。GAタグ入り
+- 制作資料（戦略・コピー・調査）は `../lp-honkouza/`・`../lp-video7/`（非公開フォルダ）。公開版の正本はこのリポジトリ側
+- 講座一覧→LPの対応は `src/pages/kouza/index.astro` と `[slug].astro` の `LP_BY_SLUG`
+- 用語集・クイズ・ブログ末尾の案内は `src/components/LearnCta.astro`（→ /lp/tesou-video/）
+- `/tokushoho/`：氏名・住所・電話番号は「請求時に開示」。**開示請求が来たら遅滞なくメールで回答**
+- 注意：`tools/fl_kouza_import.mjs` を再実行すると、7章セットの説明（質問4回）がFL側の古い説明（各章に質問）に戻る
+- サイトの導線（2026-09-18）：ナビは「ホーム／鑑定を受ける／手相を学ぶ▾／無料で学ぶ▾／自己紹介／予約」。講座を足したら `src/pages/manabu.astro`（いまの自分から選ぶ）と `service.astro`（目的別3入口）とナビの「手相を学ぶ▾」を更新
+- 表示速度（2026-09-18）：ページ切り替えのスライドは廃止（`<html transition:animate="none">`）。ロゴは `/logo-96.*`、トップのYouTubeはサムネイル→押したら再生（`.yt-lite`）。重い `favicon.png`(288KB) を表示用に使わないこと

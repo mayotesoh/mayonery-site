@@ -3,64 +3,82 @@ import Layout from '../layouts/Layout.astro';
 import { LINE_OFFICIAL_URL } from '../consts';
 ---
 
-<Layout title="提供サービス | 手相のマヨネリ">
+<Layout title="提供サービス（目的から選ぶ） | 手相のマヨネリ">
     <div class="container page-container">
         
         <header class="page-header text-center">
             <h1 class="page-title">提供サービス</h1>
-            <p class="page-desc">あなたの目的や段階に合わせて、論理的手相学をフル活用するためのサービスをご用意しています。</p>
-            <a href="/yoyaku/" class="yoyaku-banner">📅 ご予約・お問い合わせはこちら</a>
+            <p class="page-desc">目的から選んでください。</p>
+            <nav class="door-nav" aria-label="目的から選ぶ">
+                <a href="#see" class="door-chip">手相を見てもらいたい</a>
+                <a href="#learn" class="door-chip">手相を学びたい</a>
+                <a href="#pro" class="door-chip">占い師として活動を広げたい</a>
+            </nav>
         </header>
 
-        <section class="service-section">
-            <h2 class="section-title">鑑定・学習サービス</h2>
+        <section class="service-section" id="see">
+            <h2 class="section-title"><span class="door-no">1</span>手相を見てもらいたい</h2>
             <div class="service-grid">
-                
-                <div class="service-card">
-                    <div class="s-icon">📝</div>
-                    <h3>読み切りコラム・教材</h3>
-                    <p>手相の基礎知識や、特定の悩みにフォーカスした分析など、手軽に読めるコラム集です。（noteにて販売中）</p>
-                    <a href="https://note.com/mayotesoh" target="_blank" rel="noopener noreferrer" class="s-link">noteを見る →</a>
-                </div>
-
-                <div class="service-card">
-                    <div class="s-icon">📖</div>
-                    <h3>手相講座</h3>
-                    <p>論理的で体系化された「根本解決の手相学」を、ステップバイステップで本格的に学ぶ講座です。</p>
-                    <a href="/kouza" class="s-link">講座一覧を見る →</a>
-                </div>
-
                 <div class="service-card">
                     <div class="s-icon">🔍</div>
                     <h3>個人鑑定</h3>
-                    <p>オンラインにて、あなたの「設計」を論理的に読み解き、人生の戦略を立てるための個別鑑定です。</p>
+                    <p>オンラインで、あなたの「設計」を論理的に読み解き、仕事・人間関係・人生の方向性の悩みに、動き方と時期まで答えます。30分 ¥4,000〜。</p>
                     <a href="/kantei" class="s-link">鑑定メニューを見る →</a>
                 </div>
-
+                <div class="service-card">
+                    <div class="s-icon">📋</div>
+                    <h3>まずは無料で</h3>
+                    <p>12問・約2分の無料手相診断と、自分で手の特徴を選んで調べるセルフ手相診断機があります。</p>
+                    <a href="/shindan" class="s-link">無料手相診断を試す →</a>
+                </div>
             </div>
             <div class="text-center service-yoyaku">
-                <a href="/yoyaku/" class="yoyaku-link">鑑定・講座の予約ページへ →</a>
+                <a href="/yoyaku/" class="yoyaku-link">鑑定の予約ページへ →</a>
             </div>
         </section>
 
-        <section class="service-section">
-            <h2 class="section-title">同業者・講師向けサービス</h2>
+        <section class="service-section" id="learn">
+            <h2 class="section-title"><span class="door-no">2</span>手相を学びたい</h2>
             <div class="service-grid">
-                
+                <div class="service-card">
+                    <div class="s-icon">📚</div>
+                    <h3>全7章セット（動画）</h3>
+                    <p>「拾う」と「扱う」を全7章の動画で、自分のペースで。講師と1対1の質問（60分×4回）つき。¥168,000。</p>
+                    <a href="/lp/tesou-video/" class="s-link" data-astro-reload>案内を見る →</a>
+                </div>
+                <div class="service-card">
+                    <div class="s-icon">✍️</div>
+                    <h3>手相本講座（マンツーマン）</h3>
+                    <p>意味は言えるのに鑑定にならない方へ。実際の手と相談で使えるまで、講師と一緒に繰り返します。¥350,000。</p>
+                    <a href="/lp/honkouza/" class="s-link" data-astro-reload>案内を見る →</a>
+                </div>
+                <div class="service-card">
+                    <div class="s-icon">📝</div>
+                    <h3>読み切りコラム・教材</h3>
+                    <p>特定のテーマや悩みにしぼって、手軽に読めるコラム集です（noteで販売中）。</p>
+                    <a href="https://note.com/mayotesoh" target="_blank" rel="noopener noreferrer" class="s-link">noteを見る →</a>
+                </div>
+            </div>
+            <div class="text-center service-yoyaku">
+                <a href="/manabu" class="yoyaku-link">いまの自分に合う学び方を選ぶ →</a>
+            </div>
+        </section>
+
+        <section class="service-section" id="pro">
+            <h2 class="section-title"><span class="door-no">3</span>占い師として活動を広げたい</h2>
+            <div class="service-grid">
+                <div class="service-card">
+                    <div class="s-icon">🧩</div>
+                    <h3>鑑定攻略セッション</h3>
+                    <p>読めない手、組み立てられない鑑定を、講師と1対1で攻略します。次に同じ手が来たときの手順まで持ち帰ります。60分 ¥5,500〜。</p>
+                    <a href="/lp/session/" class="s-link" data-astro-reload>案内を見る →</a>
+                </div>
                 <div class="service-card">
                     <div class="s-icon">🚀</div>
                     <h3>ホームページ制作</h3>
                     <p>Notionで自動更新できる名刺代わりのサイトを制作。ページ数と機能で選べるプランと、公開後の維持まで一式で承ります。</p>
                     <a href="/website" class="s-link">料金・プランを見る →</a>
                 </div>
-                
-                <div class="service-card">
-                    <div class="s-icon">✍️</div>
-                    <h3>講師、占い師向け講座・添削サービス</h3>
-                    <p>プロの鑑定スキルを論理的にアップデート。鑑定結果の言語化や分析の深掘りをマンツーマンで指導します。</p>
-                    <a href="/tensaku" class="s-link">プロ向け詳細を見る →</a>
-                </div>
-
             </div>
         </section>
 
@@ -87,4 +105,9 @@ import { LINE_OFFICIAL_URL } from '../consts';
     .service-card p { color: #555; line-height: 1.7; font-size: 0.95rem; margin-bottom: 25px; flex-grow: 1; text-align: left; }
     .s-link { display: inline-block; color: var(--color-accent); font-weight: bold; text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.2s; }
     .s-link:hover { border-color: var(--color-accent); }
+    .door-nav { margin-top: 24px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .door-chip { display: inline-block; padding: 10px 18px; border: 1px solid var(--color-primary); border-radius: 999px; color: var(--color-primary); font-weight: bold; text-decoration: none; background: #fff; }
+    .door-chip:hover { background: var(--color-primary); color: #fff; }
+    .door-no { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; margin-right: 10px; border-radius: 50%; background: var(--color-primary); color: #fff; font-size: 1rem; vertical-align: 3px; }
+    .service-section { scroll-margin-top: 90px; }
 </style>

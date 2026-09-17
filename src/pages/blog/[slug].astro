@@ -64,7 +64,7 @@ const categories = post.properties['カテゴリー']?.multi_select?.map((t: any
 
 // 🌟 空欄なら自動でマヨネリアイコンになる強力なコード
 const eyecatchProp = post.properties['アイキャッチ'];
-let eyecatchUrl = '/favicon.png'; // 👈 デフォルト画像
+let eyecatchUrl = '/eyecatch-default.webp'; // 👈 デフォルト画像
 
 if (eyecatchProp) {
     if (eyecatchProp.type === 'rich_text' && eyecatchProp.rich_text.length > 0) {

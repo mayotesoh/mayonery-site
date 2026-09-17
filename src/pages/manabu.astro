@@ -1,0 +1,118 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// いまの自分から選ぶ。講座が増えたらここに足す
+const paths = [
+  {
+    state: 'まず無料で、手相にふれてみたい',
+    detail: '線の名前や意味を調べたい。自分の手の特徴を知りたい。',
+    name: '無料で学ぶ',
+    desc: '用語集・クイズ・無料診断で知識を集め、手相学会（LINEオープンチャット）で質問できます。YouTubeでは体験講座を公開しています。',
+    links: [
+      { label: '手相用語集', href: '/glossary' },
+      { label: '手相クイズ', href: '/quiz' },
+      { label: '無料手相診断', href: '/shindan' },
+      { label: '手相学会', href: '/gakkai' },
+    ],
+    price: '無料',
+  },
+  {
+    state: '本や動画で学んだけれど、目の前の手で止まる',
+    detail: '何線かわからない。読めても、どう組み立てればいいかわからない。自分のペースで体系を学び直したい。',
+    name: '手相講座 全7章セット（動画）',
+    desc: '「拾う」と「扱う」を全7章の動画で。講師と1対1の質問（60分×4回）つき、視聴期間は無期限。まず手相学編（¥5,000）から試すこともできます。',
+    links: [{ label: '全7章セットの案内を見る', href: '/lp/tesou-video/', lp: true }],
+    price: '¥168,000',
+  },
+  {
+    state: '意味は言えるのに、鑑定にならない',
+    detail: '実際の手と相談で使えるまで、講師と一緒に練習を繰り返したい。手相一本で鑑定を組み立てたい。',
+    name: '手相本講座（マンツーマン）',
+    desc: '全6章をマンツーマンで。自分の手やお客様の手を持ち込み、見立てや流年の作図を講師と照らし合わせながら進めます。申し込み前に無料の個別面談があります。',
+    links: [{ label: '手相本講座の案内を見る', href: '/lp/honkouza/', lp: true }],
+    price: '¥350,000',
+  },
+  {
+    state: '鑑定で、1件だけ詰まっている',
+    detail: '読めない手、組み立てられない相談を、いま解決したい。',
+    name: '鑑定攻略セッション',
+    desc: '詰まった1件を持ち込み、講師と1対1で解きます。次に同じ手が来たときの手順まで持ち帰ります。',
+    links: [{ label: '鑑定攻略セッションの案内を見る', href: '/lp/session/', lp: true }],
+    price: '60分 ¥5,500〜',
+  },
+];
+---
+
+<Layout title="手相を学ぶ | 手相のマヨネリ">
+  <div class="manabu-container">
+    <header class="manabu-header">
+      <h1 class="page-title">手相を学ぶ</h1>
+      <p class="page-desc">いまの自分に近いものから選んでください。<br />無料で始めて、必要になったら次の段階へ進めます。</p>
+    </header>
+
+    <ol class="path-list">
+      {paths.map((p, i) => (
+        <li class="path">
+          <div class="path-state">
+            <span class="path-no">{String(i + 1).padStart(2, '0')}</span>
+            <p class="path-state-title">{p.state}</p>
+            <p class="path-state-detail">{p.detail}</p>
+          </div>
+          <div class="path-answer">
+            <div class="path-answer-head">
+              <h2 class="path-name">{p.name}</h2>
+              <span class="path-price">{p.price}</span>
+            </div>
+            <p class="path-desc">{p.desc}</p>
+            <div class="path-links">
+              {p.links.map((l: any) => (
+                <a href={l.href} class={l.lp ? 'path-link path-link-main' : 'path-link'} data-astro-reload={l.lp ? true : undefined}>{l.label} →</a>
+              ))}
+            </div>
+          </div>
+        </li>
+      ))}
+    </ol>
+
+    <section class="steps-note">
+      <h2 class="steps-title">段階を踏んで進めます</h2>
+      <p>手相学編（¥5,000）→ 全7章セット（¥168,000）→ 手相本講座（¥350,000）は、購入から1年以内なら差額で次へ進めます。払ったぶんが無駄になりません。</p>
+      <a href="/kouza" class="path-link">すべての講座を一覧で見る →</a>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .manabu-container { max-width: 960px; margin: 0 auto; padding: 50px 20px 90px; }
+  .manabu-header { text-align: center; margin-bottom: 48px; }
+  .page-title { font-size: 2.2rem; color: var(--color-primary); margin-bottom: 14px; }
+  .page-desc { color: #555; line-height: 1.8; }
+
+  .path-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 20px; }
+  .path { display: grid; grid-template-columns: 0.9fr 1.1fr; background: #fff; border: 1px solid #e1ebe5; border-radius: 14px; overflow: hidden; }
+  .path-state { padding: 26px 26px; background: #f4f8f6; border-right: 1px solid #e1ebe5; }
+  .path-no { display: inline-block; font-size: 0.8rem; font-weight: bold; color: var(--color-primary); letter-spacing: 0.1em; margin-bottom: 8px; }
+  .path-state-title { font-size: 1.15rem; font-weight: bold; color: var(--color-text); line-height: 1.6; margin: 0 0 8px; }
+  .path-state-detail { font-size: 0.92rem; color: #5b7268; line-height: 1.8; margin: 0; }
+  .path-answer { padding: 26px 28px; }
+  .path-answer-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .path-name { font-size: 1.2rem; color: var(--color-primary); margin: 0; }
+  .path-price { font-weight: bold; color: var(--color-text); white-space: nowrap; }
+  .path-desc { font-size: 0.95rem; color: #444; line-height: 1.8; margin: 0 0 16px; }
+  .path-links { display: flex; flex-wrap: wrap; gap: 10px 18px; }
+  .path-link { color: var(--color-primary); font-weight: bold; text-decoration: none; }
+  .path-link:hover { text-decoration: underline; }
+  .path-link-main { display: inline-block; background: var(--color-primary); color: #fff; padding: 10px 20px; border-radius: 999px; }
+  .path-link-main:hover { background: var(--color-accent); text-decoration: none; }
+
+  .steps-note { margin-top: 40px; padding: 26px 28px; border: 1px dashed #c9d8cf; border-radius: 14px; }
+  .steps-title { font-size: 1.15rem; color: var(--color-primary); margin: 0 0 8px; }
+  .steps-note p { color: #444; line-height: 1.8; margin: 0 0 12px; }
+
+  @media (max-width: 768px) {
+    .page-title { font-size: 1.8rem; }
+    .path { grid-template-columns: 1fr; }
+    .path-state { border-right: none; border-bottom: 1px solid #e1ebe5; padding: 20px; }
+    .path-answer { padding: 20px; }
+  }
+</style>

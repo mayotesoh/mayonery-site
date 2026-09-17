@@ -38,13 +38,13 @@ const snsLinks = [
 ---
 
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" transition:animate="none">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <ClientRouter />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
+    <link rel="icon" type="image/png" href="/favicon-48.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>{title}</title>
     
     <meta name="google-site-verification" content="v36FgD4lPTk6uUfoFz586FrpHBjApqYvEr0a0pm07N4" />
@@ -75,7 +75,7 @@ const snsLinks = [
     <div class="sticky-nav-container">
         <div class="main-nav container">
             <a href="/" class="nav-logo">
-                <img src="/favicon.png" alt="手相のマヨネリ ロゴ" class="logo-image" />
+                <picture><source srcset="/logo-96.webp" type="image/webp" /><img src="/logo-96.png" alt="手相のマヨネリ ロゴ" class="logo-image" width="48" height="48" /></picture>
                 手相のマヨネリ
             </a>
             
@@ -88,30 +88,43 @@ const snsLinks = [
             <nav class="nav-menu" id="nav-menu">
                 <div class="nav-links">
                     <a href="/" class="nav-item">ホーム</a>
-                    <a href="/about" class="nav-item">自己紹介</a>
-                    <a href="/blog" class="nav-item">ブログ</a>
-                    
-                    <div class="nav-dropdown" id="shindan-dropdown">
-                        <button class="nav-item" id="shindan-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-                            無料診断 <span class="dropdown-arrow">▾</span>
+                    <a href="/kantei" class="nav-item">鑑定を受ける</a>
+
+                    <div class="nav-dropdown">
+                        <button class="nav-item nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
+                            手相を学ぶ <span class="dropdown-arrow">▾</span>
+                        </button>
+                        <div class="dropdown-menu" role="menu">
+                            <a href="/manabu" class="dropdown-item">🧭 学び方の選び方</a>
+                            <a href="/lp/tesou-video/" class="dropdown-item" data-astro-reload>📚 全7章セット（動画）</a>
+                            <a href="/lp/honkouza/" class="dropdown-item" data-astro-reload>✍️ 手相本講座（マンツーマン）</a>
+                            <a href="/lp/session/" class="dropdown-item" data-astro-reload>🔍 鑑定攻略セッション</a>
+                            <a href="/kouza" class="dropdown-item">📋 講座一覧</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-dropdown">
+                        <button class="nav-item nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
+                            無料で学ぶ <span class="dropdown-arrow">▾</span>
                         </button>
                         <div class="dropdown-menu" role="menu">
                             <a href="/shindan" class="dropdown-item">📋 無料手相診断</a>
                             <a href="/self-shindan" class="dropdown-item">🔮 セルフ手相診断機</a>
+                            <a href="/glossary" class="dropdown-item">📖 手相用語集</a>
+                            <a href="/quiz" class="dropdown-item">✏️ 手相クイズ</a>
+                            <a href="/blog" class="dropdown-item">📝 ブログ</a>
+                            <a href="/gakkai" class="dropdown-item">💬 手相学会</a>
                         </div>
                     </div>
 
-                    <a href="/glossary" class="nav-item">手相用語集</a>
-                    <a href="/quiz" class="nav-item">手相クイズ</a>
-                    <a href="/service" class="nav-item">提供サービス</a>
+                    <a href="/about" class="nav-item">自己紹介</a>
                     <a href="/yoyaku" class="nav-item nav-item-accent">予約</a>
-                    <a href="/gakkai" class="nav-item">手相学会</a> 
                 </div>
             </nav>
         </div>
     </div>
 
-    <main transition:name="page-content" transition:animate="slide">
+    <main>
         <slot />
     </main>
 
@@ -142,27 +155,27 @@ const snsLinks = [
         }
 
         function setupDropdown() {
-            const btn = document.getElementById('shindan-dropdown-btn');
-            const dropdown = document.getElementById('shindan-dropdown');
-            if (!btn || !dropdown) return;
-            if (btn.dataset.dropdownBound === 'true') return;
+            document.querySelectorAll('.nav-dropdown').forEach((dropdown) => {
+                const btn = dropdown.querySelector('.nav-dropdown-btn');
+                if (!btn || btn.dataset.dropdownBound === 'true') return;
 
-            btn.addEventListener('click', (e) => {
-                if (window.innerWidth <= 768) {
-                    e.stopPropagation();
-                    dropdown.classList.toggle('open');
-                    btn.setAttribute('aria-expanded', dropdown.classList.contains('open'));
-                }
+                btn.addEventListener('click', (e) => {
+                    if (window.innerWidth <= 768) {
+                        e.stopPropagation();
+                        dropdown.classList.toggle('open');
+                        btn.setAttribute('aria-expanded', dropdown.classList.contains('open'));
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!dropdown.contains(e.target)) {
+                        dropdown.classList.remove('open');
+                        btn.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                btn.dataset.dropdownBound = 'true';
             });
-
-            document.addEventListener('click', (e) => {
-                if (!dropdown.contains(e.target)) {
-                    dropdown.classList.remove('open');
-                    btn.setAttribute('aria-expanded', 'false');
-                }
-            });
-
-            btn.dataset.dropdownBound = 'true';
         }
 
         document.addEventListener('DOMContentLoaded', () => { setupNavigationMenu(); setupDropdown(); });
@@ -212,7 +225,6 @@ const snsLinks = [
         top: 0;
         z-index: 1000;
         background-color: rgba(242, 246, 244, 0.95);
-        backdrop-filter: blur(8px);
         border-bottom: 1px solid #e1ebe5;
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
@@ -287,23 +299,7 @@ const snsLinks = [
     .copyright { font-size: 0.85rem; opacity: 0.8; margin: 0; }
 
     /* ページ遷移をPCでも体感しやすい速度に調整 */
-    ::view-transition-old(page-content) {
-        animation: page-slide-out 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-    }
-
-    ::view-transition-new(page-content) {
-        animation: page-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-    }
-
-    @keyframes page-slide-out {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(-34px); opacity: 0; }
-    }
-
-    @keyframes page-slide-in {
-        from { transform: translateX(34px); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
+    /* ページ切り替えのスライドアニメーションは、動きが重く感じるため廃止（2026-09-18） */
 
     /* 🌟 スマホ用（横幅768px以下）の設定 */
     @media (max-width: 768px) {
@@ -347,7 +343,7 @@ const snsLinks = [
             border: none; border-radius: 8px; background: #f8faf9; padding: 0; margin-top: 0; max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
         }
         
-        .nav-dropdown.open .dropdown-menu { max-height: 300px; margin-top: 5px; margin-bottom: 10px; }
+        .nav-dropdown.open .dropdown-menu { max-height: 420px; margin-top: 5px; margin-bottom: 10px; }
         
         .dropdown-item {
             padding: 12px;
