@@ -117,6 +117,17 @@ const snsLinks = [
                         </div>
                     </div>
 
+                    <div class="nav-dropdown">
+                        <button class="nav-item nav-dropdown-btn" aria-haspopup="true" aria-expanded="false">
+                            占い師の方へ <span class="dropdown-arrow">▾</span>
+                        </button>
+                        <div class="dropdown-menu" role="menu">
+                            <a href="/lp/session/" class="dropdown-item" data-astro-reload>🔍 鑑定攻略セッション</a>
+                            <a href="/website" class="dropdown-item">🚀 ホームページ制作</a>
+                            <a href="/service" class="dropdown-item">📋 提供サービス一覧</a>
+                        </div>
+                    </div>
+
                     <a href="/about" class="nav-item">自己紹介</a>
                     <a href="/yoyaku" class="nav-item nav-item-accent">予約</a>
                 </div>
@@ -135,7 +146,16 @@ const snsLinks = [
                     <a href={sns.url} target="_blank" rel="noopener noreferrer" title={sns.name} class="footer-sns-link" set:html={sns.icon} />
                 ))}
             </div>
-            <p class="copyright">© 2026 手相のマヨネリ (Mayonery). All rights reserved.</p>
+            <nav class="footer-nav" aria-label="サイト">
+            <a href="/">ホーム</a>
+            <a href="/kantei">鑑定を受ける</a>
+            <a href="/manabu">手相を学ぶ</a>
+            <a href="/lp/session/" data-astro-reload>鑑定攻略セッション</a>
+            <a href="/website">ホームページ制作</a>
+            <a href="/about">自己紹介</a>
+            <a href="/tokushoho">特定商取引法に基づく表記</a>
+        </nav>
+        <p class="copyright">© 2026 手相のマヨネリ (Mayonery). All rights reserved.</p>
         </div>
     </footer>
 
@@ -296,6 +316,10 @@ const snsLinks = [
     .site-footer { background-color: var(--color-primary); color: white; padding: 40px 0 20px; margin-top: 60px; }
     .footer-inner { text-align: center; }
     .footer-sns { display: flex; justify-content: center; gap: 30px; margin-bottom: 25px; }
+    .footer-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 22px; margin: 18px 0 16px; }
+    .footer-nav a { color: #e5ede9; text-decoration: none; font-size: 0.88rem; }
+    .footer-nav a:hover { text-decoration: underline; }
+    @media (max-width: 768px) { .footer-nav { gap: 10px 16px; font-size: 0.85rem; } }
     .copyright { font-size: 0.85rem; opacity: 0.8; margin: 0; }
 
     /* ページ遷移をPCでも体感しやすい速度に調整 */
