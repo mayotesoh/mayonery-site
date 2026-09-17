@@ -1,0 +1,64 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// 氏名・住所・電話番号は「請求時に開示」（2026-09-18 本人決定）。開示請求が来たら遅滞なく電子メールで回答すること
+// body は行ごとの配列（表示時に改行でつなぐ）
+const rows: { label: string; body: string[] }[] = [
+  { label: '販売事業者', body: ['手相のマヨネリ（個人事業）', '氏名は、請求があった場合に遅滞なく電子メールで開示します。'] },
+  { label: '運営責任者', body: ['請求があった場合に遅滞なく電子メールで開示します。'] },
+  { label: '所在地', body: ['請求があった場合に遅滞なく電子メールで開示します。'] },
+  { label: '電話番号', body: ['請求があった場合に遅滞なく電子メールで開示します。'] },
+  { label: 'メールアドレス', body: ['<a href="mailto:mayotesoh@gmail.com">mayotesoh@gmail.com</a>'] },
+  { label: 'お問い合わせ', body: ['上記メールアドレス、または公式LINEからお問い合わせください。'] },
+  { label: '販売価格', body: ['各講座・サービスのページに税込価格で記載しています。'] },
+  { label: '商品代金以外に必要な料金', body: ['銀行振込の場合の振込手数料。オンラインで受講・視聴するためのインターネット接続料金・通信料。'] },
+  { label: 'お支払い方法', body: ['銀行振込、PayPay。講座によって分割払いに対応しています。'] },
+  { label: 'お支払い時期', body: ['お申し込み後、公式LINEでご案内する期日までにお支払いください。'] },
+  {
+    label: '提供時期',
+    body: [
+      '手相本講座・鑑定攻略セッション・個人鑑定：お支払いの確認後、日程を相談して決めた日時に提供します。',
+      '手相講座 全7章セット・章別講座：お支払いの確認後、専用の視聴ページをご案内します。',
+      'ホームページ制作：お見積りでお伝えする制作期間に沿って提供します。',
+    ],
+  },
+  {
+    label: '返品・キャンセル',
+    body: [
+      '手相本講座：初回の受講前なら全額を返金します（振込手数料を除く）。初回の受講後7日以内にお申し出いただいた場合は、初回分と教材・準備の費用（¥50,000）を差し引いて返金します。それ以降の返金はありません。分割払いの場合も同じ条件です。',
+      '手相講座 全7章セット・章別講座：動画をお渡しする前なら全額を返金します。お渡しした後の返金はありません。',
+      '鑑定攻略セッション：前日までのキャンセルは全額を返金します（振込手数料を除く）。当日のキャンセル・無断欠席の返金はありません。5回券の有効期限は購入から1年です。',
+      '個人鑑定：前日までのキャンセルは全額を返金します（振込手数料を除く）。当日のキャンセル・無断欠席、および鑑定後の返金はありません。',
+      'ホームページ制作：制作着手後のキャンセルは、着手金を返金できません。',
+      'サービスの性質上、提供後の返品・返金はお受けしていません。',
+    ],
+  },
+  { label: '動作環境', body: ['オンラインでの受講・視聴には、ビデオ通話・動画視聴ができるパソコンまたはスマートフォンと、インターネット環境が必要です。'] },
+];
+---
+
+<Layout title="特定商取引法に基づく表記 | 手相のマヨネリ">
+  <div class="tokusho-container">
+    <h1 class="page-title">特定商取引法に基づく表記</h1>
+    <dl class="tokusho-table">
+      {rows.map((r) => (
+        <div class="tokusho-row">
+          <dt>{r.label}</dt>
+          <dd set:html={r.body.join('<br>')}></dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</Layout>
+
+<style>
+  .tokusho-container { max-width: 860px; margin: 0 auto; padding: 50px 20px 80px; }
+  .page-title { font-size: 1.8rem; color: var(--color-primary); margin-bottom: 30px; }
+  .tokusho-table { border-top: 1px solid #cfd8d3; margin: 0; }
+  .tokusho-row { display: grid; grid-template-columns: 200px 1fr; gap: 20px; padding: 16px 0; border-bottom: 1px solid #e1ebe5; }
+  .tokusho-row dt { font-weight: bold; color: var(--color-text); }
+  .tokusho-row dd { margin: 0; line-height: 1.8; color: #333; }
+  @media (max-width: 640px) {
+    .tokusho-row { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>

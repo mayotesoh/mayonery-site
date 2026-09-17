@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import LearnCta from '../../components/LearnCta.astro';
 import { safeFetchJson } from '../../lib/safeFetch';
 
 interface Props {
@@ -159,6 +160,7 @@ const blocks = blocksData.results || [];
             )}
         </div>
         
+        <LearnCta />
         <div class="back-link">
             <a href="/blog" class="btn-back">← ブログ一覧へ戻る</a>
         </div>

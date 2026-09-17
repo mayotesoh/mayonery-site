@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import LearnCta from '../../components/LearnCta.astro';
 import { safeFetchJson } from '../../lib/safeFetch';
 
 interface Props {
@@ -141,7 +142,8 @@ const blocks = blocksData.results || [];
                 </div>
             )}
         </div>
-        
+
+        <LearnCta lead="用語を覚えたら、次は「見方」へ。" />
     </article>
 </Layout>
 

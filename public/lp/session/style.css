@@ -1,0 +1,399 @@
+/* 手相本講座 LP ─ すべて lp- 接頭辞でスコープ */
+
+:root {
+  --lp-green: #2f5446;
+  --lp-green-dark: #244238;
+  --lp-green-soft: #e3ebe6;
+  --lp-shu: #b4523a;
+  --lp-paper: #f6f3ec;
+  --lp-paper-deep: #efeae0;
+  --lp-white: #fdfcf9;
+  --lp-ink: #1e2622;
+  --lp-muted: #5f6a64;
+  --lp-line: #d9d2c3;
+
+  --lp-mincho: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --lp-gothic: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+
+  --lp-sec-l: 160px;
+  --lp-sec-m: 112px;
+  --lp-sec-s: 80px;
+  --lp-gap: 48px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+.lp-body {
+  margin: 0;
+  background: var(--lp-paper);
+  color: var(--lp-ink);
+  font-family: var(--lp-gothic);
+  font-size: 17px;
+  line-height: 1.95;
+  letter-spacing: 0.02em;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "palt" 1;
+}
+:where(.lp-body) :where(p, ul, ol, dl, dd, figure, h1, h2, h3) { margin: 0; }
+:where(.lp-body) :where(ul, ol) { padding: 0; list-style: none; }
+.lp-body img { max-width: 100%; height: auto; display: block; }
+.lp-body a { color: inherit; }
+
+.lp-container { width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 40px; }
+.lp-sp { display: none; }
+.lp-nowrap { white-space: nowrap; }
+
+/* ---------- 共通タイポ ---------- */
+.lp-h2 {
+  font-family: var(--lp-mincho);
+  font-weight: 600;
+  font-size: 36px;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+}
+.lp-h3 { font-size: 20px; font-weight: 700; line-height: 1.6; }
+.lp-lead { margin-top: 24px; max-width: 680px; color: var(--lp-ink); }
+.lp-small { font-size: 14px; color: var(--lp-muted); line-height: 1.8; }
+.lp-label, .lp-kicker, .lp-eyebrow {
+  font-size: 13px; font-weight: 500; letter-spacing: 0.12em; color: var(--lp-muted);
+}
+.lp-kicker { color: var(--lp-shu); margin-bottom: 16px; }
+.lp-kicker::before { content: ""; display: inline-block; width: 28px; height: 1px; background: var(--lp-shu); vertical-align: middle; margin-right: 12px; }
+.lp-em { font-style: normal; font-weight: 700; color: var(--lp-green); }
+.lp-todo { display: block; margin-top: 6px; font-size: 12px; color: var(--lp-shu); }
+
+/* ---------- セクション ---------- */
+.lp-sec--l { padding: var(--lp-sec-l) 0; }
+.lp-sec--m { padding: var(--lp-sec-m) 0; }
+.lp-sec--s { padding: var(--lp-sec-s) 0; }
+.lp-note { background: var(--lp-white); border-top: 1px solid var(--lp-line); border-bottom: 1px solid var(--lp-line); }
+
+/* ---------- CTA ---------- */
+.lp-cta { margin-top: 40px; }
+.lp-cta__btn {
+  display: inline-block;
+  background: var(--lp-green);
+  color: #fff !important;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  padding: 20px 36px;
+  border-radius: 4px;
+  transition: background-color .2s;
+}
+.lp-cta__btn:hover { background: var(--lp-green-dark); }
+.lp-cta__btn:focus-visible { outline: 2px solid var(--lp-shu); outline-offset: 3px; }
+.lp-cta__note { margin-top: 12px; font-size: 14px; color: var(--lp-muted); }
+.lp-cta__lead { margin-bottom: 20px; }
+.lp-textlink { display: inline-block; margin-top: 28px; font-size: 15px; color: var(--lp-green); text-underline-offset: 4px; }
+
+/* ---------- Header ---------- */
+.lp-header { border-bottom: 1px solid var(--lp-line); }
+.lp-header__inner { display: flex; justify-content: space-between; align-items: center; height: 64px; }
+.lp-header__logo { font-weight: 700; text-decoration: none; font-size: 15px; letter-spacing: 0.06em; }
+.lp-header__title { font-family: var(--lp-mincho); font-size: 15px; color: var(--lp-muted); }
+
+/* ---------- 01 FV ---------- */
+.lp-fv { padding: 88px 0 var(--lp-sec-l); }
+.lp-fv__inner { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 56px; align-items: center; }
+.lp-fv__title {
+  margin-top: 20px;
+  font-family: var(--lp-mincho);
+  font-weight: 600;
+  font-size: clamp(34px, 3.9vw, 54px);
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+}
+.lp-fv__title span { display: block; white-space: nowrap; }
+.lp-fv__lead { margin-top: 36px; padding-left: 20px; border-left: 1px solid var(--lp-shu); }
+.lp-fv__lead p + p { margin-top: 12px; }
+.lp-fv__sub { margin-top: 28px; font-size: 15px; color: var(--lp-muted); line-height: 1.9; }
+.lp-fv__meta { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 4px 0; font-size: 14px; }
+.lp-fv__meta li + li::before { content: "／"; color: var(--lp-line); margin: 0 10px; }
+.lp-fv__photo img { border-radius: 2px; }
+.lp-fv__photo figcaption { margin-top: 14px; font-size: 13px; color: var(--lp-muted); padding-left: 16px; position: relative; }
+.lp-fv__photo figcaption::before { content: ""; position: absolute; left: 0; top: 50%; width: 8px; height: 1px; background: var(--lp-shu); }
+
+/* ---------- 02 2つの壁 ---------- */
+.lp-walls__grid { margin-top: var(--lp-gap); display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--lp-ink); }
+.lp-wall { padding: 36px 48px 12px 0; }
+.lp-wall + .lp-wall { padding: 36px 0 12px 48px; border-left: 1px solid var(--lp-line); }
+.lp-wall__label { font-family: var(--lp-mincho); font-size: 28px; font-weight: 600; color: var(--lp-green); display: flex; align-items: baseline; gap: 12px; }
+.lp-wall__num { font-family: var(--lp-gothic); font-size: 13px; color: var(--lp-shu); border: 1px solid var(--lp-shu); border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; transform: translateY(-4px); }
+.lp-wall .lp-h3 { margin-top: 8px; font-size: 17px; }
+.lp-wall__list { margin-top: 20px; }
+.lp-wall__list li { padding: 14px 0; border-top: 1px dashed var(--lp-line); }
+.lp-walls__close { margin-top: 48px; font-family: var(--lp-mincho); font-size: 22px; line-height: 1.8; font-weight: 500; }
+
+/* ---------- 03 なぜ止まるのか ---------- */
+.lp-why { background: var(--lp-paper-deep); }
+.lp-why__inner { display: grid; grid-template-columns: 320px 1fr; gap: 64px; }
+.lp-why__title { position: sticky; top: 40px; align-self: start; }
+.lp-why__item { display: grid; grid-template-columns: 56px 1fr; gap: 8px; padding: 32px 0; border-top: 1px solid var(--lp-line); }
+.lp-why__item:first-child { border-top: none; padding-top: 0; }
+.lp-why__num { font-family: var(--lp-mincho); font-size: 34px; line-height: 1.2; color: var(--lp-shu); }
+.lp-why__item p { margin-top: 10px; }
+.lp-why__close { grid-column: 2; margin-top: 16px; padding: 32px 36px; background: var(--lp-white); border-left: 3px solid var(--lp-green); }
+.lp-why__pair { margin: 14px 0; display: grid; gap: 4px; font-family: var(--lp-mincho); font-size: 21px; line-height: 1.7; }
+.lp-why__pair strong { color: var(--lp-green); font-weight: 700; }
+
+/* ---------- 04 分解する ---------- */
+.lp-split__body { margin-top: 64px; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 72px; align-items: start; }
+.lp-split__fig svg { width: 100%; max-width: 420px; height: auto; display: block; margin: 0 auto; }
+.lp-split__fig figcaption { margin-top: 16px; font-size: 13px; color: var(--lp-muted); text-align: center; }
+.lp-palm { fill: #f1ebdf; stroke: #cbbfa9; stroke-width: 1.5; }
+.lp-ln { fill: none; stroke: var(--lp-ink); stroke-width: 3.2; stroke-linecap: round; }
+.lp-anno line { stroke: var(--lp-shu); stroke-width: 1; }
+.lp-anno text { fill: var(--lp-shu); font-size: 13px; font-family: var(--lp-gothic); letter-spacing: .08em; }
+.lp-split__point { font-family: var(--lp-mincho); font-size: 22px; line-height: 1.8; margin-bottom: 28px; }
+.lp-split__lines { margin: 18px 0; border-top: 1px solid var(--lp-shu); }
+.lp-split__lines > div { display: grid; grid-template-columns: 96px 1fr; padding: 12px 0; border-bottom: 1px solid var(--lp-line); }
+.lp-split__lines dt { color: var(--lp-shu); font-size: 15px; letter-spacing: .08em; }
+.lp-split__lines dd { margin: 0; font-weight: 700; }
+.lp-split__close { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--lp-line); }
+
+/* ---------- 05 扱う ---------- */
+.lp-handle__case { margin-top: 56px; }
+.lp-handle__consult { font-family: var(--lp-mincho); font-size: 26px; display: flex; align-items: center; gap: 16px; padding-bottom: 24px; border-bottom: 1px solid var(--lp-ink); }
+.lp-handle__consult .lp-label { font-family: var(--lp-gothic); border: 1px solid var(--lp-muted); padding: 2px 10px; }
+.lp-handle__compare { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 0; }
+.lp-handle__ng { padding: 36px 44px 36px 0; border-right: 1px solid var(--lp-line); }
+.lp-handle__ok { padding: 36px 0 12px 44px; }
+.lp-handle__tag { font-size: 14px; font-weight: 700; letter-spacing: .1em; margin-bottom: 18px; }
+.lp-handle__ng .lp-handle__tag { color: var(--lp-muted); }
+.lp-handle__ok .lp-handle__tag { color: var(--lp-green); }
+.lp-handle__quote { font-family: var(--lp-mincho); font-size: 20px; line-height: 1.8; color: var(--lp-muted); padding-left: 16px; border-left: 2px solid var(--lp-line); }
+.lp-handle__after { color: var(--lp-shu); }
+.lp-handle__after { margin-top: 20px; font-size: 15px; }
+.lp-steps { position: relative; }
+.lp-step { position: relative; padding: 0 0 32px 32px; }
+.lp-step::before { content: ""; position: absolute; left: 4px; top: 12px; bottom: -8px; width: 1px; background: var(--lp-green); }
+.lp-step:last-child::before { display: none; }
+.lp-step::after { content: ""; position: absolute; left: 0; top: 8px; width: 9px; height: 9px; border-radius: 50%; background: var(--lp-green); }
+.lp-step__no { font-size: 12px; letter-spacing: .14em; color: var(--lp-green); font-weight: 700; }
+.lp-step .lp-h3 { font-size: 18px; }
+.lp-step p:last-child { margin-top: 4px; font-size: 16px; }
+.lp-handle__example { margin-top: 8px; }
+.lp-handle__close { margin-top: 64px; font-family: var(--lp-mincho); font-size: 30px; line-height: 1.6; font-weight: 600; text-align: center; }
+
+/* ---------- 06 答え合わせ ---------- */
+.lp-class { border-top: 1px solid var(--lp-line); }
+.lp-class__head { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 64px; }
+.lp-class__lead { grid-column: 1; }
+.lp-class__lead p + p { margin-top: 16px; }
+.lp-class__photo { grid-column: 2; grid-row: 1 / span 2; }
+.lp-class__body { margin-top: 72px; display: grid; grid-template-columns: 1fr 1fr; gap: 0 64px; }
+.lp-class__subtitle { grid-row: 1; padding-bottom: 16px; border-bottom: 1px solid var(--lp-ink); }
+.lp-timeline, .lp-dash { grid-row: 2; }
+.lp-timeline li { display: grid; grid-template-columns: 88px 1fr; gap: 16px; padding: 18px 0; border-bottom: 1px dashed var(--lp-line); }
+.lp-timeline__when { font-size: 13px; color: var(--lp-shu); letter-spacing: .1em; padding-top: 3px; }
+.lp-timeline__what { font-weight: 700; }
+.lp-timeline li p:not(.lp-timeline__when):not(.lp-timeline__what) { font-size: 15px; color: var(--lp-muted); }
+.lp-dash li { padding: 18px 0; border-bottom: 1px dashed var(--lp-line); font-size: 16px; }
+.lp-dash strong { display: block; font-size: 13px; letter-spacing: .1em; color: var(--lp-green); }
+
+.lp-photo-slot {
+  border: 1px dashed #bdb39f;
+  background: repeating-linear-gradient(135deg, transparent 0 12px, rgba(0,0,0,.02) 12px 24px);
+  min-height: 280px;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 24px;
+}
+.lp-photo-slot p { font-size: 13px; color: var(--lp-muted); }
+
+/* ---------- 07 カリキュラム ---------- */
+.lp-curri__list { margin-top: var(--lp-gap); border-top: 1px solid var(--lp-ink); }
+.lp-ch { display: grid; grid-template-columns: 96px 120px 1fr; gap: 24px; padding: 28px 0; border-bottom: 1px solid var(--lp-line); align-items: start; }
+.lp-ch__no { font-family: var(--lp-mincho); font-size: 22px; font-weight: 600; line-height: 1.4; }
+.lp-ch__tag { justify-self: start; font-size: 13px; font-weight: 700; letter-spacing: .08em; padding: 3px 12px; border-radius: 2px; margin-top: 3px; white-space: nowrap; }
+.lp-ch__tag--base { border: 1px solid var(--lp-muted); color: var(--lp-muted); }
+.lp-ch__tag--pick { background: var(--lp-green-soft); color: var(--lp-green); }
+.lp-ch__tag--bridge { background: var(--lp-green-soft); color: var(--lp-green); border-right: 3px solid var(--lp-green); }
+.lp-ch__tag--use { background: var(--lp-green); color: #fff; }
+.lp-ch__body p { margin-top: 6px; font-size: 16px; }
+.lp-cta--inline { margin-top: 48px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+.lp-cta--inline .lp-cta__lead { margin: 0; font-family: var(--lp-mincho); font-size: 20px; }
+
+/* ---------- 08 講師 ---------- */
+.lp-teacher__inner { display: grid; grid-template-columns: 380px 1fr; gap: 72px; align-items: start; }
+.lp-teacher__photo { min-height: 480px; position: sticky; top: 40px; }
+.lp-teacher__quote { font-size: 32px; }
+.lp-teacher__quote span { display: block; margin-top: 12px; font-size: 22px; color: var(--lp-green); }
+.lp-teacher__name { margin-top: 36px; font-weight: 700; font-size: 20px; }
+.lp-teacher__name span { margin-left: 16px; font-size: 14px; font-weight: 400; color: var(--lp-muted); }
+.lp-teacher__body { margin-top: 20px; }
+.lp-teacher__body p + p { margin-top: 18px; }
+.lp-teacher__free { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--lp-line); }
+.lp-teacher__free ul { margin-top: 12px; }
+.lp-teacher__free li { padding: 10px 0; border-bottom: 1px dashed var(--lp-line); font-size: 16px; }
+.lp-teacher__free a { font-weight: 700; color: var(--lp-green); text-underline-offset: 4px; }
+.lp-teacher__free li span { display: block; font-size: 14px; color: var(--lp-muted); }
+
+/* ---------- 09 向き不向き ---------- */
+.lp-fit { background: var(--lp-paper-deep); }
+.lp-fit__grid { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+.lp-fit__col .lp-h3 { padding-bottom: 12px; border-bottom: 2px solid currentColor; }
+.lp-fit__col--yes .lp-h3 { color: var(--lp-green); }
+.lp-fit__col--no .lp-h3 { color: var(--lp-muted); }
+.lp-fit__col li { padding: 14px 0 14px 22px; border-bottom: 1px dashed var(--lp-line); position: relative; }
+.lp-fit__col li::before { position: absolute; left: 0; top: 14px; font-weight: 700; }
+.lp-fit__col--yes li::before { content: "○"; color: var(--lp-green); }
+.lp-fit__col--no li::before { content: "―"; color: var(--lp-muted); }
+.lp-fit__col--no li { color: var(--lp-muted); }
+.lp-fit__col li span { display: block; font-size: 14px; }
+
+/* ---------- 10 受講料 ---------- */
+.lp-price__inner { max-width: 880px; }
+.lp-price__table { margin-top: 40px; border-top: 1px solid var(--lp-ink); }
+.lp-price__row { display: grid; grid-template-columns: 160px 1fr; padding: 18px 0; border-bottom: 1px solid var(--lp-line); }
+.lp-price__row dt { font-size: 14px; color: var(--lp-muted); padding-top: 3px; }
+.lp-price__row dd { margin: 0; }
+.lp-price__row--fee { align-items: center; }
+.lp-price__yen { font-family: var(--lp-mincho); font-size: 40px; font-weight: 600; margin-right: 8px; letter-spacing: .02em; }
+.lp-price__subtitle { margin-top: 72px; }
+.lp-compare { margin-top: 16px; border-top: 1px solid var(--lp-ink); }
+.lp-compare__row { display: grid; grid-template-columns: 260px 1fr; gap: 24px; padding: 18px 0; border-bottom: 1px solid var(--lp-line); }
+.lp-compare__name { font-weight: 700; }
+.lp-compare__name span { display: block; font-weight: 400; font-size: 13px; color: var(--lp-muted); }
+.lp-compare__row--this { background: var(--lp-green-soft); padding: 22px 20px; margin: 0 -20px; border-bottom: none; }
+.lp-compare__row--this .lp-compare__name { color: var(--lp-green); }
+
+/* ---------- 11 FAQ ---------- */
+.lp-faq__inner { display: grid; grid-template-columns: 320px 1fr; gap: 64px; }
+.lp-faq__list { border-top: 1px solid var(--lp-ink); }
+.lp-q { border-bottom: 1px solid var(--lp-line); }
+.lp-q summary { list-style: none; cursor: pointer; padding: 22px 40px 22px 0; font-weight: 700; position: relative; }
+.lp-q summary::-webkit-details-marker { display: none; }
+.lp-q summary::before { content: "Q"; font-family: var(--lp-mincho); color: var(--lp-shu); margin-right: 14px; }
+.lp-q summary::after { content: ""; position: absolute; right: 6px; top: 50%; width: 10px; height: 10px; border-right: 1.5px solid var(--lp-ink); border-bottom: 1.5px solid var(--lp-ink); transform: translateY(-70%) rotate(45deg); transition: transform .2s; }
+.lp-q[open] summary::after { transform: translateY(-30%) rotate(-135deg); }
+.lp-q p { padding: 0 0 24px 30px; font-size: 16px; }
+.lp-faq__link { display: inline-block; margin-top: 8px; color: var(--lp-green); font-weight: 700; text-underline-offset: 4px; }
+
+/* ---------- 最終CTA ---------- */
+.lp-final { background: var(--lp-green); color: #f3f1ea; padding: var(--lp-sec-l) 0; }
+.lp-final__inner { max-width: 880px; }
+.lp-final__title { font-family: var(--lp-mincho); font-weight: 600; font-size: 36px; line-height: 1.55; text-align: center; }
+.lp-final__grid { margin-top: 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+.lp-final__label { font-size: 13px; letter-spacing: .12em; color: #b9cdc3; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,.3); }
+.lp-final__know li, .lp-final__flow li { padding: 14px 0; border-bottom: 1px dashed rgba(255,255,255,.22); }
+.lp-final__flow { counter-reset: flow; }
+.lp-final__flow li { counter-increment: flow; display: grid; grid-template-columns: 32px 1fr; }
+.lp-final__flow li::before { content: counter(flow); font-family: var(--lp-mincho); color: #e9b7a8; }
+.lp-final__flow li span { grid-column: 2; font-size: 14px; color: #b9cdc3; }
+.lp-cta--final { margin-top: 56px; text-align: center; }
+.lp-cta--final .lp-cta__btn { background: var(--lp-paper); color: var(--lp-green) !important; padding: 22px 48px; }
+.lp-cta--final .lp-cta__btn:hover { background: #fff; }
+.lp-cta--final .lp-cta__note { color: #b9cdc3; }
+
+/* ---------- Footer ---------- */
+.lp-footer { background: var(--lp-green-dark); color: #b9cdc3; font-size: 13px; }
+.lp-footer__inner { display: flex; justify-content: space-between; padding-top: 24px; padding-bottom: 24px; }
+.lp-footer a { text-decoration: none; }
+
+/* =================== SP =================== */
+@media (max-width: 768px) {
+  :root { --lp-sec-l: 96px; --lp-sec-m: 72px; --lp-sec-s: 56px; --lp-gap: 32px; }
+  .lp-body { font-size: 16px; line-height: 1.9; }
+  .lp-container { padding: 0 20px; }
+  .lp-pc { display: none; }
+  .lp-sp { display: inline; }
+  .lp-h2 { font-size: 25px; }
+  .lp-h3 { font-size: 17px; }
+
+  .lp-header__inner { height: 52px; }
+
+  .lp-fv { padding: 40px 0 var(--lp-sec-l); }
+  .lp-fv__inner { grid-template-columns: 1fr; gap: 40px; }
+  .lp-fv__title { font-size: 27px; margin-top: 14px; letter-spacing: 0.02em; }
+  .lp-fv__title span { white-space: normal; }
+  .lp-fv__lead { margin-top: 24px; padding-left: 14px; }
+  .lp-fv__sub { font-size: 14px; }
+  .lp-fv__meta { font-size: 13px; }
+  .lp-fv__meta li + li::before { margin: 0 8px; }
+  .lp-why__title br { display: inline; }
+  .lp-fv__photo { order: 2; margin: 0 -20px; }
+  .lp-fv__photo figcaption { margin-left: 20px; }
+  .lp-cta__btn { display: block; text-align: center; font-size: 16px; padding: 18px 16px; }
+
+  .lp-walls__grid { grid-template-columns: 1fr; }
+  .lp-wall, .lp-wall + .lp-wall { padding: 28px 0 8px; border-left: none; }
+  .lp-wall + .lp-wall { border-top: 1px solid var(--lp-ink); margin-top: 20px; }
+  .lp-walls__close { font-size: 18px; margin-top: 36px; }
+
+  .lp-why__inner { grid-template-columns: 1fr; gap: 32px; }
+  .lp-why__title { position: static; }
+  .lp-why__item { grid-template-columns: 40px 1fr; padding: 24px 0; }
+  .lp-why__num { font-size: 26px; }
+  .lp-why__close { grid-column: 1; padding: 24px 20px; }
+  .lp-why__pair { font-size: 18px; }
+
+  .lp-split__body { grid-template-columns: 1fr; gap: 36px; margin-top: 40px; }
+  .lp-split__point { font-size: 19px; }
+  .lp-split__lines > div { grid-template-columns: 76px 1fr; }
+
+  .lp-handle__consult { font-size: 21px; }
+  .lp-handle__compare { grid-template-columns: 1fr; }
+  .lp-handle__ng { padding: 28px 0; border-right: none; border-bottom: 1px solid var(--lp-line); }
+  .lp-handle__ok { padding: 28px 0 0; }
+  .lp-handle__quote { font-size: 17px; }
+  .lp-handle__close { font-size: 22px; margin-top: 40px; }
+
+  .lp-class__head { grid-template-columns: 1fr; }
+  .lp-class__photo { grid-column: 1; grid-row: auto; min-height: 200px; }
+  .lp-class__body { grid-template-columns: 1fr; margin-top: 48px; }
+  .lp-class__subtitle, .lp-timeline, .lp-dash { grid-row: auto; }
+  .lp-dash + .lp-class__subtitle, .lp-timeline + .lp-class__subtitle { margin-top: 40px; }
+  .lp-timeline li { grid-template-columns: 72px 1fr; }
+
+  .lp-ch { grid-template-columns: 1fr; gap: 6px; padding: 24px 0; }
+  .lp-ch__no { font-size: 19px; display: inline; }
+  .lp-ch__tag { margin-top: 0; }
+  .lp-cta--inline { flex-direction: column; align-items: stretch; gap: 16px; }
+  .lp-cta--inline .lp-cta__lead { font-size: 17px; }
+
+  .lp-teacher__inner { grid-template-columns: 1fr; gap: 36px; }
+  .lp-teacher__photo { position: static; min-height: 260px; }
+  .lp-teacher__quote { font-size: 23px; }
+  .lp-teacher__quote span { font-size: 18px; }
+  .lp-teacher__name span { display: block; margin-left: 0; }
+
+  .lp-fit__grid { grid-template-columns: 1fr; gap: 36px; }
+
+  .lp-price__row { grid-template-columns: 96px 1fr; gap: 8px; }
+  .lp-price__yen { font-size: 32px; }
+  .lp-price__subtitle { margin-top: 48px; }
+  .lp-compare__row { grid-template-columns: 1fr; gap: 4px; }
+  .lp-compare__row--this { margin: 0 -20px; padding: 20px; }
+
+  .lp-faq__inner { grid-template-columns: 1fr; gap: 24px; }
+  .lp-q summary { padding: 18px 32px 18px 0; }
+  .lp-q p { padding-left: 0; }
+
+  .lp-final__title { font-size: 23px; }
+  .lp-final__grid { grid-template-columns: 1fr; gap: 32px; margin-top: 40px; }
+  .lp-cta--final .lp-cta__btn { padding: 18px 16px; }
+
+  .lp-footer__inner { flex-direction: column; gap: 8px; }
+}
+
+/* ---------- 公開版：写真の仮枠を外したレイアウト（2026-09-18） ---------- */
+.lp-class__head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.lp-class__head .lp-h2 { grid-column: 1; }
+.lp-class__lead { grid-column: 2; grid-row: 1; align-self: end; }
+.lp-teacher__inner { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
+.lp-teacher__text { display: contents; }
+.lp-teacher__quote { grid-column: 1; align-self: start; position: sticky; top: 40px; }
+.lp-teacher__name, .lp-teacher__body, .lp-teacher__free { grid-column: 2; }
+.lp-teacher__name { margin-top: 0; grid-row: 1; }
+@media (max-width: 768px) {
+  .lp-class__head { grid-template-columns: 1fr; }
+  .lp-class__lead { grid-column: 1; grid-row: auto; }
+  .lp-teacher__inner { grid-template-columns: 1fr; }
+  .lp-teacher__quote { position: static; }
+  .lp-teacher__name, .lp-teacher__body, .lp-teacher__free { grid-column: 1; grid-row: auto; }
+}
+.lp-teacher__quote { grid-row: 1 / span 3; }
+@media (max-width: 768px) { .lp-teacher__quote { grid-row: auto; } }

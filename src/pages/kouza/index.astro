@@ -2,6 +2,13 @@
 import Layout from '../../layouts/Layout.astro';
 import { safeFetchJson } from '../../lib/safeFetch';
 
+// 専用の案内ページ（LP）がある講座は、一覧からLPへ直接つなぐ
+const LP_BY_SLUG: Record<string, string> = {
+  'tesou-kobetsu-full': '/lp/honkouza/',
+  'tesou-set-all7': '/lp/tesou-video/',
+  'kantei-kouryaku': '/lp/session/',
+};
+
 // .envから鍵とIDを読み込む
 const apiKey = import.meta.env.NOTION_API_KEY;
 const kouzaDbId = import.meta.env.NOTION_KOUZA_ID;
@@ -48,7 +55,7 @@ const kouzaList = allPosts.filter((post: any) => {
         const slug = item.properties['URLスラッグ']?.rich_text[0]?.plain_text || item.id;
         
         return (
-          <a href={`/kouza/${slug}`} class="kouza-card">
+          <a href={LP_BY_SLUG[slug] ?? `/kouza/${slug}`} class="kouza-card" data-astro-reload={LP_BY_SLUG[slug] ? true : undefined}>
             <div class="level-tags">
               {levels.map((level: any) => (
                 <span class="level-tag" style={{backgroundColor: level.color === 'default' ? '#eee' : `var(--color-${level.color}, #ddd)`}}>{level.name}</span>

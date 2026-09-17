@@ -26,7 +26,9 @@ try {
     proPosts = allPosts.filter((post: any) => {
         const status = post.properties['ステータス']?.status?.name || post.properties['ステータス']?.select?.name || '';
         const levels = post.properties['レベル']?.multi_select?.map((t: any) => t.name) || [];
-        return status === '公開' && levels.includes('プロ');
+        const slug = post.properties['URLスラッグ']?.rich_text?.[0]?.plain_text || '';
+        // 鑑定攻略セッション（プロ向けの添削・壁打ち。2026-09 にスポット技術指導を統合）はレベルに関係なく載せる
+        return status === '公開' && (levels.includes('プロ') || slug === 'kantei-kouryaku');
     });
 } catch(e) {
     console.error(e);
@@ -62,7 +64,7 @@ try {
                             <h2 class="kouza-title">{title}</h2>
                             <p class="kouza-summary">{summary}</p>
                             <div class="card-action">
-                                <a href={`/kouza/${slug}`} class="btn-detail">詳細・お申し込み →</a>
+                                <a href={slug === 'kantei-kouryaku' ? '/lp/session/' : `/kouza/${slug}`} class="btn-detail" data-astro-reload={slug === 'kantei-kouryaku' ? true : undefined}>詳細・お申し込み →</a>
                             </div>
                         </div>
                     </article>

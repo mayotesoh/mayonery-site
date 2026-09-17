@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import LearnCta from '../components/LearnCta.astro';
 import { safeFetchJson } from '../lib/safeFetch';
 
 const apiKey = import.meta.env.NOTION_API_KEY;
@@ -114,6 +115,7 @@ const categories = CAT_ORDER.filter((c) => catCounts[c]);
             <span id="score-number">0</span><span class="score-total"> / <span id="final-total"></span></span>
           </div>
           <p id="score-message" class="score-message"></p>
+          <LearnCta lead="クイズで覚えた知識を、目の前の手で使えるように。" />
           
           <div class="result-actions">
             <button onclick="window.location.reload();" class="retry-btn">別の問題に挑戦する</button>

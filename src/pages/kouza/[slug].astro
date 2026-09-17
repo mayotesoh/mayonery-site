@@ -55,6 +55,13 @@ const levels = course.properties['レベル']?.multi_select?.map((m: any) => m.n
 const level = levels[0] || 'クラス未設定';
 const isPro = levels.includes('プロ');
 const price = course.properties['価格']?.rich_text?.[0]?.plain_text || '';
+const courseSlug = course.properties['URLスラッグ']?.rich_text?.[0]?.plain_text || '';
+const LP_BY_SLUG: Record<string, string> = {
+  'tesou-kobetsu-full': '/lp/honkouza/',
+  'tesou-set-all7': '/lp/tesou-video/',
+  'kantei-kouryaku': '/lp/session/',
+};
+const lpUrl = LP_BY_SLUG[courseSlug];
 
 const apiKey = import.meta.env.NOTION_API_KEY;
 const blocksData = apiKey
@@ -123,6 +130,10 @@ const blocks = blocksData.results || [];
             )}
         </div>
         
+        {lpUrl && (
+          <a class="lp-guide" href={lpUrl} data-astro-reload>この講座の詳しい案内ページを見る →</a>
+        )}
+
         <div class="auto-cta-box">
             <p class="cta-message">講座の開講スケジュールや詳細については、お気軽にお問い合わせください。</p>
             <a href="/yoyaku/" class="btn-line-cta btn-yoyaku">予約ページを見る</a>
@@ -135,6 +146,8 @@ const blocks = blocksData.results || [];
 </Layout>
 
 <style>
+    .lp-guide { display: block; margin: 0 0 24px; padding: 18px 20px; text-align: center; font-weight: bold; color: var(--color-primary); background: #eaf3ee; border-radius: 10px; text-decoration: none; }
+    .lp-guide:hover { text-decoration: underline; }
     .single-course-container { max-width: 800px; margin: 0 auto; padding: 40px 15px 80px; }
     .back-link-top { margin-bottom: 30px; }
     .btn-text { color: var(--color-primary); text-decoration: none; font-weight: bold; transition: color 0.2s; }

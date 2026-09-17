@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import LearnCta from '../../components/LearnCta.astro';
 import { safeFetchJson } from '../../lib/safeFetch';
 
 // 🌟 全クイズのURLパスを自動生成する処理
@@ -91,6 +92,7 @@ const choices = [choice1, choice2, choice3, choice4].filter(c => c !== "");
                     <h3>【解説】</h3>
                     <p>{explanation || '解説は現在準備中です。'}</p>
                 </div>
+                <LearnCta lead="クイズで覚えた知識を、目の前の手で使えるように。" />
             </div>
         </div>
 

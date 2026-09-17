@@ -1,0 +1,126 @@
+/* 全7章セットLP 専用（style.css は本講座LPと共通） */
+
+/* ---------- 色：本講座LP（深緑）と分けて藍にする ---------- */
+:root {
+  --lp-green: #2c4a63;
+  --lp-green-dark: #223a4e;
+  --lp-green-soft: #e3e9ef;
+}
+.lp-final { color: #eef1f4; }
+.lp-final__label, .lp-final__flow li span, .lp-cta--final .lp-cta__note { color: #b7c5d2 !important; }
+.lp-footer { color: #b7c5d2; }
+
+/* ---------- 01 FV 目次 ---------- */
+.lp-fv__inner { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); }
+.lp-toc { background: var(--lp-white); border: 1px solid var(--lp-line); padding: 28px 32px 24px; }
+.lp-toc__head { font-family: var(--lp-mincho); font-size: 22px; font-weight: 600; display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 14px; border-bottom: 1px solid var(--lp-ink); }
+.lp-toc__head span { font-family: var(--lp-gothic); font-size: 12px; font-weight: 500; letter-spacing: .12em; color: var(--lp-muted); }
+.lp-toc__list li { border-bottom: 1px dashed var(--lp-line); }
+.lp-toc__list a { display: grid; grid-template-columns: 36px 1fr auto; align-items: baseline; gap: 8px; padding: 12px 0; text-decoration: none; }
+.lp-toc__list a:hover .lp-toc__name { color: var(--lp-green); }
+.lp-toc__no { font-family: var(--lp-mincho); font-size: 15px; color: var(--lp-shu); }
+.lp-toc__name { font-family: var(--lp-mincho); font-size: 17px; font-weight: 600; }
+.lp-toc__tag { font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 1px 8px; border-radius: 2px; background: var(--lp-green-soft); color: var(--lp-green); white-space: nowrap; }
+.lp-toc__tag--base { background: none; border: 1px solid var(--lp-muted); color: var(--lp-muted); }
+.lp-toc__tag--use { background: var(--lp-green); color: #fff; }
+.lp-toc__gate { border-bottom: 1px solid var(--lp-shu) !important; }
+.lp-toc__foot { margin-top: 16px; font-size: 14px; font-weight: 700; color: var(--lp-green); }
+
+
+/* ---------- 03 全7章 ---------- */
+.lp-vorder { margin-top: 28px; max-width: 760px; display: flex; gap: 14px; align-items: baseline; font-size: 15px; }
+.lp-vorder__mark { flex: none; font-size: 12px; letter-spacing: .12em; color: var(--lp-shu); border: 1px solid var(--lp-shu); padding: 1px 8px; }
+.lp-vch .lp-ch { grid-template-columns: 64px 120px 1fr 120px; }
+.lp-vch .lp-ch__no { font-size: 24px; color: var(--lp-muted); }
+.lp-vch__price { justify-self: end; font-size: 14px; color: var(--lp-muted); padding-top: 3px; white-space: nowrap; }
+.lp-vch__gate { border-bottom: 1px solid var(--lp-shu); position: relative; }
+.lp-vch__gate::after { content: "ここまでが後半の前提"; position: absolute; right: 0; bottom: -11px; background: var(--lp-white); padding: 0 0 0 10px; font-size: 12px; letter-spacing: .08em; color: var(--lp-shu); }
+.lp-vch__foot { margin-top: 20px; }
+
+/* ---------- 04 質問4回 ---------- */
+.lp-qa4__inner { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 72px; align-items: start; }
+.lp-qa4__band { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--lp-ink); border-bottom: 1px solid var(--lp-ink); }
+.lp-qa4__band span { position: relative; text-align: center; padding: 18px 0 30px; font-family: var(--lp-mincho); font-size: 18px; color: var(--lp-muted); border-left: 1px solid var(--lp-line); }
+.lp-qa4__band span:first-child { border-left: none; }
+.lp-qa4__band span.is-q { color: var(--lp-ink); background: var(--lp-green-soft); }
+.lp-qa4__band span i { position: absolute; left: 0; right: 0; bottom: 8px; font-style: normal; font-family: var(--lp-gothic); font-size: 11px; letter-spacing: .06em; color: var(--lp-green); font-weight: 700; }
+.lp-qa4__caption { margin-top: 12px; }
+.lp-qa4__body .lp-dash { margin-top: 28px; }
+
+/* ---------- 05 本講座との違い ---------- */
+.lp-vs__table { margin-top: 48px; border-top: 1px solid var(--lp-ink); }
+.lp-vs__row { display: grid; grid-template-columns: 180px 1fr 1fr; gap: 0 32px; padding: 18px 0; border-bottom: 1px solid var(--lp-line); }
+.lp-vs__row p span { font-size: 14px; color: var(--lp-muted); }
+.lp-vs__row [role="rowheader"] { font-size: 14px; color: var(--lp-muted); padding-top: 2px; }
+.lp-vs__row--head { padding: 14px 0; }
+.lp-vs__row--head p { font-weight: 700; font-size: 17px; }
+.lp-vs__row--head p:nth-child(2) { color: var(--lp-green); }
+.lp-vs__row--key { background: var(--lp-green-soft); margin: 0 -20px; padding: 22px 20px; }
+.lp-vs__row--key strong { color: var(--lp-green); }
+.lp-vs__yen { font-family: var(--lp-mincho); font-size: 24px; font-weight: 600; }
+.lp-vs__close { margin-top: 48px; font-family: var(--lp-mincho); font-size: 22px; line-height: 1.8; }
+
+/* ---------- 06 階段 ---------- */
+.lp-ladder__steps { margin-top: 56px; display: grid; grid-template-columns: 1fr 120px 1fr 120px 1fr; align-items: end; }
+.lp-ladder__step { border-top: 1px solid var(--lp-ink); padding: 20px 0 0; }
+.lp-ladder__step:nth-child(1) { margin-bottom: 0; }
+.lp-ladder__step:nth-child(3) { margin-bottom: 48px; }
+.lp-ladder__step:nth-child(5) { margin-bottom: 96px; }
+.lp-ladder__step--this { border-top: 3px solid var(--lp-green); }
+.lp-ladder__name { font-weight: 700; }
+.lp-ladder__step--this .lp-ladder__name { color: var(--lp-green); }
+.lp-ladder__yen { font-family: var(--lp-mincho); font-size: 30px; font-weight: 600; line-height: 1.3; margin-top: 4px; }
+.lp-ladder__what { margin-top: 10px; font-size: 15px; color: var(--lp-muted); }
+.lp-ladder__gap { align-self: center; display: flex; flex-direction: column; align-items: center; font-size: 13px; color: var(--lp-shu); line-height: 1.4; }
+.lp-ladder__gap span { font-size: 11px; letter-spacing: .12em; }
+.lp-ladder__gap::after { content: "→"; font-size: 18px; line-height: 1; margin-top: 4px; }
+.lp-ladder__note { margin-top: 36px; }
+
+/* ---------- 07 講師 ---------- */
+.lp-vteacher { border-top: 1px solid var(--lp-line); }
+.lp-vteacher__inner { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+.lp-vteacher .lp-teacher__name { margin-top: 0; }
+
+/* ---------- 09 受講料 ---------- */
+.lp-vtry { margin-top: 32px; padding: 20px 24px; border: 1px dashed var(--lp-line); }
+.lp-vtry a { font-weight: 700; color: var(--lp-green); text-underline-offset: 4px; }
+.lp-vtry span { display: block; margin-top: 6px; font-size: 14px; color: var(--lp-muted); }
+
+/* ---------- 11 申し込み ---------- */
+.lp-final__grid--one { grid-template-columns: 1fr; max-width: 560px; margin-left: auto; margin-right: auto; }
+
+/* =================== SP =================== */
+@media (max-width: 768px) {
+  .lp-fv__inner { grid-template-columns: 1fr; }
+  .lp-toc { padding: 22px 20px 18px; }
+  .lp-toc__name { font-size: 16px; }
+  .lp-vorder { flex-direction: column; gap: 8px; font-size: 14px; }
+  .lp-vch .lp-ch { grid-template-columns: auto auto 1fr; gap: 6px 12px; align-items: center; }
+  .lp-vch .lp-ch__no { font-size: 18px; }
+  .lp-vch .lp-ch__body { grid-column: 1 / -1; }
+  .lp-vch__price { grid-row: 1; grid-column: 3; }
+  .lp-vch__gate::after { font-size: 11px; }
+
+  .lp-qa4__inner { grid-template-columns: 1fr; gap: 32px; }
+  .lp-qa4__band span { font-size: 14px; padding: 12px 0 26px; }
+  .lp-qa4__band span i { font-size: 9px; letter-spacing: 0; }
+
+  .lp-vs__row { grid-template-columns: 1fr 1fr; gap: 4px 16px; font-size: 15px; }
+  .lp-vs__row [role="rowheader"] { grid-column: 1 / -1; font-size: 12px; }
+  .lp-vs__row--head p:first-child { display: none; }
+  .lp-vs__row--head p { font-size: 15px; }
+  .lp-vs__yen { font-size: 20px; }
+  .lp-vs__close { font-size: 18px; }
+
+  .lp-ladder__steps { grid-template-columns: 1fr; align-items: stretch; margin-top: 36px; }
+  .lp-ladder__step, .lp-ladder__step:nth-child(3), .lp-ladder__step:nth-child(5) { margin: 0; padding: 16px 0 16px; }
+  .lp-ladder__step:nth-child(3) { margin-left: 24px; }
+  .lp-ladder__step:nth-child(5) { margin-left: 48px; }
+  .lp-ladder__gap { flex-direction: row; align-items: baseline; gap: 8px; padding: 6px 0 6px 12px; }
+  .lp-ladder__gap:nth-child(2) { margin-left: 12px; }
+  .lp-ladder__gap:nth-child(4) { margin-left: 36px; }
+  .lp-ladder__gap::after { content: "↓"; font-size: 15px; }
+  .lp-ladder__yen { font-size: 24px; }
+
+  .lp-vteacher__inner { grid-template-columns: 1fr; gap: 28px; }
+}
