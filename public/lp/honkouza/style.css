@@ -141,7 +141,7 @@
 
 /* ---------- 04 分解する ---------- */
 .lp-split__body { margin-top: 64px; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 72px; align-items: start; }
-.lp-split__fig svg { width: 100%; max-width: 420px; height: auto; display: block; margin: 0 auto; }
+.lp-split__fig img { width: 100%; max-width: 520px; height: auto; display: block; margin: 0 auto; border-radius: 8px; }
 .lp-split__fig figcaption { margin-top: 16px; font-size: 13px; color: var(--lp-muted); text-align: center; }
 .lp-palm { fill: #f1ebdf; stroke: #cbbfa9; stroke-width: 1.5; }
 .lp-ln { fill: none; stroke: var(--lp-ink); stroke-width: 3.2; stroke-linecap: round; }
@@ -414,3 +414,11 @@
   .lp-footer__inner { align-items: flex-start; }
   .lp-footer__nav { gap: 8px 16px; }
 }
+
+/* 分解の写真（2026-09-18 差し替え）：本文の線名に写真と同じ色の印をつける */
+.lp-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+.lp-dot--kanjo { background: #e8a020; }
+.lp-dot--zuno { background: #4a90e2; }
+.lp-dot--seimei { background: #e03127; }
+.lp-dot--unmei { background: #8b5cf6; }
+.lp-split__lines dt { display: flex; align-items: center; }
