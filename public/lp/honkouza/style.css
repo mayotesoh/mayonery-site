@@ -422,3 +422,10 @@
 .lp-dot--seimei { background: #e03127; }
 .lp-dot--unmei { background: #8b5cf6; }
 .lp-split__lines dt { display: flex; align-items: center; }
+
+/* 06 授業の画面（2026-09-18 追加） */
+.lp-class__fig { margin-top: 48px; }
+.lp-class__fig img { width: 100%; height: auto; border: 1px solid var(--lp-line); border-radius: 6px; display: block; }
+.lp-class__fig figcaption { margin-top: 12px; font-size: 13px; color: var(--lp-muted); padding-left: 16px; position: relative; }
+.lp-class__fig figcaption::before { content: ""; position: absolute; left: 0; top: 50%; width: 8px; height: 1px; background: var(--lp-shu); }
+@media (max-width: 768px) { .lp-class__fig { margin-top: 32px; } }
