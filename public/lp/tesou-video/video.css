@@ -124,3 +124,9 @@
 
   .lp-vteacher__inner { grid-template-columns: 1fr; gap: 28px; }
 }
+
+/* セットに含まれないもの（2026-09-25 追加） */
+.lp-vnote { margin-top: 20px; padding: 18px 22px; border-left: 3px solid var(--lp-shu); background: var(--lp-white); font-size: 15px; line-height: 1.9; }
+.lp-vnote strong { color: var(--lp-shu); font-weight: 700; }
+.lp-vnote .lp-small { display: inline-block; margin-top: 6px; color: var(--lp-muted); }
+@media (max-width: 768px) { .lp-vnote { padding: 16px 18px; font-size: 14px; } }

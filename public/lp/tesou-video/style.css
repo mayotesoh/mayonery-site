@@ -288,6 +288,14 @@
 .lp-cta--final .lp-cta__btn:hover { background: #fff; }
 .lp-cta--final .lp-cta__note { color: #b9cdc3; }
 
+/* 公式LINEの登録特典（最終CTAの中・2026-09-25 追加） */
+.lp-gift { margin-top: 48px; padding: 24px 28px; border: 1px solid rgba(255,255,255,.28); border-radius: 6px; background: rgba(255,255,255,.06); }
+.lp-gift__label { font-size: 13px; letter-spacing: .12em; color: #b9cdc3; }
+.lp-gift__body { margin-top: 10px; font-size: 15px; line-height: 1.9; }
+.lp-gift__body strong { font-weight: 700; }
+@media (max-width: 768px) { .lp-gift { margin-top: 32px; padding: 20px; } .lp-gift__body { font-size: 14px; } }
+
+
 /* ---------- Footer ---------- */
 .lp-footer { background: var(--lp-green-dark); color: #b9cdc3; font-size: 13px; }
 .lp-footer__inner { display: flex; justify-content: space-between; padding-top: 24px; padding-bottom: 24px; }
