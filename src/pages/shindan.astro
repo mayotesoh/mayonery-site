@@ -2,408 +2,1613 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="無料手相診断 | 手相のマヨネリ">
-    <div class="shindan-page container">
-        
-        <div id="start-screen" class="shindan-card text-center">
-            <h1 class="main-title">✋ 無料手相・性格診断</h1>
-            <p class="sub-title">あなたの「設計」を見つめ直す第一歩</p>
-            <div class="desc-box">
-                <p>専門的な手相知識に基づいて、あなたの性格や行動特性を詳しく分析します。</p>
-                <p>質問は全部で12問。約2分で完了します。</p>
-            </div>
-            <button onclick="startDiagnosis()" class="btn-primary pulse-animation">
-                診断を始める
-            </button>
-        </div>
+<Layout title="無料 手相診断 | 手相のマヨネリ">
 
-        <div id="question-screen" class="shindan-card" style="display: none;">
-            <div class="progress-container">
-                <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
-            </div>
-            
-            <div class="question-header text-center">
-                <span id="question-number" class="q-number"></span>
-                <h2 id="question-title" class="q-title"></h2>
-            </div>
-            
-            <div id="question-image" class="image-container text-center">
-                </div>
-            
-            <div id="choices" class="choices-container">
-                </div>
-            
-            <div class="back-btn-container text-center" id="back-button-container" style="display: none;">
-                <button onclick="previousQuestion()" class="btn-text">
-                    ← 前の質問に戻る
-                </button>
-            </div>
-        </div>
+  <div class="ssw">
 
-        <div id="result-screen" class="shindan-card" style="display: none;">
-            <div class="text-center">
-                <h1 class="main-title">🎯 診断結果</h1>
-                <p class="sub-title mb-8">あなたの手相から読み解いた詳細な分析</p>
-            </div>
-            
-            <div id="diagnosis-result" class="result-content">
-                </div>
-            
-            <div class="action-buttons text-center mt-10">
-                <p class="share-text">診断結果をシェアする</p>
-                <div class="share-buttons">
-                    <button onclick="shareToTwitter()" class="btn-share twitter">X (Twitter)</button>
-                    <button onclick="shareToFacebook()" class="btn-share facebook">Facebook</button>
-                    <button onclick="shareToLine()" class="btn-share line">LINE</button>
-                </div>
-                
-                <div class="mt-8">
-                    <button onclick="restartDiagnosis()" class="btn-secondary">
-                        もう一度診断する
-                    </button>
-                </div>
-            </div>
-        </div>
-
+    <div class="ssw-hero">
+      <h1 class="ssw-title">手相診断</h1>
+      <p class="ssw-sub">自分の手の形を入力すると、そこから何が読めるかを出します。<br>名前と意味を覚えるのではなく、<strong>線を分解して読む</strong>やり方です。</p>
     </div>
+
+    <!-- 入口の選択 -->
+    <div class="sd-modes" id="sd-modes">
+      <button class="sd-mode" id="sd-mode-easy" type="button">
+        <span class="sd-mode__label">かんたん</span>
+        <span class="sd-mode__lead">12問に答えるだけ</span>
+        <span class="sd-mode__desc">手相を見たことがなくても選べます。近いものを選んでいくだけ。約2分です。</span>
+      </button>
+      <button class="sd-mode" id="sd-mode-detail" type="button">
+        <span class="sd-mode__label">くわしく</span>
+        <span class="sd-mode__lead">自分で形を調整する</span>
+        <span class="sd-mode__desc">つまみを動かすと手の絵がその場で変わります。自分の手に近づけてください。</span>
+      </button>
+    </div>
+
+    <!-- かんたんモード：12問 -->
+    <div class="sd-quiz" id="sd-quiz" hidden>
+      <div class="sd-quiz__bar"><div class="sd-quiz__fill" id="sd-fill"></div></div>
+      <p class="sd-quiz__count" id="sd-count"></p>
+      <h2 class="sd-quiz__q" id="sd-q"></h2>
+      <p class="sd-quiz__hint" id="sd-hint"></p>
+      <div class="sd-quiz__choices" id="sd-choices"></div>
+      <div class="sd-quiz__nav">
+        <button type="button" class="sd-link" id="sd-back">← 前にもどる</button>
+        <button type="button" class="sd-link" id="sd-to-detail">つまみで細かく入力する</button>
+      </div>
+    </div>
+
+    <div class="ssw-layout" id="ssw-layout" hidden>
+
+      <aside class="ssw-panel">
+
+        <div class="ssw-tabs">
+          <button class="ssw-tab active" id="tab-you">自分の手相</button>
+          <button class="ssw-tab" id="tab-partner">相手の手相</button>
+        </div>
+        <div class="ssw-share-wrap">
+          <button class="ssw-url-share-btn" id="share-btn">自分の手相URLをコピーして相手に送る</button>
+        </div>
+
+        <div class="ssw-sec-head" style="color:var(--ssw-heart)">感情線（Heart Line）</div>
+
+        <div class="ssw-srow ssw-hl">
+          <div class="ssw-smeta">
+            <span class="ssw-sname">① 起点位置</span>
+            <span class="ssw-sval" id="v1">50</span>
+          </div>
+          <div class="ssw-strack">
+            <span class="ssw-send-l">低い</span>
+            <input type="range" id="s1" min="0" max="100" value="50" />
+            <span class="ssw-send-r">高い</span>
+          </div>
+        </div>
+        <div class="ssw-srow ssw-hl">
+          <div class="ssw-smeta">
+            <span class="ssw-sname">② 長さ</span>
+            <span class="ssw-sval" id="v2">50</span>
+          </div>
+          <div class="ssw-strack">
+            <span class="ssw-send-l">短い</span>
+            <input type="range" id="s2" min="0" max="100" value="50" />
+            <span class="ssw-send-r">長い</span>
+          </div>
+        </div>
+        <div class="ssw-srow ssw-hl">
+          <div class="ssw-smeta">
+            <span class="ssw-sname">③ カーブ</span>
+            <span class="ssw-sval" id="v3">50</span>
+          </div>
+          <div class="ssw-strack">
+            <span class="ssw-send-l">下向き</span>
+            <input type="range" id="s3" min="0" max="100" value="50" />
+            <span class="ssw-send-r">上向き</span>
+          </div>
+        </div>
+
+        <div class="ssw-divider"></div>
+        <div class="ssw-sec-head" style="color:var(--ssw-head)">頭脳線（Head Line）</div>
+
+        <div class="ssw-srow ssw-hl2">
+          <div class="ssw-smeta">
+            <span class="ssw-sname">④ 起点位置</span>
+            <span class="ssw-sval" id="v4">50</span>
+          </div>
+          <div class="ssw-strack">
+            <span class="ssw-send-l">低い</span>
+            <input type="range" id="s4" min="0" max="100" value="50" />
+            <span class="ssw-send-r">高い</span>
+          </div>
+        </div>
+        <div class="ssw-srow ssw-hl2">
+          <div class="ssw-smeta">
+            <span class="ssw-sname">⑤ 長さ</span>
+            <span class="ssw-sval" id="v5">50</span>
+          </div>
+          <div class="ssw-strack">
+            <span class="ssw-send-l">短い</span>
+            <input type="range" id="s5" min="0" max="100" value="50" />
+            <span class="ssw-send-r">長い</span>
+          </div>
+        </div>
+        <div class="ssw-srow ssw-hl2">
+          <div class="ssw-smeta">
+            <span class="ssw-sname">⑥ 向き</span>
+            <span class="ssw-sval" id="v6">50</span>
+          </div>
+          <div class="ssw-strack">
+            <span class="ssw-send-l">下向き</span>
+            <input type="range" id="s6" min="0" max="100" value="50" />
+            <span class="ssw-send-r">水平</span>
+          </div>
+        </div>
+
+        <div class="ssw-divider"></div>
+        <div class="ssw-sec-head" style="color:var(--ssw-life)">生命線（Life Line）</div>
+
+        <div class="ssw-srow ssw-ll">
+          <div class="ssw-smeta">
+            <span class="ssw-sname">⑦ 起点位置</span>
+            <span class="ssw-sval" id="v7">50</span>
+          </div>
+          <div class="ssw-strack">
+            <span class="ssw-send-l">低い</span>
+            <input type="range" id="s7" min="0" max="100" value="50" />
+            <span class="ssw-send-r">高い</span>
+          </div>
+        </div>
+        <div class="ssw-srow ssw-ll">
+          <div class="ssw-smeta">
+            <span class="ssw-sname">⑧ 張り・膨らみ</span>
+            <span class="ssw-sval" id="v8">50</span>
+          </div>
+          <div class="ssw-strack">
+            <span class="ssw-send-l">小さい</span>
+            <input type="range" id="s8" min="0" max="100" value="50" />
+            <span class="ssw-send-r">大きい</span>
+          </div>
+        </div>
+        <div class="ssw-srow ssw-ll">
+          <div class="ssw-smeta">
+            <span class="ssw-sname">⑨ 終点</span>
+            <span class="ssw-sval" id="v9">50</span>
+          </div>
+          <div class="ssw-strack">
+            <span class="ssw-send-l">内側</span>
+            <input type="range" id="s9" min="0" max="100" value="50" />
+            <span class="ssw-send-r">外側</span>
+          </div>
+        </div>
+
+        <div class="ssw-divider"></div>
+        <div class="ssw-sec-head" style="color:var(--ssw-hand)">手の形・指</div>
+
+        <div class="ssw-srow ssw-hd">
+          <div class="ssw-smeta">
+            <span class="ssw-sname">⑩ 手のひらの形</span>
+            <span class="ssw-sval" id="v10">50</span>
+          </div>
+          <div class="ssw-strack">
+            <span class="ssw-send-l">幅広</span>
+            <input type="range" id="s10" min="0" max="100" value="50" />
+            <span class="ssw-send-r">縦長</span>
+          </div>
+        </div>
+        <div class="ssw-srow ssw-hd">
+          <div class="ssw-smeta">
+            <span class="ssw-sname">⑪ 指の長さ</span>
+            <span class="ssw-sval" id="v11">50</span>
+          </div>
+          <div class="ssw-strack">
+            <span class="ssw-send-l">短い</span>
+            <input type="range" id="s11" min="0" max="100" value="50" />
+            <span class="ssw-send-r">長い</span>
+          </div>
+        </div>
+
+        <button class="ssw-reset-btn" id="reset-btn">すべてリセット</button>
+        <button class="ssw-diagnose-btn" id="diagnose-btn">この手相を診断する</button>
+        <button class="ssw-diagnose-btn" id="diagnose-pair-btn" style="margin-top:0.85rem; background:linear-gradient(135deg, #d9467d, #2b6cb0);">二人の相性を診断する</button>
+      </aside>
+
+      <div class="ssw-preview">
+        <svg class="ssw-palm-svg" viewBox="0 -80 625 857" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <radialGradient id="palmFillSsw" cx="50%" cy="54%" r="54%">
+              <stop offset="0%"   stop-color="rgba(78, 123, 103, 0.08)" />
+              <stop offset="100%" stop-color="rgba(78, 123, 103, 0)" />
+            </radialGradient>
+          </defs>
+
+          <path id="hand-glow"
+            d="M109.255 636C133.255 693.5 167.97 715.5 198.47 744C228.971 772.5 312.47 776.5 351.47 776.5C390.47 776.5 488.47 775.5 522.97 744C557.47 712.5 571.97 663.5 577.47 591.5C582.97 519.5 583.47 409 583.47 409C583.47 409 659.47 169.5 604.47 148.5C549.47 127.5 494.47 352.5 494.47 352.5C494.47 352.5 560.97 70 494.47 54C427.97 38 395.47 331.5 395.47 331.5C395.47 331.5 422.47 0.5 351.47 0.5C280.47 0.5 287.47 331.5 287.47 331.5C287.47 331.5 258.47 43.9885 189.971 54C121.471 64.0115 183.471 347 183.471 347C183.471 347 189.971 364 189.971 415.5C189.971 467 183.471 538 183.471 538C183.471 538 51.4705 352 9.47048 409C-32.5295 466 85.2548 578.5 109.255 636Z"
+            fill="url(#palmFillSsw)" stroke="none" />
+
+          <path id="hand-path"
+            d="M109.255 636C133.255 693.5 167.97 715.5 198.47 744C228.971 772.5 312.47 776.5 351.47 776.5C390.47 776.5 488.47 775.5 522.97 744C557.47 712.5 571.97 663.5 577.47 591.5C582.97 519.5 583.47 409 583.47 409C583.47 409 659.47 169.5 604.47 148.5C549.47 127.5 494.47 352.5 494.47 352.5C494.47 352.5 560.97 70 494.47 54C427.97 38 395.47 331.5 395.47 331.5C395.47 331.5 422.47 0.5 351.47 0.5C280.47 0.5 287.47 331.5 287.47 331.5C287.47 331.5 258.47 43.9885 189.971 54C121.471 64.0115 183.471 347 183.471 347C183.471 347 189.971 364 189.971 415.5C189.971 467 183.471 538 183.471 538C183.471 538 51.4705 352 9.47048 409C-32.5295 466 85.2548 578.5 109.255 636Z" />
+
+          <line x1="352" y1="655" x2="352" y2="420"
+                stroke="rgba(0,0,0,0.08)" stroke-width="1.8"
+                stroke-dasharray="6,9" stroke-linecap="round"/>
+
+          <path id="life-line"  />
+          <path id="head-line"  />
+          <path id="heart-line" />
+        </svg>
+
+        <div class="ssw-legend">
+          <div class="ssw-leg"><div class="ssw-leg-bar" style="background:var(--ssw-heart)"></div>感情線</div>
+          <div class="ssw-leg"><div class="ssw-leg-bar" style="background:var(--ssw-head)"></div>頭脳線</div>
+          <div class="ssw-leg"><div class="ssw-leg-bar" style="background:var(--ssw-life)"></div>生命線</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="ssw-result-panel" class="ssw-result-hidden">
+      <div class="ssw-result-inner">
+        <h2 class="ssw-result-title">手相診断レポート</h2>
+        <p class="ssw-result-sub">手相に刻まれた特徴から読み取れる、あなたの性質の傾向です。どちらが優れているということはありません。</p>
+        <div id="ssw-result-body"></div>
+        <button class="ssw-result-close" id="result-close">再診断する（閉じる）</button>
+      </div>
+    </div>
+
+  </div>
 </Layout>
 
-<script is:inline>
-    // 💡 すべて .png で指定しています
-    const questions = [
-        { id: 1, category: "lifeline", title: "生命線の高さ", image: "/lifeline_height.png", choices: ["高い", "低い", "普通"] },
-        { id: 2, category: "lifeline", title: "生命線の張り", image: "/lifeline_curve.png", choices: ["大きい", "少ない", "普通"] },
-        { id: 3, category: "lifeline", title: "生命線の向き", image: "/lifeline_direction.png", choices: ["小指方面", "親指方面", "手首方面"] },
-        { id: 4, category: "headline", title: "頭脳線の長さ", image: "/headline_length.png", choices: ["長い", "短い", "普通"] },
-        { id: 5, category: "headline", title: "頭脳線と感情線の距離", image: "/headline_emotion_distance.png", choices: ["近い", "遠い", "くっついている"] },
-        { id: 6, category: "headline", title: "頭脳線と生命線の距離", image: "/headline_life_distance.png", choices: ["離れている", "同じくらい", "くっついている"] },
-        { id: 7, category: "headline", title: "頭脳線の向き", image: "/headline_direction.png", choices: ["まっすぐ", "斜め", "大きく下がる"] },
-        { id: 8, category: "heartline", title: "感情線の長さ", image: "/heartline_length.png", choices: ["長い", "短い", "普通"] },
-        { id: 9, category: "heartline", title: "感情線の高さ", image: "/heartline_height.png", choices: ["高い", "低い", "普通"] },
-        { id: 10, category: "heartline", title: "感情線の向き", image: "/heartline_direction.png", choices: ["まっすぐ", "上まで上がっている", "中間", "下がっている"] },
-        { id: 11, category: "hand", title: "手の形", image: "/hand_shape.png", choices: ["正方形", "長方形"] },
-        { id: 12, category: "finger", title: "指の長さ", image: "/finger_length.png", choices: ["長い", "短い"] }
-    ];
-
-    let currentQuestion = 0;
-    let answers = {};
-
-    function startDiagnosis() {
-        document.getElementById('start-screen').style.display = 'none';
-        document.getElementById('question-screen').style.display = 'block';
-        showQuestion();
-    }
-
-    function showQuestion() {
-        const question = questions[currentQuestion];
-        const progress = ((currentQuestion + 1) / questions.length) * 100;
-        
-        document.getElementById('progress-bar').style.width = progress + '%';
-        document.getElementById('question-number').textContent = `質問 ${currentQuestion + 1} / ${questions.length}`;
-        document.getElementById('question-title').textContent = question.title;
-        
-        const imageContainer = document.getElementById('question-image');
-        imageContainer.innerHTML = `<img src="${question.image}" alt="${question.title}" class="palm-image" onerror="this.style.display='none'">`;
-        
-        const choicesContainer = document.getElementById('choices');
-        choicesContainer.innerHTML = '';
-        
-        question.choices.forEach((choice) => {
-            const btn = document.createElement('button');
-            btn.className = 'btn-choice';
-            btn.textContent = choice;
-            btn.onclick = () => selectChoice(choice);
-            choicesContainer.appendChild(btn);
-        });
-        
-        document.getElementById('back-button-container').style.display = currentQuestion > 0 ? 'block' : 'none';
-    }
-
-    function selectChoice(choice) {
-        const question = questions[currentQuestion];
-        answers[question.id] = { question: question.title, answer: choice, category: question.category };
-        currentQuestion++;
-        
-        if (currentQuestion < questions.length) {
-            setTimeout(showQuestion, 200);
-        } else {
-            setTimeout(showResult, 200);
-        }
-    }
-
-    function previousQuestion() {
-        if (currentQuestion > 0) {
-            currentQuestion--;
-            delete answers[questions[currentQuestion].id];
-            showQuestion();
-        }
-    }
-
-    function showResult() {
-        document.getElementById('question-screen').style.display = 'none';
-        document.getElementById('result-screen').style.display = 'block';
-        document.getElementById('diagnosis-result').innerHTML = generateDiagnosis();
-    }
-
-    function generateDiagnosis() {
-        const lifeline = getAnswersByCategory('lifeline');
-        const headline = getAnswersByCategory('headline');
-        const heartline = getAnswersByCategory('heartline');
-        const hand = getAnswersByCategory('hand');
-        const finger = getAnswersByCategory('finger');
-        
-        return `
-            <div class="result-box">
-                <h3 class="result-title">🏃 生命線から見る行動特性</h3>
-                <p class="result-text">${generateLifelineDiagnosis(lifeline)}</p>
-            </div>
-            <div class="result-box">
-                <h3 class="result-title">🧠 頭脳線から見る思考パターン</h3>
-                <p class="result-text">${generateHeadlineDiagnosis(headline)}</p>
-            </div>
-            <div class="result-box">
-                <h3 class="result-title">❤️ 感情線から見る感情表現</h3>
-                <p class="result-text">${generateHeartlineDiagnosis(heartline)}</p>
-            </div>
-            <div class="result-box">
-                <h3 class="result-title">✋ 手の形と指から見る価値観</h3>
-                <p class="result-text">${generateHandDiagnosis(hand, finger)}</p>
-            </div>
-            <div class="result-box highlight-box">
-                <h3 class="result-title">✨ 総合的なあなたの性格</h3>
-                <p class="result-text">${generateOverallDiagnosis(lifeline, headline, heartline, hand, finger)}</p>
-            </div>
-        `;
-    }
-
-    function getAnswersByCategory(category) { return Object.values(answers).filter(answer => answer.category === category); }
-
-    function generateLifelineDiagnosis(lifeline) {
-        const height = lifeline.find(a => a.question === '生命線の高さ')?.answer;
-        const curve = lifeline.find(a => a.question === '生命線の張り')?.answer;
-        const direction = lifeline.find(a => a.question === '生命線の向き')?.answer;
-        
-        let diagnosis = "あなたの生命線の特徴から、基本的な行動パターンと活動エネルギーの使い方が読み取れます。";
-        if (height === '高い') diagnosis += "直感的で衝動的な行動を取りやすい傾向があります。新しいアイデアや機会が現れたとき、深く考える前にまず行動に移すタイプです。";
-        else if (height === '低い') diagnosis += "物事を慎重に考えてから行動する非衝動的なタイプです。リスクを十分に検討し、計画的にアプローチすることで、安定した成果を上げることができます。";
-        else diagnosis += "衝動性と慎重さのバランスが取れています。状況に応じて、時には積極的に行動し、時には慎重に判断するという柔軟性を持っています。";
-        
-        if (curve === '大きい') diagnosis += "また、豊富なバイタリティと活動的なエネルギーを持っています。困難な状況でも持ち前のエネルギーで乗り越えられます。";
-        else if (curve === '少ない') diagnosis += "また、精神的な充実感を重視するタイプで、量よりも質を大切にし、深く考え抜かれた行動を取ることを好みます。";
-        else diagnosis += "また、活動的な面と精神的な面のバランスが良く取れています。";
-
-        if (direction === '小指方面') diagnosis += "外向的で環境を変化させることを好む、向上心の強い性格です。";
-        else if (direction === '親指方面') diagnosis += "内向的で安定した環境を好み、信頼できる仲間との絆を大切にする性格です。";
-        else diagnosis += "基盤を重視する安定志向の性格で、持続可能な成長を目指す賢明さを持っています。";
-        return diagnosis;
-    }
-
-    function generateHeadlineDiagnosis(headline) {
-        const length = headline.find(a => a.question === '頭脳線の長さ')?.answer;
-        const emotionDistance = headline.find(a => a.question === '頭脳線と感情線の距離')?.answer;
-        const lifeDistance = headline.find(a => a.question === '頭脳線と生命線の距離')?.answer;
-        const direction = headline.find(a => a.question === '頭脳線の向き')?.answer;
-        
-        let diagnosis = "あなたの頭脳線から、思考の特徴と意思決定のパターンを詳しく分析してみましょう。";
-        if (length === '長い') diagnosis += "物事を深く考え抜く長考型の思考パターンを持っています。複雑な問題に対しても時間をかけてじっくりと分析できます。";
-        else if (length === '短い') diagnosis += "直感的で素早い判断を得意とする回転の早い思考タイプです。スピーディーに結論を導き出すことができます。";
-        else diagnosis += "深く考える時と直感で判断する時のバランスが良く取れており、効率的で現実的な判断を下すことができます。";
-        
-        if (emotionDistance === '近い') diagnosis += "思考に感情が大きく影響するタイプで、人の気持ちを理解した温かみのある決定ができます。";
-        else if (emotionDistance === '遠い') diagnosis += "冷静で客観的な判断力に優れており、感情に左右されることなく合理的な決定を下すことができます。";
-        else diagnosis += "頭脳線と感情線がくっついているマスカケ線をお持ちのあなたは、極端で独創的な発想を生み出すことができる稀有な才能の持ち主です。";
-
-        if (lifeDistance === '離れている') diagnosis += "行動に対して思考の制約が少なく、自由な発想で積極的に行動することができます。";
-        else if (lifeDistance === '同じくらい') diagnosis += "思考と行動の調和が取れており、適度に考えてから行動に移すという現実的なスタイルを持っています。";
-        else diagnosis += "行動する前にしっかりと考える慎重なタイプで、リスクを最小限に抑えた安全な判断を下すことができます。";
-
-        if (direction === 'まっすぐ') diagnosis += "理論よりも実際の結果を重視する、現実的で実践的な思考を好みます。";
-        else if (direction === '斜め') diagnosis += "現実的な思考と理想的な発想のバランスが取れた柔軟な思考力を持っています。";
-        else diagnosis += "想像力豊かで、既存の枠にとらわれない斬新なアイデアを生み出すことができる感性豊かな思考力を持っています。";
-        return diagnosis;
-    }
-
-    function generateHeartlineDiagnosis(heartline) {
-        const length = heartline.find(a => a.question === '感情線の長さ')?.answer;
-        const height = heartline.find(a => a.question === '感情線の高さ')?.answer;
-        const direction = heartline.find(a => a.question === '感情線の向き')?.answer;
-        
-        let diagnosis = "あなたの感情線から、感情の豊かさと表現方法の特徴を詳しく見ていきましょう。";
-        if (length === '長い') diagnosis += "非常に豊かで深い感情を持っています。愛情深く情熱的で、人との関係においても深いつながりを求める傾向があります。";
-        else if (length === '短い') diagnosis += "さっぱりとした爽やかな感情表現を持っています。感情に振り回されることなく、冷静で客観的な判断ができます。";
-        else diagnosis += "感情の豊かさと冷静さのバランスが取れています。柔軟な感情表現ができるタイプです。";
-        
-        if (height === '高い') diagnosis += "また、外向的で社交性に優れています。自分の感情を素直に表現することができ、明るく開放的な性格です。";
-        else if (height === '低い') diagnosis += "また、内向的で深く考える傾向があります。少数の親しい人との時間を大切にし、質の高い人間関係を築くことを好みます。";
-        else diagnosis += "また、外向性と内向性のバランスが取れており、適応性の高い感情表現ができます。";
-
-        if (direction === 'まっすぐ') diagnosis += "クールで落ち着いた感情表現を持ち、理性的に自分の気持ちをコントロールできます。";
-        else if (direction === '上まで上がっている') diagnosis += "積極的で情熱的な感情表現を持ち、自分の気持ちをはっきりと相手に伝えることができます。";
-        else if (direction === '中間') diagnosis += "状況を見ながら適切なタイミングで自分の気持ちを伝えることができる配慮深さを持っています。";
-        else diagnosis += "控えめで奥ゆかしい感情表現を持ち、相手のペースに合わせることができる思いやり深い性格です。";
-        return diagnosis;
-    }
-
-    function generateHandDiagnosis(hand, finger) {
-        const handShape = hand[0]?.answer;
-        const fingerLength = finger[0]?.answer;
-        
-        let diagnosis = "あなたの手の形と指の長さから、基本的な価値観と情報処理のスタイルを分析します。";
-        if (handShape === '正方形') diagnosis += "現実的で実践的な価値観を重視します。理論よりも実際の体験を重視し、着実に結果を積み重ねていく堅実さを持っています。";
-        else diagnosis += "理想的で精神的な価値観を重視します。目に見えない価値や精神的な豊かさを大切にし、独創的な発想を生み出すことができます。";
-        
-        if (fingerLength === '長い') diagnosis += "また、複雑な情報でも整理整頓して理解し、詳細な部分まで注意深く検討する、情報処理能力に優れた分析的なタイプです。";
-        else diagnosis += "また、詳細な分析よりも、直感や過去の経験に基づいて素早く判断を下すことを好む、主観的で直感的な判断を重視するタイプです。";
-        return diagnosis;
-    }
-
-    function generateOverallDiagnosis(lifeline, headline, heartline, hand, finger) {
-        const lifeHeight = lifeline.find(a => a.question === '生命線の高さ')?.answer;
-        const headLength = headline.find(a => a.question === '頭脳線の長さ')?.answer;
-        const heartLength = heartline.find(a => a.question === '感情線の長さ')?.answer;
-        const handShape = hand[0]?.answer;
-        
-        let diagnosis = "これまでの分析を総合すると、あなたは非常にユニークで魅力的な個性を持った人物であることがわかります。<br><br>";
-        
-        if (lifeHeight === '高い' && headLength === '短い') diagnosis += "最大の強みは「直感的な行動力と素早い判断力」です。他の人が迷っている間に迅速に行動を起こし、チャンスを掴むことができます。";
-        else if (lifeHeight === '低い' && headLength === '長い') diagnosis += "最大の強みは「慎重な性格と深い思考力」です。多角的な分析を行ってから行動するため、失敗が少なく安定した成果を上げることができます。";
-        else diagnosis += "最大の強みは「バランスの取れた行動力と思考力」です。状況に応じて柔軟に対応し、適切な判断を下すことができる適応力の高さが光ります。";
-        
-        if (heartLength === '長い') diagnosis += "人間関係においては、その深い愛情と温かさで多くの人から信頼され、頼られる存在となるでしょう。";
-        else if (heartLength === '短い') diagnosis += "人間関係においては、相手に重い負担をかけることなく、長続きする安定した心地よい関係を築くことができます。";
-        else diagnosis += "人間関係においては、適度な距離感を保ちながら深いつながりも築けるため、多様な人々と良好な関係を維持できます。";
-        
-        if (handShape === '正方形') diagnosis += "今後は、その実践的なアプローチを活かし、具体的な成果を上げることができる分野でさらなる活躍が期待できます。";
-        else diagnosis += "今後は、その創造性と理想を追求する姿勢を活かし、革新的なアイデアで社会に新しい価値を提供していくことができるでしょう。";
-        
-        diagnosis += "<br><br>あなたには無限の可能性があります。この診断結果を参考に、自信を持って人生を歩んでいってください。";
-        return diagnosis;
-    }
-
-    function shareToTwitter() {
-        const text = encodeURIComponent("手相のマヨネリで無料性格診断をやってみました！専門的な手相知識ベースで面白い✨ #手相占い #性格診断");
-        const url = encodeURIComponent(window.location.href);
-        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
-    }
-    function shareToFacebook() { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank'); }
-    function shareToLine() { window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent("手相で性格がわかる診断サイト見つけた！無料だから試してみて✨")}`, '_blank'); }
-    function restartDiagnosis() {
-        currentQuestion = 0;
-        answers = {};
-        document.getElementById('result-screen').style.display = 'none';
-        document.getElementById('start-screen').style.display = 'block';
-    }
-</script>
-
 <style is:global>
-    /* 🌟 魔法１：すべての要素の横幅計算を「枠内」に強制する */
-    .shindan-page * {
-        box-sizing: border-box !important;
+  /* Result panel overlay (Light Mode) */
+  #ssw-result-panel {
+    position: fixed;
+    inset: 0;
+    background: rgba(242, 246, 244, 0.85); /* サイトの背景色を透過 */
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  #ssw-result-panel.ssw-result-hidden { display: none; }
+
+  .ssw-result-inner {
+    background: #ffffff;
+    border: 1px solid #d1e0d7;
+    border-radius: 20px;
+    padding: 2.5rem 2.5rem;
+    max-width: 750px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    color: var(--color-text);
+    box-shadow: 0 15px 35px rgba(29, 51, 42, 0.1);
+    font-family: system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', sans-serif;
+  }
+  .ssw-result-title {
+    font-size: 1.3rem;
+    color: var(--color-primary);
+    margin: 0 0 0.5rem;
+    letter-spacing: 0.1em;
+    text-align: center;
+    font-weight: bold;
+  }
+  .ssw-result-sub {
+    font-size: 0.8rem;
+    color: #7a9487;
+    margin: 0 0 2.5rem;
+    text-align: center;
+  }
+  .ssw-result-close {
+    display: block;
+    width: 100%;
+    margin-top: 2rem;
+    padding: 1rem;
+    background: var(--color-primary);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 0 var(--color-accent), 0 6px 15px rgba(78, 123, 103, 0.2);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+  }
+  .ssw-result-close:hover { 
+    background: var(--color-accent);
+    transform: translateY(-2px); 
+    box-shadow: 0 6px 0 var(--color-accent), 0 8px 20px rgba(78, 123, 103, 0.3);
+  }
+  .ssw-result-close:active {
+    transform: translateY(4px); box-shadow: 0 0 0 transparent;
+  }
+
+  /* Dynamic result sections */
+  #ssw-result-body .result-section { margin-bottom: 2.5rem; }
+
+  /* JSで生成する結果の中身。**Astroのscoped CSSはJS生成要素に効かない**ので、
+     ここ（is:global）に #ssw-result-body 配下として書く（CLAUDE.md の既知の注意点） */
+  #ssw-result-body .sd-pick p { margin:0 0 .9em; line-height:2; }
+  #ssw-result-body .sd-term { color:#2b6cb0; text-decoration:underline; text-underline-offset:3px; }
+  #ssw-result-body .sd-term:hover { color:var(--color-primary); }
+  #ssw-result-body .sd-note { margin:18px 0 6px; padding:18px 20px; background:#fdf6f8; border-left:3px solid #d9467d; border-radius:0 8px 8px 0; }
+  #ssw-result-body .sd-note p { margin:0 0 .7em; line-height:1.95; font-size:.95rem; }
+  #ssw-result-body .sd-note p:last-child { margin-bottom:0; }
+  #ssw-result-body .sd-small { font-size:.82rem; color:#7a9487; line-height:1.85; }
+  #ssw-result-body .sd-check ul { margin:.8em 0; padding-left:1.2em; }
+  #ssw-result-body .sd-check li { margin:.5em 0; line-height:1.95; }
+  #ssw-result-body .type-break { margin-top:16px; padding-top:14px; border-top:1px dashed #d1e0d7; text-align:left; }
+  #ssw-result-body .type-break__label { display:block; font-size:.72rem; letter-spacing:.12em; color:#7a9487; margin-bottom:6px; }
+  #ssw-result-body .type-break p { margin:0 0 .6em; font-size:.88rem; line-height:1.9; }
+  #ssw-result-body .sd-next { margin-top:36px; padding:24px 26px; background:#fff; border:1px solid #d1e0d7;
+             border-left:4px solid var(--color-primary); border-radius:0 12px 12px 0; }
+  #ssw-result-body .sd-next__lead { margin:0 0 10px; font-weight:700; }
+  #ssw-result-body .sd-next ul { margin:0 0 14px; padding-left:1.2em; }
+  #ssw-result-body .sd-next li { margin:.45em 0; line-height:1.9; font-size:.92rem; }
+  #ssw-result-body .sd-next a { color:var(--color-primary); font-weight:700; }
+
+  #ssw-result-body .result-heading {
+    font-size: 0.95rem;
+    color: var(--color-accent);
+    font-weight: bold;
+    margin-bottom: 1.2rem;
+    border-bottom: 1px solid #d1e0d7;
+    padding-bottom: 0.4rem;
+    letter-spacing: 0.1em;
+  }
+  #ssw-result-body .summary-box {
+    background: var(--color-bg);
+    border-left: 4px solid var(--color-primary);
+    padding: 1.2rem 1.5rem;
+    border-radius: 4px 12px 12px 4px;
+    margin-bottom: 2rem;
+  }
+  #ssw-result-body .summary-box p {
+    font-size: 0.85rem;
+    color: var(--color-text);
+    line-height: 1.7;
+    margin-bottom: 0.8rem;
+  }
+  #ssw-result-body .summary-box p:last-child { margin-bottom: 0; }
+  
+  #ssw-result-body .spider-wrap { display: flex; justify-content: center; margin: 1rem 0; }
+  #ssw-result-body .spider-wrap svg { width: 100%; max-width: 480px; }
+  
+  #ssw-result-body .allocation-chart-container {
+    display: flex; align-items: center; justify-content: center;
+    gap: 2.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+  }
+  #ssw-result-body .donut-chart {
+    width: 170px; height: 170px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    transition: background 0.5s ease-out; flex-shrink: 0;
+  }
+  #ssw-result-body .donut-inner {
+    width: 130px; height: 130px;
+    background: #ffffff;
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; box-shadow: inset 0 0 12px rgba(0,0,0,0.05);
+  }
+  #ssw-result-body .donut-total {
+    font-size: 0.75rem; color: #7a9487;
+    text-align: center; letter-spacing: 0.1em; line-height: 1.4; font-weight: bold;
+  }
+  #ssw-result-body .stat-labels { display: flex; flex-direction: column; gap: 0.8rem; }
+  #ssw-result-body .stat-lbl {
+    font-size: 0.85rem; color: var(--color-text); font-weight: 500;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  
+  #ssw-result-body .quad-section {
+    margin-top: 1.8rem; border-top: 1px solid #d1e0d7; padding-top: 1.8rem;
+  }
+  #ssw-result-body .quad-section h3 {
+    font-size: 0.85rem; color: var(--color-accent);
+    letter-spacing: 0.1em; margin: 0 0 1.2rem; text-align: center; font-weight: bold;
+  }
+  #ssw-result-body .quad-wrap { display: flex; justify-content: center; }
+  #ssw-result-body .quad-wrap svg { width: 100%; max-width: 380px; }
+  
+  #ssw-result-body .type-card {
+    margin-top: 1.2rem; background: var(--color-bg);
+    border: 1px solid #d1e0d7; border-radius: 12px;
+    padding: 1.5rem 1.2rem; text-align: center;
+  }
+  #ssw-result-body .type-name {
+    font-size: 1.1rem; font-weight: 700; color: var(--color-primary);
+    margin-bottom: 0.6rem; letter-spacing: 0.04em;
+  }
+  #ssw-result-body .type-desc {
+    font-size: 0.85rem; color: var(--color-text); line-height: 1.6; opacity: 0.9;
+  }
+  
+  @media (max-width: 600px) {
+    .ssw-result-inner { padding: 1.5rem 1.2rem; border-radius: 14px; }
+    #ssw-result-body .allocation-chart-container { gap: 1.5rem; }
+    #ssw-result-body .donut-chart { width: 140px; height: 140px; }
+    #ssw-result-body .donut-inner { width: 106px; height: 106px; }
+  }
+
+  /* ★ スマホ時の診断結果ポップアップ調整（ヘッダー被り防止） */
+  @media (max-width: 860px) {
+    #ssw-result-panel {
+      padding: 85px 1rem 1.5rem !important;
+      align-items: flex-start !important;
     }
-
-    .shindan-page {
-        padding: 40px 15px;
-        max-width: 800px;
-        margin: 0 auto;
-        min-height: 70vh;
+    .ssw-result-inner {
+      max-height: 100% !important;
+      margin: 0 auto;
     }
+  }
 
-    .shindan-card {
-        background-color: white;
-        border-radius: 16px;
-        padding: 40px 30px;
-        box-shadow: 0 10px 30px rgba(78, 123, 103, 0.1);
-        border: 1px solid #d1e0d7;
-        border-top: 5px solid var(--color-primary);
-        width: 100%;       /* 枠いっぱいに広げる */
-        overflow: hidden;  /* 🌟 魔法２：枠からはみ出したものは強制的に切り捨てる（隠す） */
+  /* ★ スマホ画面固定用のグローバルスタイル */
+  @media (max-width: 860px) {
+    body { 
+      overflow: hidden !important; 
+      overscroll-behavior-y: none;
     }
-
-    .main-title { color: var(--color-primary); font-size: 2rem; margin-bottom: 10px; }
-    .sub-title { color: var(--color-accent); font-weight: bold; font-size: 1.1rem; margin-bottom: 30px; }
-    .desc-box { background-color: var(--color-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; color: var(--color-text); line-height: 1.6; }
-
-    .progress-container { background-color: #d1e0d7; height: 8px; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
-    .progress-bar { background-color: var(--color-accent); height: 100%; transition: width 0.4s ease; }
-
-    .question-header { margin-bottom: 30px; }
-    .q-number { display: inline-block; background-color: var(--color-bg); color: var(--color-primary); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; }
-    .q-title { font-size: 1.5rem; color: var(--color-text); }
-    
-    /* 🌟 画像エリアの最終調整 */
-    .image-container {
-        width: 100%;
-        margin-bottom: 30px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+    .site-footer { 
+      display: none !important; 
     }
-    .palm-image {
-        max-width: 100%;    /* 絶対に枠を超えない */
-        width: auto;
-        height: auto;
-        max-height: 320px;  /* 高すぎないように制御 */
-        object-fit: contain;
-        border-radius: 8px;
-        border: 3px solid var(--color-primary);
-        box-shadow: 0 4px 10px rgba(78, 123, 103, 0.15);
-    }
-
-    /* 🌟 ボタンエリアの最終調整 */
-    .choices-container {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        width: 100%;
-        margin-bottom: 30px;
-    }
-    .btn-choice {
-        background-color: white;
-        border: 2px solid var(--color-primary);
-        color: var(--color-primary);
-        padding: 15px;
-        font-size: 1.1rem;
-        font-weight: bold;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.2s;
-        width: 100%;
-        -webkit-appearance: none; /* 🌟 魔法３：ブラウザ標準のグレーボタンデザインを強制リセット */
-        appearance: none;
-    }
-    .btn-choice:hover {
-        background-color: var(--color-primary);
-        color: white;
-        transform: translateY(-2px);
-    }
-
-    /* 結果画面の要素 */
-    .result-box { background-color: var(--color-bg); padding: 25px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid var(--color-accent); text-align: left;}
-    .highlight-box { background-color: var(--color-primary); color: white; border-left: none; }
-    .result-title { font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px dashed rgba(0,0,0,0.1); padding-bottom: 10px; }
-    .highlight-box .result-title { border-bottom-color: rgba(255,255,255,0.3); }
-    .result-text { line-height: 1.8; font-size: 1rem; }
-
-    /* ボタン類 */
-    .btn-primary { background-color: var(--color-primary); color: white; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 30px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(78, 123, 103, 0.35); }
-    .btn-secondary { background-color: white; color: var(--color-text); border: 2px solid #ccc; padding: 12px 30px; font-weight: bold; border-radius: 30px; cursor: pointer; transition: all 0.2s; }
-    .btn-secondary:hover { border-color: var(--color-primary); color: var(--color-primary); }
-    .btn-text { background: none; border: none; color: #888; cursor: pointer; font-weight: bold; text-decoration: underline; }
-    .btn-text:hover { color: var(--color-primary); }
-
-    .share-text { font-weight: bold; margin-bottom: 15px; }
-    .share-buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
-    .btn-share { padding: 10px 20px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
-    .btn-share:hover { opacity: 0.8; }
-    .twitter { background-color: #000000; }
-    .facebook { background-color: #1877F2; }
-    .line { background-color: #06C755; }
-
-    .pulse-animation { animation: pulse 2s infinite; }
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-    .text-center { text-align: center; }
-    .mb-8 { margin-bottom: 2rem; }
-    .mt-10 { margin-top: 2.5rem; }
-    .mt-8 { margin-top: 2rem; }
+  }
 </style>
+
+<style>
+  /* ───────── 入口の選択・かんたん12問（2026-09-28 統合で追加） ───────── */
+
+  /* `hidden` 属性は display の指定に負ける。
+     .ssw-layout は display:grid を持っているので、これが無いと隠れない。
+     隠れないと、手の絵（SVG）が入口のボタンに重なってタップできなくなる。 */
+  .ssw [hidden] { display: none !important; }
+
+  .sd-modes { display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:820px; margin:0 auto 40px; }
+  .sd-mode { display:block; text-align:left; background:#fff; border:1px solid #d1e0d7; border-radius:14px;
+             padding:24px 24px 26px; cursor:pointer; font:inherit; color:inherit; transition:border-color .2s, transform .2s, box-shadow .2s; }
+  .sd-mode:hover { border-color:var(--color-primary); transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,.06); }
+  .sd-mode__label { display:inline-block; font-size:.72rem; letter-spacing:.14em; color:#fff;
+                    background:var(--color-primary); border-radius:100px; padding:3px 12px; margin-bottom:12px; }
+  .sd-mode__lead { display:block; font-size:1.18rem; font-weight:700; margin-bottom:8px; }
+  .sd-mode__desc { display:block; font-size:.88rem; line-height:1.85; color:#5f6a64; }
+
+  .sd-quiz { max-width:680px; margin:0 auto 48px; background:#fff; border:1px solid #d1e0d7;
+             border-radius:14px; padding:28px 28px 24px; }
+  .sd-quiz__bar { height:4px; background:#e8f0ea; border-radius:100px; overflow:hidden; }
+  .sd-quiz__fill { height:100%; background:var(--color-primary); width:0; transition:width .3s; }
+  .sd-quiz__count { margin:14px 0 4px; font-size:.78rem; letter-spacing:.1em; color:#7a9487; }
+  .sd-quiz__q { margin:0 0 10px; font-size:1.3rem; line-height:1.6; }
+  .sd-quiz__hint { margin:0 0 20px; font-size:.86rem; line-height:1.9; color:#5f6a64; }
+  .sd-quiz__choices { display:grid; gap:10px; }
+  .sd-choice { font:inherit; text-align:left; background:#fbfdfc; border:1px solid #d1e0d7; border-radius:10px;
+               padding:15px 18px; cursor:pointer; transition:background .15s, border-color .15s; }
+  .sd-choice:hover { background:#eef4f0; border-color:var(--color-primary); }
+  .sd-quiz__nav { display:flex; justify-content:space-between; gap:12px; margin-top:20px; }
+  .sd-link { font:inherit; font-size:.84rem; background:none; border:none; color:#5f6a64;
+             text-decoration:underline; cursor:pointer; padding:4px 0; }
+  .sd-link:hover { color:var(--color-primary); }
+
+  /* ───────── 結果の追加部分 ───────── */
+
+  @media (max-width:640px){
+    .sd-modes { grid-template-columns:1fr; gap:12px; }
+    .sd-mode { padding:20px; }
+    .sd-quiz { padding:22px 18px 20px; border-radius:12px; }
+    .sd-quiz__q { font-size:1.12rem; }
+    .sd-next { padding:20px; }
+  }
+
+  /* ── Wrapper: Light Mode matched to Site ── */
+  .ssw {
+    /* サイト全体の変数をそのまま使用 */
+    --ssw-bg: var(--color-bg);
+    --ssw-surface: #ffffff;
+    --ssw-border: #d1e0d7;
+    --ssw-text: var(--color-text);
+    --ssw-muted: #7a9487;
+    --ssw-accent: var(--color-primary);
+    
+    /* ラインの色：白背景に映えるよう少し濃いめに調整 */
+    --ssw-heart: #d9467d; /* 落ち着いた濃いピンク */
+    --ssw-head: #2b6cb0;  /* 落ち着いた青 */
+    --ssw-life: var(--color-primary); /* サイトの緑 */
+    --ssw-hand: #d97706;  /* 落ち着いたゴールド */
+
+    background: transparent;
+    color: var(--ssw-text);
+    font-family: inherit;
+    padding-bottom: 4rem;
+  }
+
+  /* ── Hero / Intro ── */
+  .ssw-hero {
+    text-align: center;
+    padding: 2.8rem 1rem 1.8rem;
+    position: relative;
+  }
+  .ssw-hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%; transform: translateX(-50%);
+    width: min(600px, 80%); height: 1px;
+    background: linear-gradient(90deg, transparent, var(--ssw-border), transparent);
+  }
+  .ssw-title {
+    font-size: clamp(1.6rem, 4.5vw, 2.4rem);
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    background: none;
+    -webkit-text-fill-color: initial;
+    color: var(--color-primary); /* サイトのメインカラーに統一 */
+    margin: 0 0 0.5rem;
+  }
+  .ssw-sub {
+    font-size: 0.84rem;
+    color: var(--ssw-muted);
+    letter-spacing: 0.04em;
+    margin: 0;
+  }
+
+  /* ── Main layout ── */
+  .ssw-layout {
+    display: grid;
+    grid-template-columns: 348px 1fr;
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 1.8rem auto 0;
+    padding: 0 1.5rem;
+  }
+
+  /* ── Panel ── */
+  .ssw-panel {
+    background: var(--ssw-surface);
+    border: 1px solid var(--ssw-border);
+    border-radius: 18px;
+    padding: 1.5rem 1.25rem 1.25rem;
+    height: fit-content;
+    position: sticky;
+    top: 80px;
+    box-shadow: 0 4px 15px rgba(78, 123, 103, 0.05); /* ほんのり緑の影 */
+  }
+
+  /* ★ スマホ版の完全アプリ化レイアウト */
+  @media (max-width: 860px) {
+    /* タイトル非表示 */
+    .ssw-hero { display: none; }
+
+    /* ツール全体を画面に完全に貼り付ける */
+    .ssw-layout {
+      position: fixed;
+      top: 105px;
+      left: 0;
+      width: 100%;
+      height: calc(100dvh - 105px);
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      padding: 0;
+      z-index: 1000;
+      background: var(--color-bg);
+      box-sizing: border-box;
+    }
+
+    /* 上部：手相プレビュー */
+    .ssw-preview {
+      order: 1;
+      flex: 0 0 32%;
+      min-height: 0 !important;
+      height: 32%;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 8px 0; 
+      background: var(--color-bg);
+      border: none;
+      border-bottom: 2px solid #d1e0d7;
+      border-radius: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      z-index: 10;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    /* SVG画像を枠内に確実に収める */
+    .ssw-palm-svg {
+      height: 100%;
+      max-height: 100%;
+      width: auto;
+      max-width: 100%;
+      display: block;
+      transform-origin: center bottom;
+    }
+
+    .ssw-legend { display: none; }
+
+    /* 下部：スライダー */
+    .ssw-panel {
+      order: 2;
+      flex: 1;
+      width: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      padding: 15px 15px 120px;
+      background: #ffffff;
+      margin: 0;
+      border: none;
+      border-radius: 0;
+      position: static;
+      box-sizing: border-box;
+    }
+
+    .ssw-srow { margin-bottom: 0.85rem; }
+    .ssw-sec-head { margin-bottom: 0.6rem; margin-top: 0.8rem; }
+    .ssw-divider { margin: 0.8rem 0; }
+  }
+
+  .ssw-sec-head {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .ssw-sec-head::before {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+    box-shadow: 0 0 6px currentColor;
+  }
+  .ssw-divider { height: 1px; background: var(--ssw-border); margin: 1rem 0; }
+
+  /* ── Slider Row ── */
+  .ssw-srow { margin-bottom: 0.75rem; }
+  .ssw-smeta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.28rem; }
+  .ssw-sname { font-size: 0.8rem; font-weight: 600; color: var(--ssw-text); }
+  .ssw-sval {
+    font-size: 0.7rem; font-weight: 700;
+    padding: 0.06rem 0.38rem; border-radius: 4px;
+    min-width: 26px; text-align: center;
+  }
+  .ssw-strack { display: flex; align-items: center; gap: 0.45rem; }
+  .ssw-strack input[type=range] { flex: 1; min-width: 0; }
+  .ssw-send-l, .ssw-send-r {
+    font-size: 0.65rem; color: var(--ssw-muted); font-weight: bold;
+    white-space: nowrap; flex-shrink: 0; width: 4.8em;
+  }
+  .ssw-send-l { text-align: right; }
+  .ssw-send-r { text-align: left; }
+
+  /* Range base */
+  .ssw input[type=range] {
+    -webkit-appearance: none;
+    width: 100%; height: 6px; border-radius: 3px; outline: none; cursor: pointer;
+  }
+  .ssw input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 3px solid #ffffff;
+    cursor: grab;
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .ssw input[type=range]::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.15); }
+  .ssw input[type=range]::-moz-range-track { height: 6px; border-radius: 3px; border: none; }
+  .ssw input[type=range]::-moz-range-thumb {
+    width: 28px; height: 28px; border-radius: 50%; border: 3px solid #ffffff; cursor: grab;
+  }
+
+  /* トラック：全体均一色（左右の優劣なし） */
+  .ssw-hl input[type=range] { background: rgba(217, 70, 125, 0.3); }
+  .ssw-hl input[type=range]::-webkit-slider-thumb {
+    background: var(--ssw-heart);
+    box-shadow: 0 0 0 4px rgba(217, 70, 125, 0.2), 0 2px 6px rgba(217, 70, 125, 0.4);
+  }
+  .ssw-hl .ssw-sval { color: var(--ssw-heart); background: rgba(217,70,125,0.1); }
+
+  .ssw-hl2 input[type=range] { background: rgba(43, 108, 176, 0.3); }
+  .ssw-hl2 input[type=range]::-webkit-slider-thumb {
+    background: var(--ssw-head);
+    box-shadow: 0 0 0 4px rgba(43, 108, 176, 0.2), 0 2px 6px rgba(43, 108, 176, 0.4);
+  }
+  .ssw-hl2 .ssw-sval { color: var(--ssw-head); background: rgba(43,108,176,0.1); }
+
+  .ssw-ll input[type=range] { background: rgba(78, 123, 103, 0.3); }
+  .ssw-ll input[type=range]::-webkit-slider-thumb {
+    background: var(--ssw-life);
+    box-shadow: 0 0 0 4px rgba(78, 123, 103, 0.2), 0 2px 6px rgba(78, 123, 103, 0.4);
+  }
+  .ssw-ll .ssw-sval { color: var(--ssw-life); background: rgba(78,123,103,0.1); }
+
+  .ssw-hd input[type=range] { background: rgba(217, 119, 6, 0.3); }
+  .ssw-hd input[type=range]::-webkit-slider-thumb {
+    background: var(--ssw-hand);
+    box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.2), 0 2px 6px rgba(217, 119, 6, 0.4);
+  }
+  .ssw-hd .ssw-sval { color: var(--ssw-hand); background: rgba(217,119,6,0.1); }
+
+  /* Reset button */
+  .ssw-reset-btn {
+    display: block; width: 100%; margin-top: 1.25rem;
+    padding: 0.6rem 1rem; 
+    background-color: #ffffff; 
+    border-radius: 12px; 
+    border: 1px solid #e1ebe5; 
+    box-shadow: 0 4px 0 #d1e0d7, 0 5px 10px rgba(78, 123, 103, 0.06);
+    color: var(--ssw-muted); font-size: 0.8rem; font-weight: bold; letter-spacing: 0.06em;
+    cursor: pointer; transition: all 0.2s ease;
+    font-family: inherit;
+  }
+  .ssw-reset-btn:hover { 
+    color: var(--color-primary); transform: translateY(-2px); 
+    box-shadow: 0 6px 0 #d1e0d7, 0 8px 15px rgba(78, 123, 103, 0.12); 
+  }
+  .ssw-reset-btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+
+  /* ── タブ切替 ── */
+  .ssw-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+    background: rgba(78, 123, 103, 0.07);
+    border-radius: 12px;
+    padding: 4px;
+  }
+  .ssw-tab {
+    flex: 1;
+    padding: 9px 0;
+    border: none;
+    border-radius: 9px;
+    font-size: 0.88rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    background: transparent;
+    color: var(--color-text);
+    opacity: 0.55;
+    transition: background 0.18s, opacity 0.18s, box-shadow 0.18s;
+  }
+  .ssw-tab.active {
+    background: #ffffff;
+    opacity: 1;
+    box-shadow: 0 2px 8px rgba(78, 123, 103, 0.18);
+    color: var(--color-primary);
+  }
+
+  /* ── URL共有ボタン ── */
+  .ssw-share-wrap {
+    margin-bottom: 14px;
+  }
+  .ssw-url-share-btn {
+    display: block;
+    width: 100%;
+    padding: 9px 12px;
+    background: transparent;
+    border: 1.5px dashed rgba(78, 123, 103, 0.5);
+    border-radius: 9px;
+    color: var(--color-primary);
+    font-size: 0.8rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.18s, border-color 0.18s;
+  }
+  .ssw-url-share-btn:hover {
+    background: rgba(78, 123, 103, 0.08);
+    border-color: var(--color-primary);
+  }
+
+  /* Diagnose button */
+  .ssw-diagnose-btn {
+    display: block; width: 100%; margin-top: 0.85rem;
+    padding: 0.85rem 1rem;
+    background: var(--color-primary);
+    border: none;
+    border-radius: 12px;
+    color: #ffffff; font-size: 0.9rem; font-weight: bold;
+    letter-spacing: 0.08em; cursor: pointer;
+    box-shadow: 0 4px 0 var(--color-accent), 0 5px 10px rgba(78, 123, 103, 0.15);
+    transition: all 0.2s ease;
+    font-family: inherit;
+  }
+  .ssw-diagnose-btn:hover {
+    background: #5a8a75;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--color-accent), 0 8px 15px rgba(78, 123, 103, 0.2);
+  }
+  .ssw-diagnose-btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+
+  /* ── 相性診断専用スコア表示 ── */
+  .pair-score-wrap { text-align: center; margin: 1rem 0 2rem; background: rgba(78, 123, 103, 0.05); border: 1px solid #d1e0d7; border-radius: 16px; padding: 2rem 1rem; }
+  .pair-score-num { font-size: 4.5rem; font-weight: 800; color: var(--color-primary); line-height: 1; margin: 0.5rem 0; font-family: system-ui; }
+  .pair-score-label { font-size: 0.85rem; color: #7a9487; font-weight: bold; letter-spacing: 0.15em; }
+
+  /* ── Preview Panel (PC Light Mode) ── */
+  .ssw-preview {
+    background: #ffffff;
+    border: 1px solid var(--ssw-border);
+    border-radius: 18px;
+    padding: 1.5rem;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 520px;
+    position: relative; overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  }
+
+  .ssw-palm-svg {
+    width: 100%; max-width: 420px; height: auto;
+    overflow: visible; transform-origin: 50% 100%;
+    transition: transform 0.25s ease;
+  }
+
+  /* SVG hand / lines */
+  #hand-path {
+    fill: rgba(242, 246, 244, 0.8);
+    stroke: var(--color-text);
+    stroke-width: 2.2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  #heart-line {
+    fill: none; stroke: var(--ssw-heart); stroke-width: 2.8; stroke-linecap: round;
+    filter: drop-shadow(0 0 3px rgba(217,70,125,0.3));
+  }
+  #head-line {
+    fill: none; stroke: var(--ssw-head); stroke-width: 2.8; stroke-linecap: round;
+    filter: drop-shadow(0 0 3px rgba(43,108,176,0.3));
+  }
+  #life-line {
+    fill: none; stroke: var(--ssw-life); stroke-width: 2.8; stroke-linecap: round;
+    filter: drop-shadow(0 0 3px rgba(78,123,103,0.3));
+  }
+
+  /* Legend */
+  .ssw-legend { display: flex; gap: 1.6rem; margin-top: 1.2rem; flex-wrap: wrap; justify-content: center; }
+  .ssw-leg { display: flex; align-items: center; gap: 0.4rem; font-size: 0.74rem; color: var(--ssw-text); font-weight: bold; }
+  .ssw-leg-bar { width: 22px; height: 3px; border-radius: 2px; }
+</style>
+
+<script is:inline data-astro-rerun>
+(function () {
+  'use strict';
+
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const R    = n => parseFloat(n.toFixed(1));
+
+  const IDS = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11'];
+  const sliders = {};
+  IDS.forEach(id => { sliders[id] = document.getElementById(id); });
+
+  // ──────────────────────────────────────────────
+  // かんたんモード（12問）
+  //
+  // 12問の答えを、そのまま「くわしく」のつまみの値に変換する。
+  // 入口が2つあるだけで、**結果を出す仕組みは1つ**。
+  // ──────────────────────────────────────────────
+  const QUESTIONS = [
+    { key:'q1',  s:'s7',  q:'生命線は、どのあたりから始まっていますか',
+      hint:'生命線は、親指を囲むように伸びる線です。その「始まり」が、人差し指の付け根に近いか、親指の付け根に近いかを見ます。',
+      choices:[['高い（人差し指の付け根に近い）',75],['ふつう',50],['低い（親指の付け根に近い）',25]] },
+    { key:'q2',  s:'s8',  q:'生命線の膨らみ方は',
+      hint:'親指側にどれくらい大きく張り出しているかです。手のひらの真ん中あたりまで張っていれば「大きい」。',
+      choices:[['大きく張っている',75],['ふつう',50],['小さい（親指に沿っている）',25]] },
+    { key:'q3',  s:'s9',  q:'生命線の終わりは、どちらへ向かっていますか',
+      hint:'手首のほうまで下りてきた先が、手首の中央側（内側）か、手のひらの外側（小指側）かを見ます。',
+      choices:[['外側（小指のほう）へ流れる',75],['まっすぐ手首へ',50],['内側（親指の付け根）へ回る',25]] },
+    { key:'q4',  s:'s5',  q:'頭脳線の長さは',
+      hint:'頭脳線は、手のひらを横切る2本のうち「下のほう」の線です。手のひらの半分より長いか短いか。',
+      choices:[['長い（手のひらを大きく横切る）',75],['ふつう',50],['短い',25]] },
+    { key:'q5',  s:'s4',  q:'頭脳線の始まりは、生命線とどうなっていますか',
+      hint:'2本の線の「出発点」の関係です。ここは読みが大きく変わるところなので、よく見てください。',
+      choices:[['離れている',75],['少しだけ重なっている',50],['しっかりくっついている',25]] },
+    { key:'q6',  s:'s6',  q:'頭脳線は、どちらへ向かっていますか',
+      hint:'先端が手首のほうへ下がっているか、まっすぐ横へ抜けているか。',
+      choices:[['ほぼ水平にまっすぐ',75],['ゆるやかに下がる',50],['大きく下がる',20]] },
+    { key:'q7',  s:'s2',  q:'感情線の長さは',
+      hint:'感情線は、手のひらを横切る2本のうち「上のほう」の線です。小指側から、どこまで伸びていますか。',
+      choices:[['長い（人差し指のほうまで）',75],['ふつう',50],['短い（中指の手前で止まる）',25]] },
+    { key:'q8',  s:'s1',  q:'感情線は、どのあたりを通っていますか',
+      hint:'指の付け根に近いところを通るか、手のひらの中ほどを通るか。',
+      choices:[['高い（指の付け根に近い）',75],['ふつう',50],['低い（手のひらの中ほど）',25]] },
+    { key:'q9',  s:'s3',  q:'感情線の先は、どうなっていますか',
+      hint:'先端が上を向いて跳ねるか、まっすぐ伸びるか、下を向くか。',
+      choices:[['上向きに跳ねる',80],['まっすぐ',55],['下向きに落ちる',20]] },
+    { key:'q10', s:'s10', q:'手のひらの形は',
+      hint:'手首から指の付け根までの「縦」と、手のひらの「横幅」を比べてください。',
+      choices:[['縦長',75],['どちらとも言えない',50],['幅広（四角い）',25]] },
+    { key:'q11', s:'s11', q:'指の長さは',
+      hint:'手のひらの縦の長さと、中指の長さを比べます。中指のほうが長ければ「長い」。',
+      choices:[['長い',75],['ふつう',50],['短い',25]] },
+    // 12問目はつまみに直結させない。「くっついている」ならマスカケなので、結果で別に扱う
+    { key:'q12', s:null,  q:'頭脳線と感情線は、離れていますか',
+      hint:'手のひらを横切る2本の線の間隔です。1本につながって見える場合は、いちばん下を選んでください。',
+      choices:[['はっきり離れている','far'],['間が狭い','near'],['1本につながって見える','masukake']] },
+  ];
+
+  const answers = {};
+  let qi = 0;
+
+  const el = id => document.getElementById(id);
+  const show = (id, on) => { const n = el(id); if (n) n.hidden = !on; };
+
+  function renderQuestion() {
+    const Q = QUESTIONS[qi];
+    el('sd-fill').style.width = ((qi) / QUESTIONS.length * 100) + '%';
+    el('sd-count').textContent = `${qi + 1} / ${QUESTIONS.length}`;
+    el('sd-q').textContent = Q.q;
+    el('sd-hint').textContent = Q.hint;
+    const box = el('sd-choices');
+    box.innerHTML = '';
+    Q.choices.forEach(([label, val]) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sd-choice';
+      b.textContent = label;
+      b.addEventListener('click', () => {
+        answers[Q.key] = val;
+        if (Q.s) { state.you[Q.s] = val; }
+        qi++;
+        if (qi < QUESTIONS.length) renderQuestion();
+        else finishQuiz();
+      });
+      box.appendChild(b);
+    });
+    el('sd-back').style.visibility = qi > 0 ? 'visible' : 'hidden';
+  }
+
+  function finishQuiz() {
+    applyStateToSliders('you');
+    update();
+    show('sd-quiz', false);
+    show('ssw-layout', true);
+    // 12問の答えをつまみに入れた状態で、そのまま結果を出す
+    el('diagnose-btn').click();
+    el('ssw-layout').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function startEasy() {
+    qi = 0;
+    show('sd-modes', false);
+    show('sd-quiz', true);
+    renderQuestion();
+  }
+  function startDetail() {
+    show('sd-modes', false);
+    show('sd-quiz', false);
+    show('ssw-layout', true);
+    applyStateToSliders('you');
+    update();
+  }
+
+  // ── 2人分の状態管理 ──
+  const initVals = () => Object.fromEntries(IDS.map(id => [id, 50]));
+  const state = { you: initVals(), partner: initVals() };
+  let currentTab = 'you';
+
+  // スライダーDOMに現在のタブのstateを反映
+  function applyStateToSliders(tab) {
+    IDS.forEach(id => { sliders[id].value = state[tab][id]; });
+  }
+
+  // state[currentTab] から読む（描画関数はすべてこれ経由）
+  const t = id => state[currentTab][id] / 100;
+
+  const ORIG_PATH = 'M109.255 636C133.255 693.5 167.97 715.5 198.47 744C228.971 772.5 312.47 776.5 351.47 776.5C390.47 776.5 488.47 775.5 522.97 744C557.47 712.5 571.97 663.5 577.47 591.5C582.97 519.5 583.47 409 583.47 409C583.47 409 659.47 169.5 604.47 148.5C549.47 127.5 494.47 352.5 494.47 352.5C494.47 352.5 560.97 70 494.47 54C427.97 38 395.47 331.5 395.47 331.5C395.47 331.5 422.47 0.5 351.47 0.5C280.47 0.5 287.47 331.5 287.47 331.5C287.47 331.5 258.47 43.9885 189.971 54C121.471 64.0115 183.471 347 183.471 347C183.471 347 189.971 364 189.971 415.5C189.971 467 183.471 538 183.471 538C183.471 538 51.4705 352 9.47048 409C-32.5295 466 85.2548 578.5 109.255 636Z';
+
+  function morphPath(t10, fyScale) {
+    const CX = 312, BY = 340, MAX_Y = 777;
+    const venusPower = t10 < 0.5 ? lerp(1, 0.8, t10 * 2) : lerp(0.8, 0, (t10 - 0.5) * 2);
+    const moonPower  = t10 < 0.5 ? lerp(0, 0.2, t10 * 2) : lerp(0.2, 1, (t10 - 0.5) * 2);
+
+    const tx = (x, y) => {
+      let nx = x;
+      if (y > BY && x < CX) {
+        const depth       = Math.min(1, (y - BY) / (MAX_Y - BY));
+        const widthFactor = Math.min(1, (CX - x) / CX);
+        nx -= venusPower * 65 * Math.pow(depth, 0.8) * widthFactor;
+      }
+      return parseFloat(nx.toFixed(2));
+    };
+    const ty = (x, y) => {
+      let ny = y < BY ? BY - (BY - y) * fyScale : y;
+      if (y > BY && x > CX) {
+        const depth       = Math.min(1, (y - BY) / (MAX_Y - BY));
+        const widthFactor = Math.min(1, (x - CX) / (625 - CX));
+        ny += moonPower * 65 * Math.pow(depth, 1.2) * widthFactor;
+      }
+      return parseFloat(ny.toFixed(2));
+    };
+
+    const parts = [];
+    const segRe = /([MmCcZz])([^MmCcZz]*)/g;
+    const numRe = /-?[0-9]*\.?[0-9]+(?:e[-+]?[0-9]+)?/g;
+    let seg;
+    while ((seg = segRe.exec(ORIG_PATH)) !== null) {
+      const cmd = seg[1];
+      if (cmd === 'Z' || cmd === 'z') { parts.push(cmd); continue; }
+      const ns = (seg[2].match(numRe) || []).map(Number);
+      let s = cmd;
+      for (let i = 0; i < ns.length; i += 2) {
+        if (i > 0) s += ' ';
+        s += tx(ns[i], ns[i+1]) + ' ' + ty(ns[i], ns[i+1]);
+      }
+      parts.push(s);
+    }
+    return parts.join('');
+  }
+
+  function heartPath() {
+    const sY = R(lerp(536, 456, lerp(0.20, 1.0, t('s1'))));
+    const eX = R(lerp(357, 207, t('s2')));
+    const s3 = t('s3') < 0.5 ? lerp(0.27, 0.5, t('s3') * 2) : lerp(0.5, 1.0, (t('s3') - 0.5) * 2);
+    const eYOffset = s3 < 0.5 ? lerp(60, -98, s3 * 2) : lerp(-98, -153, (s3 - 0.5) * 2);
+    const eY   = R(sY + eYOffset);
+    const archH = s3 < 0.5 ? lerp(-30, 20, s3 * 2) : lerp(20, 33, (s3 - 0.5) * 2);
+    const cp1X = R(562 + (eX - 562) * 0.35);
+    const cp2X = R(562 + (eX - 562) * 0.65);
+    const cp1Y = R(sY + (eY - sY) * 0.35 + archH);
+    const cp2Y = R(sY + (eY - sY) * 0.65 + archH);
+    return `M 562,${sY} C ${cp1X},${cp1Y} ${cp2X},${cp2Y} ${eX},${eY}`;
+  }
+
+  function headPath() {
+    const sX = 195;
+    const sY = R(lerp(494, 374, lerp(0.14, 0.70, t('s4'))));
+    const eX = R(lerp(362, 570, t('s5')));
+    const maxDropForCurrentLength = lerp(130, 230, t('s5'));
+    const drop = lerp(maxDropForCurrentLength, 30, t('s6'));
+    const eY   = R(sY + drop);
+    const cp1X = R(sX + (eX - sX) * 0.25);
+    const cp2X = R(sX + (eX - sX) * 0.65);
+    const cp1Y = R(sY + drop * lerp(0.20, 0.50, t('s6')));
+    const cp2Y = R(sY + drop * lerp(0.50, 0.90, t('s6')));
+    return `M ${sX},${sY} C ${cp1X},${cp1Y} ${cp2X},${cp2Y} ${eX},${eY}`;
+  }
+
+  function lifePath() {
+    const sX = 195;
+    const sY = R(lerp(494, 374, lerp(0.14, 0.70, t('s7'))));
+    const eX = R(lerp(242, 422, t('s9')));
+    const eY = 720;
+    const b  = t('s8');
+    const pH = eY - sY;
+    const cp1X = R(lerp(262, 382, b));
+    const cp1Y = R(sY + pH * lerp(0.25, 0.20, b));
+    const cp2Offset = t('s9') < 0.5
+      ? lerp(120, 0, t('s9') * 2)
+      : lerp(0, -80, (t('s9') - 0.5) * 2);
+    const cp2X = R(eX + cp2Offset);
+    const cp2Y = R(sY + pH * lerp(0.65, 0.70, b));
+    return `M ${sX},${sY} C ${cp1X},${cp1Y} ${cp2X},${cp2Y} ${eX},${eY}`;
+  }
+
+  function update() {
+    document.getElementById('heart-line').setAttribute('d', heartPath());
+    document.getElementById('head-line').setAttribute('d', headPath());
+    document.getElementById('life-line').setAttribute('d', lifePath());
+    const mp = morphPath(t('s10'), lerp(0.97, 1.18, t('s11')));
+    document.getElementById('hand-path').setAttribute('d', mp);
+    document.getElementById('hand-glow').setAttribute('d', mp);
+    document.querySelector('.ssw-palm-svg').style.transform = '';
+    IDS.forEach((id, i) => {
+      document.getElementById('v' + (i + 1)).textContent = sliders[id].value;
+    });
+  }
+
+  // スライダー操作 → state に保存 → 再描画
+  IDS.forEach(id => {
+    sliders[id].addEventListener('input', () => {
+      state[currentTab][id] = parseInt(sliders[id].value, 10);
+      update();
+    });
+  });
+
+  // リセット（現在のタブのみ）
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    IDS.forEach(id => { state[currentTab][id] = 50; });
+    applyStateToSliders(currentTab);
+    update();
+  });
+
+  // タブ切替
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('tab-you').classList.toggle('active', tab === 'you');
+    document.getElementById('tab-partner').classList.toggle('active', tab === 'partner');
+    applyStateToSliders(tab);
+    update();
+  }
+  document.getElementById('tab-you').addEventListener('click', () => switchTab('you'));
+  document.getElementById('tab-partner').addEventListener('click', () => switchTab('partner'));
+
+  /* ─── Diagnosis (Light Mode Matched) ─── */
+  const RESULT_DATA = [
+    { id: 's1',  l: '内面を重視する内向タイプ',       r: '人との関わりを好む外向タイプ',       c: '#d9467d' },
+    { id: 's2',  l: '感情をコントロールする冷静派',    r: '感情豊かな情熱家',                 c: '#d9467d' },
+    { id: 's3',  l: '控えめで穏やかな愛情表現',       r: 'ストレートで積極的な愛情表現',       c: '#d9467d' },
+    { id: 's4',  l: '石橋を叩いて渡る慎重派',         r: '直感で動く行動派',                 c: '#2b6cb0' },
+    { id: 's5',  l: '瞬時に決める直感・回転型',       r: 'じっくり熟考する論理・長考型',       c: '#2b6cb0' },
+    { id: 's6',  l: '想像力豊かなロマンチスト',       r: '実務能力に長けたリアリスト',         c: '#2b6cb0' },
+    { id: 's7',  l: '落ち着きがあり安定を好む',       r: 'エネルギッシュな衝動派',             c: 'var(--color-primary)' },
+    { id: 's8',  l: '自分のペースを守る省エネ型',     r: 'バイタリティ溢れる活動家',           c: 'var(--color-primary)' },
+    { id: 's9',  l: '一つの場所で輝く定住志向',       r: '環境の変化を楽しむ変化志向',         c: 'var(--color-primary)' },
+    { id: 's10', l: '地に足のついた現実志向',         r: '感性を重んじる精神志向',             c: '#d97706' },
+    { id: 's11', l: '自分の感覚を信じる主観派',       r: '客観的データを重んじる論理派',       c: '#d97706' },
+  ];
+
+  const SPIDER_LABELS = [
+    ['内向', '外向'], ['冷静', '情熱'], ['穏やか', '積極的'],
+    ['慎重', '行動派'], ['回転型', '長考型'], ['ロマンチスト', 'リアリスト'],
+    ['安定', '衝動'], ['省エネ', '活動家'], ['定住', '変化'],
+    ['現実', '精神'], ['主観', '客観'],
+  ];
+
+  function buildSpider(vals) {
+    const N = vals.length;
+    const W = 560, H = 560, CX = 280, CY = 280;
+    const SR = 165, LR = 213;
+    const angle = i => (2 * Math.PI * i / N) - Math.PI / 2;
+    // ライトモード用に色を調整
+    const dotColors = ['#d9467d','#d9467d','#d9467d','#2b6cb0','#2b6cb0','#2b6cb0','#4e7b67','#4e7b67','#4e7b67','#d97706','#d97706'];
+
+    let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+    [0.25, 0.5, 0.75, 1.0].forEach(f => {
+      const dash = f === 0.5 ? 'stroke-dasharray="5,4" stroke="rgba(0,0,0,0.15)" stroke-width="1.5"'
+                             : 'stroke="rgba(0,0,0,0.06)" stroke-width="1"';
+      s += `<circle cx="${CX}" cy="${CY}" r="${(SR*f).toFixed(1)}" fill="none" ${dash}/>`;
+    });
+    for (let i = 0; i < N; i++) {
+      const ca = Math.cos(angle(i)), sa = Math.sin(angle(i));
+      s += `<line x1="${(CX-SR*ca).toFixed(1)}" y1="${(CY-SR*sa).toFixed(1)}" x2="${(CX+SR*ca).toFixed(1)}" y2="${(CY+SR*sa).toFixed(1)}" stroke="rgba(0,0,0,0.08)" stroke-width="1"/>`;
+    }
+    vals.forEach((v, i) => {
+      const ca = Math.cos(angle(i)), sa = Math.sin(angle(i));
+      const posFrac = v / 100, negFrac = (100 - v) / 100;
+      const px = (CX + SR * posFrac * ca).toFixed(1);
+      const py = (CY + SR * posFrac * sa).toFixed(1);
+      const nx = (CX - SR * negFrac * ca).toFixed(1);
+      const ny = (CY - SR * negFrac * sa).toFixed(1);
+      s += `<line x1="${nx}" y1="${ny}" x2="${px}" y2="${py}" stroke="${dotColors[i]}" stroke-width="1.8" opacity="0.6"/>`;
+      s += `<circle cx="${px}" cy="${py}" r="5" fill="${dotColors[i]}" stroke="#fff" stroke-width="1.5"/>`;
+      s += `<circle cx="${nx}" cy="${ny}" r="4" fill="${dotColors[i]}" stroke="#fff" stroke-width="1.2" opacity="0.7"/>`;
+      const lx = (CX - LR*ca).toFixed(1), ly = (CY - LR*sa).toFixed(1);
+      const lanchor = ca > 0.15 ? 'end' : ca < -0.15 ? 'start' : 'middle';
+      const rx = (CX + LR*ca).toFixed(1), ry = (CY + LR*sa).toFixed(1);
+      const ranchor = ca > 0.15 ? 'start' : ca < -0.15 ? 'end' : 'middle';
+      s += `<text x="${lx}" y="${ly}" text-anchor="${lanchor}" dominant-baseline="middle" fill="var(--color-text)" font-weight="600" font-size="12" opacity="0.8">${SPIDER_LABELS[i][0]}</text>`;
+      s += `<text x="${rx}" y="${ry}" text-anchor="${ranchor}" dominant-baseline="middle" fill="var(--color-text)" font-weight="600" font-size="12" opacity="0.8">${SPIDER_LABELS[i][1]}</text>`;
+    });
+    s += `<circle cx="${CX}" cy="${CY}" r="3.5" fill="rgba(0,0,0,0.2)"/>`;
+    s += `</svg>`;
+    return s;
+  }
+
+  function buildBipolarSvg(vals) {
+    const W = 600, rowH = 38;
+    const H = RESULT_DATA.length * rowH + 40;
+    const CX = W / 2, trackW = 180, trackLeft = CX - trackW / 2;
+    let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;display:block;margin:0 auto;">`;
+    RESULT_DATA.forEach((item, i) => {
+      const val = vals[i], y = 30 + i * rowH;
+      s += `<text x="${trackLeft - 15}" y="${y + 4}" text-anchor="end" fill="var(--color-text)" font-size="13" font-weight="600">${item.l}</text>`;
+      s += `<text x="${trackLeft + trackW + 15}" y="${y + 4}" text-anchor="start" fill="var(--color-text)" font-size="13" font-weight="600">${item.r}</text>`;
+      s += `<rect x="${trackLeft}" y="${y - 2}" width="${trackW}" height="4" rx="2" fill="rgba(0,0,0,0.06)"/>`;
+      s += `<line x1="${CX}" y1="${y - 6}" x2="${CX}" y2="${y + 6}" stroke="rgba(0,0,0,0.15)" stroke-width="2"/>`;
+      const dotX = trackLeft + (val / 100) * trackW;
+      s += `<circle cx="${dotX}" cy="${y}" r="12" fill="${item.c}" opacity="0.15"/>`;
+      s += `<circle cx="${dotX}" cy="${y}" r="6" fill="${item.c}" stroke="#ffffff" stroke-width="1.5"/>`;
+    });
+    s += `</svg>`;
+    return s;
+  }
+
+  function buildQuadrant(posX, posY) {
+    const W = 380, H = 380, CX = 190, CY = 190, QR = 145;
+    const dx = (CX + posX / 50 * QR).toFixed(1);
+    const dy = (CY - posY / 50 * QR).toFixed(1);
+    const qColor = (posX >= 0 && posY >= 0) ? '#d9467d' :
+                   (posX <  0 && posY >= 0) ? '#2b6cb0' :
+                   (posX <  0 && posY <  0) ? '#4e7b67' : '#d97706';
+    let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+    ['0.25','0.5','0.75'].forEach(f => {
+      s += `<circle cx="${CX}" cy="${CY}" r="${(QR * f).toFixed(1)}" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="1"/>`;
+    });
+    s += `<circle cx="${CX}" cy="${CY}" r="${QR}" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1.2"/>`;
+    s += `<line x1="${CX-QR}" y1="${CY}" x2="${CX+QR}" y2="${CY}" stroke="rgba(0,0,0,0.15)" stroke-width="1.2"/>`;
+    s += `<line x1="${CX}" y1="${CY-QR}" x2="${CX}" y2="${CY+QR}" stroke="rgba(0,0,0,0.15)" stroke-width="1.2"/>`;
+    const ql = [
+      { x: CX+QR-6, y: CY-QR+14, anchor: 'end',   t: 'Visionary', col: '#d9467d' },
+      { x: CX-QR+6, y: CY-QR+14, anchor: 'start', t: 'Creator',   col: '#2b6cb0' },
+      { x: CX-QR+6, y: CY+QR-8,  anchor: 'start', t: 'Analyst',   col: '#4e7b67' },
+      { x: CX+QR-6, y: CY+QR-8,  anchor: 'end',   t: 'Promoter',  col: '#d97706' },
+    ];
+    ql.forEach(q => {
+      s += `<text x="${q.x}" y="${q.y}" text-anchor="${q.anchor}" fill="${q.col}" font-size="11" opacity="0.8" font-weight="700">${q.t}</text>`;
+    });
+    s += `<text x="${CX}" y="${CY-QR-10}" text-anchor="middle" fill="var(--color-text)" font-size="10" opacity="0.6">精神的・直感</text>`;
+    s += `<text x="${CX}" y="${CY+QR+18}" text-anchor="middle" fill="var(--color-text)" font-size="10" opacity="0.6">現実的・論理</text>`;
+    s += `<text x="${CX+QR+6}" y="${CY+4}" text-anchor="start" fill="var(--color-text)" font-size="10" opacity="0.6">動的</text>`;
+    s += `<text x="${CX-QR-6}" y="${CY+4}" text-anchor="end"   fill="var(--color-text)" font-size="10" opacity="0.6">静的</text>`;
+    s += `<line x1="${CX}" y1="${CY}" x2="${dx}" y2="${dy}" stroke="${qColor}" stroke-width="1.2" opacity="0.6" stroke-dasharray="4,3"/>`;
+    s += `<circle cx="${dx}" cy="${dy}" r="10" fill="${qColor}" opacity="0.25"/>`;
+    s += `<circle cx="${dx}" cy="${dy}" r="6" fill="${qColor}" stroke="#fff" stroke-width="1.8"/>`;
+    s += `</svg>`;
+    return s;
+  }
+
+  // ── 2人用：対極軸ギャップメーター ──
+  function buildPairBipolarSvg(yVals, pVals) {
+    const W = 600, rowH = 38;
+    const H = RESULT_DATA.length * rowH + 70;
+    const CX = W / 2, trackW = 180, trackLeft = CX - trackW / 2;
+    let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;height:auto;display:block;margin:0 auto;">`;
+
+    s += `<circle cx="${CX - 50}" cy="20" r="7" fill="#2b6cb0" stroke="#fff" stroke-width="1.5"/>`;
+    s += `<text x="${CX - 35}" y="24" fill="var(--color-text)" font-size="12" font-weight="bold">あなたの手相</text>`;
+    s += `<circle cx="${CX + 50}" cy="20" r="7" fill="#d9467d" stroke="#fff" stroke-width="1.5"/>`;
+    s += `<text x="${CX + 65}" y="24" fill="var(--color-text)" font-size="12" font-weight="bold">お相手の手相</text>`;
+
+    RESULT_DATA.forEach((item, i) => {
+      const yVal = yVals[i], pVal = pVals[i], y = 60 + i * rowH;
+      s += `<text x="${trackLeft - 15}" y="${y + 4}" text-anchor="end" fill="var(--color-text)" font-size="13" font-weight="600">${item.l}</text>`;
+      s += `<text x="${trackLeft + trackW + 15}" y="${y + 4}" text-anchor="start" fill="var(--color-text)" font-size="13" font-weight="600">${item.r}</text>`;
+      s += `<rect x="${trackLeft}" y="${y - 2}" width="${trackW}" height="4" rx="2" fill="rgba(0,0,0,0.06)"/>`;
+      s += `<line x1="${CX}" y1="${y - 6}" x2="${CX}" y2="${y + 6}" stroke="rgba(0,0,0,0.15)" stroke-width="2"/>`;
+
+      const yDotX = trackLeft + (yVal / 100) * trackW;
+      const pDotX = trackLeft + (pVal / 100) * trackW;
+
+      s += `<line x1="${yDotX}" y1="${y}" x2="${pDotX}" y2="${y}" stroke="#7a9487" stroke-width="6" opacity="0.3" stroke-linecap="round"/>`;
+      s += `<circle cx="${yDotX}" cy="${y}" r="6" fill="#2b6cb0" stroke="#ffffff" stroke-width="1.5"/>`;
+      s += `<circle cx="${pDotX}" cy="${y}" r="6" fill="#d9467d" stroke="#ffffff" stroke-width="1.5"/>`;
+    });
+    s += `</svg>`;
+    return s;
+  }
+
+  // ── 2人用：性格マトリクス ──
+  function buildPairQuadrant(yX, yY, pX, pY) {
+    const W = 380, H = 380, CX = 190, CY = 190, QR = 145;
+    const ydx = (CX + yX / 50 * QR).toFixed(1), ydy = (CY - yY / 50 * QR).toFixed(1);
+    const pdx = (CX + pX / 50 * QR).toFixed(1), pdy = (CY - pY / 50 * QR).toFixed(1);
+
+    let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+    ['0.25','0.5','0.75'].forEach(f => {
+      s += `<circle cx="${CX}" cy="${CY}" r="${(QR * f).toFixed(1)}" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="1"/>`;
+    });
+    s += `<circle cx="${CX}" cy="${CY}" r="${QR}" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1.2"/>`;
+    s += `<line x1="${CX-QR}" y1="${CY}" x2="${CX+QR}" y2="${CY}" stroke="rgba(0,0,0,0.15)" stroke-width="1.2"/>`;
+    s += `<line x1="${CX}" y1="${CY-QR}" x2="${CX}" y2="${CY+QR}" stroke="rgba(0,0,0,0.15)" stroke-width="1.2"/>`;
+
+    const ql = [
+      { x: CX+QR-6, y: CY-QR+14, anchor: 'end',   t: 'Visionary', col: '#d9467d' },
+      { x: CX-QR+6, y: CY-QR+14, anchor: 'start', t: 'Creator',   col: '#2b6cb0' },
+      { x: CX-QR+6, y: CY+QR-8,  anchor: 'start', t: 'Analyst',   col: '#4e7b67' },
+      { x: CX+QR-6, y: CY+QR-8,  anchor: 'end',   t: 'Promoter',  col: '#d97706' },
+    ];
+    ql.forEach(q => { s += `<text x="${q.x}" y="${q.y}" text-anchor="${q.anchor}" fill="${q.col}" font-size="11" opacity="0.8" font-weight="700">${q.t}</text>`; });
+    s += `<text x="${CX}" y="${CY-QR-10}" text-anchor="middle" fill="var(--color-text)" font-size="10" opacity="0.6">精神的・直感</text>`;
+    s += `<text x="${CX}" y="${CY+QR+18}" text-anchor="middle" fill="var(--color-text)" font-size="10" opacity="0.6">現実的・論理</text>`;
+    s += `<text x="${CX+QR+6}" y="${CY+4}" text-anchor="start" fill="var(--color-text)" font-size="10" opacity="0.6">動的</text>`;
+    s += `<text x="${CX-QR-6}" y="${CY+4}" text-anchor="end"   fill="var(--color-text)" font-size="10" opacity="0.6">静的</text>`;
+
+    s += `<line x1="${ydx}" y1="${ydy}" x2="${pdx}" y2="${pdy}" stroke="#7a9487" stroke-width="2" opacity="0.5" stroke-dasharray="5,5"/>`;
+
+    s += `<circle cx="${ydx}" cy="${ydy}" r="12" fill="#2b6cb0" opacity="0.2"/>`;
+    s += `<circle cx="${ydx}" cy="${ydy}" r="6" fill="#2b6cb0" stroke="#fff" stroke-width="1.5"/>`;
+    s += `<circle cx="${pdx}" cy="${pdy}" r="12" fill="#d9467d" opacity="0.2"/>`;
+    s += `<circle cx="${pdx}" cy="${pdy}" r="6" fill="#d9467d" stroke="#fff" stroke-width="1.5"/>`;
+    s += `</svg>`;
+    return s;
+  }
+
+  document.getElementById('diagnose-btn').addEventListener('click', () => {
+    document.querySelector('.ssw-result-title').textContent = "手相診断レポート";
+    document.querySelector('.ssw-result-sub').textContent = "手相に刻まれた特徴から読み取れる、あなたの性質の傾向です。どちらが優れているということはありません。";
+    // 診断は常に「自分」のデータを使用（後続プロンプトで相性診断に拡張予定）
+    const vals = RESULT_DATA.map(item => state.you[item.id]);
+    const chartSvg   = buildSpider(vals);
+    const bipolarSvg = buildBipolarSvg(vals);
+
+    const [v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11] = vals;
+    const x_avg = (v1 + v3 + v4 + v7 + v8 + v9) / 6;
+    const y_avg = (v2 + (100 - v5) + (100 - v6) + v10 + (100 - v11)) / 5;
+    const posX = x_avg - 50, posY = y_avg - 50;
+
+    let typeName, typeDesc;
+    // 名前を覚えてもらうためのものではありません。
+    // **この位置は、上の「拾う」で挙げた線を足した結果**です。線が変われば位置も変わります。
+    if      (posX >= 0 && posY >= 0) { typeName = '感情が先に出て、外へ向かう';   typeDesc = '思う前に動き、動きながら考える出方です。感情が行動の燃料になるので、乗っているときの推進力が大きく出ます。'; }
+    else if (posX <  0 && posY >= 0) { typeName = '感情が先に出て、内へ向かう';   typeDesc = '感じたことを、まず自分の中で深めてから出す出方です。数を広げるより、ひとつを掘るほうに力が向きます。'; }
+    else if (posX <  0 && posY <  0) { typeName = '考えが先に出て、内へ向かう';   typeDesc = '確かめてから動く出方です。土台が固まるまで動かないぶん、動き出したあとがぶれにくくなります。'; }
+    else                             { typeName = '考えが先に出て、外へ向かう';   typeDesc = '段取りを立ててから外に出す出方です。やると決めたことを形にするところに力が向きます。'; }
+
+    const quadSvg = buildQuadrant(posX, posY);
+
+    let textHeart = 'あなたは、';
+    if      (v1 >= 60) textHeart += '人との関わりを好む外向的な性質を持ちながら、';
+    else if (v1 <= 40) textHeart += '自身の内面とじっくり向き合うことを大切にしながら、';
+    else               textHeart += '状況に応じて人との距離感を柔軟に保ちながら、';
+    if      (v2 >= 60) textHeart += '豊かな感情表現で周囲を惹きつける情熱的な一面があります。';
+    else if (v2 <= 40) textHeart += '感情をしっかりコントロールし、常に冷静な対応ができる落ち着きを持っています。';
+    else               textHeart += '感情の波が少なく、穏やかなコミュニケーションを築くことができます。';
+
+    let textHead = '思考や仕事の面では、';
+    if      (v4 >= 60) textHead += '直感を信じて素早く行動に移すフットワークの軽さを持ち、';
+    else if (v4 <= 40) textHead += '石橋を叩いて渡る慎重さと計画性を持ち、';
+    else               textHead += '周囲の状況をよく見てから的確なタイミングで動き出し、';
+    if      (v5 >= 60) textHead += '物事を論理的に深く掘り下げる熟考型のアプローチを得意とします。';
+    else if (v5 <= 40) textHead += '瞬時の判断力と頭の回転の速さを活かして次々と課題を処理していきます。';
+    else               textHead += '直感と論理をバランス良く使い分け、柔軟に最適解を導き出します。';
+
+    let textLife = 'ライフスタイルとしては、';
+    if      (v9 >= 60) textLife += '環境の変化や新しい刺激を楽しみながら、';
+    else if (v9 <= 40) textLife += 'ひとつの場所や安定した環境に根を下ろし、';
+    else               textLife += '日常の中に適度な変化を取り入れながら、';
+    if      (v8 >= 60) textLife += 'バイタリティ溢れる活動的な日々を送る傾向があります。';
+    else if (v8 <= 40) textLife += '自分のペースを守り、無理のない範囲で着実にエネルギーを注ぐことを好みます。';
+    else               textLife += 'オンとオフの切り替えを大切にして、安定したエネルギーで過ごすタイプです。';
+
+    const summaryHtml = `
+      <div class="result-section">
+        <h3 class="result-heading">② 扱う ── 拾ったものを、組み立てる</h3>
+        <div class="summary-box">
+          <p>${textHeart}</p>
+          <p>${textHead}</p>
+          <p>${textLife}</p>
+        </div>
+      </div>`;
+
+    const intanRatio = v10 / 100, tanRatio = 1 - intanRatio;
+    const infoRatio  = v11 / 100, subjRatio = 1 - infoRatio;
+    const pctFire  = intanRatio * subjRatio * 100;
+    const pctWater = intanRatio * infoRatio * 100;
+    const pctEarth = tanRatio   * subjRatio * 100;
+    const pctWind  = tanRatio   * infoRatio * 100;
+    const stop1 = pctFire.toFixed(2);
+    const stop2 = (pctFire + pctWater).toFixed(2);
+    const stop3 = (pctFire + pctWater + pctEarth).toFixed(2);
+
+    const elements = [
+      { name: '火', emoji: '🔥', pct: pctFire,  color: '#d9467d', desc: '無形×主観' },
+      { name: '水', emoji: '💧', pct: pctWater, color: '#2b6cb0', desc: '無形×情報' },
+      { name: '地', emoji: '🌿', pct: pctEarth, color: '#d97706', desc: '有形×主観' },
+      { name: '風', emoji: '🌀', pct: pctWind,  color: '#4e7b67', desc: '有形×情報' },
+    ];
+    const dominant = elements.reduce((a, b) => a.pct >= b.pct ? a : b);
+
+    const donutHtml = `
+      <div class="result-section">
+        <h3 class="result-heading">土台となる気質（手形の4属性）</h3>
+        <div class="allocation-chart-container">
+          <div class="donut-chart" style="background:conic-gradient(#d9467d 0% ${stop1}%,#2b6cb0 ${stop1}% ${stop2}%,#d97706 ${stop2}% ${stop3}%,#4e7b67 ${stop3}% 100%);">
+            <div class="donut-inner"><span class="donut-total">BASE<br>NATURE</span></div>
+          </div>
+          <div class="stat-labels">
+            <div class="stat-lbl"><span style="color:#d9467d; font-size:1.2em;">●</span> 【火】無形×主観: ${pctFire.toFixed(1)}%</div>
+            <div class="stat-lbl"><span style="color:#2b6cb0; font-size:1.2em;">●</span> 【水】無形×情報: ${pctWater.toFixed(1)}%</div>
+            <div class="stat-lbl"><span style="color:#d97706; font-size:1.2em;">●</span> 【地】有形×主観: ${pctEarth.toFixed(1)}%</div>
+            <div class="stat-lbl"><span style="color:#4e7b67; font-size:1.2em;">●</span> 【風】有形×情報: ${pctWind.toFixed(1)}%</div>
+          </div>
+        </div>
+        <div style="margin-top:1.2rem;padding:1.5rem;background:var(--color-bg);border:1px solid #d1e0d7;border-radius:12px;text-align:center;">
+          <div style="font-size:0.75rem;color:#7a9487;letter-spacing:0.12em;margin-bottom:0.4rem;font-weight:bold;">最優位属性</div>
+          <div style="font-size:2.2rem;line-height:1;">${dominant.emoji}</div>
+          <div style="font-size:1.15rem;font-weight:700;color:${dominant.color};margin:0.5rem 0 0.2rem;letter-spacing:0.06em;">【${dominant.name}】${dominant.desc}</div>
+          <div style="font-size:0.8rem;color:var(--color-text);opacity:0.8;">${dominant.pct.toFixed(1)}% — 最も強く現れる気質</div>
+        </div>
+      </div>`;
+
+    // ── ① 拾う：入力から「何が出ているか」を用語で言う ──
+    // 各項目が用語集にリンクする。診断が用語集の入口になる。
+    const G = (slug, label) => `<a class="sd-term" href="/glossary/${slug}/">${label}</a>`;
+    const pick = [];
+    const band = (v, lo, mid, hi) => (v >= 60 ? hi : v <= 40 ? lo : mid);
+
+    pick.push(`${G('life-line','生命線')}は、${band(v7,'低いところから始まっています','ふつうの高さから始まっています','高いところから始まっています')}。${band(v8,'親指に沿って小さく','ほどほどに','大きく張り出して')}伸び、終わりは${band(v9,'内側へ回っています','まっすぐ手首へ向かっています','外側へ流れています')}。`);
+    pick.push(`${G('head-line','頭脳線')}は${band(v5,'短め','ふつうの長さ','長め')}で、${band(v6,'大きく下がっています','ゆるやかに下がっています','ほぼ水平に伸びています')}。始まりは${G('life-line','生命線')}と${band(v4,'しっかりくっついています','少し重なっています','離れています')}。`);
+    pick.push(`${G('heart-line','感情線')}は${band(v2,'短め','ふつうの長さ','長め')}で、${band(v1,'手のひらの中ほど','ふつうの高さ','指の付け根に近いところ')}を通り、先は${band(v3,'下を向いています','まっすぐ伸びています','上を向いています')}。`);
+    pick.push(`${G('hand-shape','手の形')}は${band(v10,'幅広','中間','縦長')}、${G('finger','指')}は${band(v11,'短め','ふつう','長め')}です。`);
+
+    // マスカケ（12問目で「1本につながって見える」を選んだとき）
+    const masukake = answers.q12 === 'masukake';
+    const masukakeHtml = masukake ? `
+      <div class="sd-note">
+        <p><strong>${G('masukake-line','マスカケ')}ですね。</strong>「珍しい強運の線」と言われることが多い線です。</p>
+        <p>ただ、この講座ではそう読みません。<strong>特別な線が引かれているのではなく、${G('heart-line','感情線')}と${G('head-line','頭脳線')}が重なって1本に見えている状態</strong>です。${G('life-line','生命線')}は重なっていません。</p>
+        <p>感情と思考が同じ軸に乗るので、ブレーキがかかりにくく、熱量が一方向に大きく出ます。良い悪いではなく、そういう構造だということです。</p>
+      </div>` : '';
+
+    const pickHtml = `
+      <div class="result-section">
+        <h3 class="result-heading">① 拾う ── いま出ているもの</h3>
+        <div class="sd-pick">${pick.map(p => `<p>${p}</p>`).join('')}</div>
+        ${masukakeHtml}
+        <p class="sd-small">青い語を押すと、その用語の説明が読めます。</p>
+      </div>`;
+
+    // ── ③ 確かめ方 ──
+    const checkHtml = `
+      <div class="result-section">
+        <h3 class="result-heading">③ 確かめる ── 当たっているかを、自分で見る</h3>
+        <div class="sd-check">
+          <p>手相は、当てものではありません。<strong>出た読みが自分に合っているかを、実際の出来事と照らし合わせて確かめます。</strong>合わなければ、読み方のどこかがずれています。</p>
+          <ul>
+            <li>上の「拾う」で挙げた形は、<strong>自分の手を見て、本当にそうなっていますか。</strong>ここがずれていると、この先は全部ずれます</li>
+            <li>「扱う」の内容で、<strong>心当たりがあるのはどれですか。</strong>ひとつでも当たっていれば、その線の読みは合っています</li>
+            <li>当たっていないものは、<strong>どの線の読みから来ていますか。</strong>そこが、あなたの手では違う出方をしている場所です</li>
+          </ul>
+          <p class="sd-small">左右の手で結果が変わります。ふだん使うほうの手が「外に出している自分」、反対の手が「ひとりのときの自分」です。両方やってみると、差そのものが情報になります。</p>
+        </div>
+      </div>`;
+
+    document.getElementById('ssw-result-body').innerHTML =
+      pickHtml +
+      summaryHtml +
+      `<div class="result-section">
+         <h3 class="result-heading">分析パラメーター（対極バランス）</h3>
+         <div style="margin:1.5rem 0 0;">${bipolarSvg}</div>
+       </div>` +
+      `<div class="spider-wrap">${chartSvg}</div>` +
+      `<div class="quad-section">
+         <h3 class="result-heading" style="border:none; margin-bottom:0.5rem;">性格マトリクス</h3>
+         <div class="quad-wrap">${quadSvg}</div>
+         <div class="type-card">
+           <div class="type-name">${typeName}</div>
+           <div class="type-desc">${typeDesc}</div>
+           <div class="type-break">
+             <span class="type-break__label">この位置は、こう出ています</span>
+             <p>横は <strong>${G('heart-line','感情線')}の起点・カーブ</strong>、<strong>${G('head-line','頭脳線')}の起点</strong>、<strong>${G('life-line','生命線')}の起点・張り・終点</strong>を足したもの。縦は <strong>感情線の長さ</strong>、<strong>頭脳線の長さ・向き</strong>、<strong>${G('hand-shape','手の形')}</strong>、<strong>${G('finger','指の長さ')}</strong>を足したものです。</p>
+             <p class="sd-small"><strong>この名前を覚える必要はありません。</strong>線が変われば位置も変わります。名前ではなく、<strong>どの線がどう効いたか</strong>を見てください。手相のマークも、これと同じで「線の集合体」です。</p>
+           </div>
+         </div>
+       </div>
+       <div class="quad-section">${donutHtml}</div>` +
+      checkHtml +
+      `<div class="sd-next">
+         <p class="sd-next__lead">もっと読めるようになりたくなったら</p>
+         <ul>
+           <li><a href="/glossary/">手相用語集</a> ── この診断に出てきた線の説明が、全部あります</li>
+           <li><a href="/quiz/">手相クイズ</a> ── 覚えた読み方を試せます</li>
+           <li><a href="/lp/tesou-video/" data-astro-reload>手相講座 全7章セット</a> ── 「拾う」と「扱う」を、順番に学べる動画講座</li>
+         </ul>
+         <p class="sd-small">公式LINEに登録すると、小冊子『手相は、分解して読む』（PDF・全50ページ）をお渡ししています。<a href="https://lin.ee/utbXwum" target="_blank" rel="noopener">受け取る</a></p>
+       </div>`;
+
+    document.getElementById('ssw-result-panel').classList.remove('ssw-result-hidden');
+  });
+
+  document.getElementById('diagnose-pair-btn').addEventListener('click', () => {
+    const y = state.you;
+    const p = state.partner;
+    let score = 100;
+
+    let textHeart = "";
+    let textHead = "";
+    let textLife = "";
+
+    // ── 感情線・対人の相性 ──
+    const diffS2 = Math.abs(y.s2 - p.s2);
+    if (diffS2 > 30) { score -= 15; textHeart += "愛情の熱量（感情線の長さ）にギャップがあり、片方が寂しさを感じやすいかもしれません。お互いの愛情表現の重さが違うことを理解し、歩み寄る工夫が必要です。"; }
+    else { textHeart += "愛情の熱量が近く、お互いに同じくらいの気持ちの強さで向き合える心地よい相性です。"; }
+
+    if (y.s3 < 40 && p.s3 < 40) { score -= 10; textHeart += "お互いに感情を表に出すのが苦手（まっすぐ・下向き）なため、不満を溜め込んで爆発させないよう、意識的に話し合う時間を作りましょう。"; }
+    else {
+      const diffS3 = Math.abs(y.s3 - p.s3);
+      if (diffS3 > 30) textHeart += "感情表現のストレートさに違いがあります。言葉足らずや言い過ぎによるすれ違いに気をつけてください。";
+      else textHeart += "感情表現のペースも似ており、スムーズでフラットなコミュニケーションが取れます。";
+    }
+
+    if (Math.abs(y.s1 - p.s1) <= 25) textHeart += "根本的なキャラクターや空気感（陽キャ・陰キャのテンション）も合っており、自然体でいられます。";
+
+    // ── 頭脳線・手形（価値観）の相性 ──
+    const diffS5 = Math.abs(y.s5 - p.s5);
+    if (diffS5 > 30) { score -= 10; textHead += "物事を決断するスピード（思考時間）に差があります。相手のペースを急かしたり、逆に遅すぎるとイライラしないよう理解が必要です。"; }
+    else { textHead += "決断のスピード感が似ており、一緒に物事を進める上でストレスが少ないでしょう。"; }
+
+    const diffS6 = Math.abs(y.s6 - p.s6);
+    const diffS10 = Math.abs(y.s10 - p.s10);
+    if (diffS6 > 30 || diffS10 > 30) { score -= 10; textHead += "現実重視か精神・ロマン重視かといった根本の価値観が異なるため、意見が対立した際は互いの視点（現実的解決か、感情的共感か）を尊重し合う必要があります。"; }
+    else { textHead += "現実的か精神的かという価値観の土台が一致しており、深い部分で共感し合えます。"; }
+
+    if (y.s4 > 60 && p.s4 > 60) { score -= 10; textHead += "ただし、お互いに直感的で感情的になりやすい面があるため、衝突した時は着地点が見つかりにくくなる傾向があります。どちらかが冷静になるよう心がけてください。"; }
+
+    // ── 生命線（ライフスタイル）の相性 ──
+    const diffS9 = Math.abs(y.s9 - p.s9);
+    if (diffS9 > 30) { score -= 10; textLife += "休日の過ごし方（インドア派かアウトドア派か）に違いがあります。どちらかが無理して合わせすぎないよう、それぞれの時間も楽しむ配慮が必要です。"; }
+    else { textLife += "休日の過ごし方や環境への適応力が似ており、一緒に過ごす時間がとても充実します。"; }
+
+    const diffS8 = Math.abs(y.s8 - p.s8);
+    if (diffS8 > 30) { score -= 10; textLife += "持っているバイタリティ（活動のエネルギー）に差があるため、活動的な側が相手を疲れさせないようペース配分に気を配りましょう。"; }
+    else { textLife += "持っているエネルギー量が同程度なので、無理なく同じペースで日常を楽しめます。"; }
+
+    const diffS7 = Math.abs(y.s7 - p.s7);
+    if (diffS7 > 30) { textLife += "衝動の強さには違いがありますが、これがかえってマンネリを防ぎ、お互いに新鮮な刺激を与え合える良いスパイスになっています。"; score += 5; }
+
+    if (score < 0) score = 0;
+    if (score > 100) score = 100;
+
+    const yVals = RESULT_DATA.map(item => Number(y[item.id]));
+    const pVals = RESULT_DATA.map(item => Number(p[item.id]));
+
+    const yX = ((y.s1 + y.s3 + y.s4 + y.s7 + y.s8 + y.s9) / 6) - 50;
+    const yY = ((y.s2 + (100 - y.s5) + (100 - y.s6) + y.s10 + (100 - y.s11)) / 5) - 50;
+    const pX = ((p.s1 + p.s3 + p.s4 + p.s7 + p.s8 + p.s9) / 6) - 50;
+    const pY = ((p.s2 + (100 - p.s5) + (100 - p.s6) + p.s10 + (100 - p.s11)) / 5) - 50;
+
+    const pairBipolarSvg = buildPairBipolarSvg(yVals, pVals);
+    const pairQuadSvg = buildPairQuadrant(yX, yY, pX, pY);
+
+    let pairHtml = `
+      <div class="result-section">
+        <div class="pair-score-wrap">
+          <div class="pair-score-label">長期的なパートナーシップ相性</div>
+          <div class="pair-score-num">${score}<span style="font-size:1.5rem;">%</span></div>
+          <p style="font-size:0.8rem; color:#7a9487; margin-top:0.5rem; line-height:1.5;">※このスコアはお互いの価値観の共有度と、一緒にいる際の「不快感の少なさ」を表しています。</p>
+        </div>
+        <h3 class="result-heading">感情・コミュニケーション</h3>
+        <div class="summary-box"><p>${textHeart}</p></div>
+        <h3 class="result-heading">思考・価値観</h3>
+        <div class="summary-box"><p>${textHead}</p></div>
+        <h3 class="result-heading">ライフスタイル・活動</h3>
+        <div class="summary-box"><p>${textLife}</p></div>
+      </div>
+    `;
+
+    pairHtml += `
+      <div class="result-section">
+        <h3 class="result-heading">価値観のギャップ分析</h3>
+        <p style="font-size:0.8rem; color:#7a9487; text-align:center; margin-bottom:1rem;">太い線が短いほど価値観が似ており、長いほどギャップがあります。</p>
+        <div style="margin:1.5rem 0 0;">${pairBipolarSvg}</div>
+      </div>
+      <div class="quad-section">
+        <h3 class="result-heading" style="border:none; margin-bottom:0.5rem;">二人の性格ポジション</h3>
+        <p style="font-size:0.8rem; color:#7a9487; text-align:center; margin-bottom:1rem;">距離が近いほど似た者同士、遠いほど異なる役割を持っています。</p>
+        <div class="quad-wrap">${pairQuadSvg}</div>
+      </div>
+    `;
+
+    document.getElementById('ssw-result-body').innerHTML = pairHtml;
+    document.querySelector('.ssw-result-title').textContent = "二人の相性診断レポート";
+    document.querySelector('.ssw-result-sub').textContent = "手相の差分から読み解く、二人が長く一緒にいるための取扱説明書です。";
+    document.getElementById('ssw-result-panel').classList.remove('ssw-result-hidden');
+  });
+
+  document.getElementById('result-close').addEventListener('click', () => {
+    document.getElementById('ssw-result-panel').classList.add('ssw-result-hidden');
+  });
+
+  // ── URL生成：自分のデータを ?p= パラメータにエンコードしてコピー ──
+  document.getElementById('share-btn').addEventListener('click', () => {
+    const encoded = IDS.map(id => state.you[id]).join('-');
+    const url = location.origin + location.pathname + '?p=' + encoded;
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById('share-btn');
+      const orig = btn.textContent;
+      btn.textContent = 'コピーしました！✅';
+      setTimeout(() => { btn.textContent = orig; }, 2500);
+    }).catch(() => {
+      prompt('このURLをコピーしてください', url);
+    });
+  });
+
+  // ── URL読み込み：?p= があれば partner に読み込み、you タブで開始 ──
+  (function loadFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const p = params.get('p');
+    if (!p) return;
+    const nums = p.split('-').map(n => {
+      const v = parseInt(n, 10);
+      return isNaN(v) ? 50 : Math.min(100, Math.max(0, v));
+    });
+    if (nums.length !== IDS.length) return;
+    IDS.forEach((id, i) => { state.partner[id] = nums[i]; });
+    // 相手のデータを読み込んだので you タブで開始（ユーザーが自分を入力できる状態）
+    switchTab('you');
+  })();
+
+  update();
+
+  // ── 入口の切り替え ──
+  el('sd-mode-easy').addEventListener('click', startEasy);
+  el('sd-mode-detail').addEventListener('click', startDetail);
+  el('sd-to-detail').addEventListener('click', () => {
+    // 途中まで答えたぶんは、つまみに入ったまま引き継がれる
+    applyStateToSliders('you');
+    update();
+    show('sd-quiz', false);
+    show('ssw-layout', true);
+  });
+  el('sd-back').addEventListener('click', () => { if (qi > 0) { qi--; renderQuestion(); } });
+
+  // 相手の手相を読み込んだURLで来た場合は、いきなり入力画面を開く
+  if (location.hash === '#detail' || new URLSearchParams(location.search).has('p')) startDetail();
+})();
+</script>
