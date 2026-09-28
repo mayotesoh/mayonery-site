@@ -31,6 +31,8 @@ import Layout from '../layouts/Layout.astro';
       <p class="sd-quiz__count" id="sd-count"></p>
       <h2 class="sd-quiz__q" id="sd-q"></h2>
       <p class="sd-quiz__hint" id="sd-hint"></p>
+      <figure class="sd-quiz__figure" id="sd-figure"></figure>
+      <p class="sd-quiz__lead">近いものを選んでください</p>
       <div class="sd-quiz__choices" id="sd-choices"></div>
       <div class="sd-quiz__nav">
         <button type="button" class="sd-link" id="sd-back">← 前にもどる</button>
@@ -305,6 +307,22 @@ import Layout from '../layouts/Layout.astro';
   }
 
   /* Dynamic result sections */
+
+  /* クイズの選択肢と絵は **JSで作っている**ので、scoped CSS が効かない。
+     ここ（is:global）に #sd-quiz 配下として書く（CLAUDE.md の既知の注意点） */
+  #sd-quiz .sd-choice { font:inherit; font-size:1rem; font-weight:700; color:var(--color-text);
+               background:#fff; border:1.5px solid #cfe0d6; border-radius:10px;
+               padding:16px 10px; cursor:pointer; line-height:1.5;
+               transition:background .15s, border-color .15s, color .15s, transform .12s; }
+  #sd-quiz .sd-choice:hover { background:var(--color-primary); border-color:var(--color-primary);
+                     color:#fff; transform:translateY(-2px); }
+  #sd-quiz .sd-choice:active { transform:translateY(0); }
+  #sd-quiz .sd-quiz__figure img { display:block; width:100%; height:auto; }
+
+  @media (max-width: 640px) {
+    #sd-quiz .sd-choice { font-size: .93rem; padding: 14px 6px; }
+  }
+
   #ssw-result-body .result-section { margin-bottom: 2.5rem; }
 
   /* JSで生成する結果の中身。**Astroのscoped CSSはJS生成要素に効かない**ので、
@@ -452,29 +470,42 @@ import Layout from '../layouts/Layout.astro';
   .sd-mode__lead { display:block; font-size:1.18rem; font-weight:700; margin-bottom:8px; }
   .sd-mode__desc { display:block; font-size:.88rem; line-height:1.85; color:#5f6a64; }
 
-  .sd-quiz { max-width:680px; margin:0 auto 48px; background:#fff; border:1px solid #d1e0d7;
-             border-radius:14px; padding:28px 28px 24px; }
-  .sd-quiz__bar { height:4px; background:#e8f0ea; border-radius:100px; overflow:hidden; }
-  .sd-quiz__fill { height:100%; background:var(--color-primary); width:0; transition:width .3s; }
-  .sd-quiz__count { margin:14px 0 4px; font-size:.78rem; letter-spacing:.1em; color:#7a9487; }
-  .sd-quiz__q { margin:0 0 10px; font-size:1.3rem; line-height:1.6; }
-  .sd-quiz__hint { margin:0 0 20px; font-size:.86rem; line-height:1.9; color:#5f6a64; }
-  .sd-quiz__choices { display:grid; gap:10px; }
-  .sd-choice { font:inherit; text-align:left; background:#fbfdfc; border:1px solid #d1e0d7; border-radius:10px;
-               padding:15px 18px; cursor:pointer; transition:background .15s, border-color .15s; }
-  .sd-choice:hover { background:#eef4f0; border-color:var(--color-primary); }
-  .sd-quiz__nav { display:flex; justify-content:space-between; gap:12px; margin-top:20px; }
-  .sd-link { font:inherit; font-size:.84rem; background:none; border:none; color:#5f6a64;
-             text-decoration:underline; cursor:pointer; padding:4px 0; }
-  .sd-link:hover { color:var(--color-primary); }
+  .sd-quiz { max-width:760px; margin:0 auto 56px; background:#fff; border:1px solid #e3ebe6;
+             border-radius:18px; padding:34px 36px 28px; box-shadow:0 10px 30px rgba(31,61,48,.07); }
+  .sd-quiz__bar { height:3px; background:#e8f0ea; border-radius:100px; overflow:hidden; }
+  .sd-quiz__fill { height:100%; background:var(--color-primary); width:0; transition:width .35s ease; }
+  .sd-quiz__count { margin:16px 0 6px; font-size:.74rem; letter-spacing:.16em; color:#9ab0a4; font-weight:700; }
+  .sd-quiz__q { margin:0 0 12px; font-size:1.42rem; line-height:1.6; letter-spacing:.01em; }
+  .sd-quiz__hint { margin:0 0 22px; font-size:.87rem; line-height:1.95; color:#5f6a64;
+                   padding-left:14px; border-left:2px solid #d6e5db; }
+
+  /* 質問の絵。1枚に選択肢が全部入っているので、大きく見せる */
+  .sd-quiz__figure { margin:0 0 20px; background:#f7faf8; border:1px solid #e8f0ea;
+                     border-radius:12px; overflow:hidden; }
+
+  .sd-quiz__lead { margin:0 0 12px; font-size:.82rem; letter-spacing:.06em; color:#9ab0a4; text-align:center; }
+
+  .sd-quiz__choices { display:grid; gap:12px; }
+  .sd-quiz__choices[data-cols="2"] { grid-template-columns:repeat(2,1fr); }
+  .sd-quiz__choices[data-cols="3"] { grid-template-columns:repeat(3,1fr); }
+  .sd-quiz__choices[data-cols="4"] { grid-template-columns:repeat(4,1fr); }
+
+  .sd-quiz__nav { display:flex; justify-content:space-between; gap:12px; margin-top:24px;
+                  padding-top:16px; border-top:1px solid #eef3f0; }
+  .sd-link { font:inherit; font-size:.83rem; background:none; border:none; color:#7a9487;
+             cursor:pointer; padding:4px 0; }
+  .sd-link:hover { color:var(--color-primary); text-decoration:underline; }
 
   /* ───────── 結果の追加部分 ───────── */
 
   @media (max-width:640px){
     .sd-modes { grid-template-columns:1fr; gap:12px; }
     .sd-mode { padding:20px; }
-    .sd-quiz { padding:22px 18px 20px; border-radius:12px; }
-    .sd-quiz__q { font-size:1.12rem; }
+    .sd-quiz { padding:24px 18px 20px; border-radius:14px; }
+    .sd-quiz__q { font-size:1.16rem; }
+    .sd-quiz__hint { font-size:.84rem; margin-bottom:18px; }
+    /* 4択は2列に。1列あたり90pxしかないと「まっす／ぐ」のように割れる */
+    .sd-quiz__choices[data-cols="4"] { grid-template-columns:repeat(2,1fr); }
     .sd-next { padding:20px; }
   }
 
@@ -872,44 +903,59 @@ import Layout from '../layouts/Layout.astro';
   // 12問の答えを、そのまま「くわしく」のつまみの値に変換する。
   // 入口が2つあるだけで、**結果を出す仕組みは1つ**。
   // ──────────────────────────────────────────────
+  // 画像は public/shindan/*.webp。**1枚に選択肢が全部、ラベル付きで入っている。**
+  // → choices の文言と並び順は、画像のラベルと完全に一致させること。
+  //   ここがずれると、絵と押すボタンが食い違う（2026-09-28 に一度やった）。
   const QUESTIONS = [
-    { key:'q1',  s:'s7',  q:'生命線は、どのあたりから始まっていますか',
+    { key:'q1', img:'lifeline_height', s:'s7',
+      q:'生命線は、どのあたりから始まっていますか',
       hint:'生命線は、親指を囲むように伸びる線です。その「始まり」が、人差し指の付け根に近いか、親指の付け根に近いかを見ます。',
-      choices:[['高い（人差し指の付け根に近い）',75],['ふつう',50],['低い（親指の付け根に近い）',25]] },
-    { key:'q2',  s:'s8',  q:'生命線の膨らみ方は',
-      hint:'親指側にどれくらい大きく張り出しているかです。手のひらの真ん中あたりまで張っていれば「大きい」。',
-      choices:[['大きく張っている',75],['ふつう',50],['小さい（親指に沿っている）',25]] },
-    { key:'q3',  s:'s9',  q:'生命線の終わりは、どちらへ向かっていますか',
-      hint:'手首のほうまで下りてきた先が、手首の中央側（内側）か、手のひらの外側（小指側）かを見ます。',
-      choices:[['外側（小指のほう）へ流れる',75],['まっすぐ手首へ',50],['内側（親指の付け根）へ回る',25]] },
-    { key:'q4',  s:'s5',  q:'頭脳線の長さは',
-      hint:'頭脳線は、手のひらを横切る2本のうち「下のほう」の線です。手のひらの半分より長いか短いか。',
-      choices:[['長い（手のひらを大きく横切る）',75],['ふつう',50],['短い',25]] },
-    { key:'q5',  s:'s4',  q:'頭脳線の始まりは、生命線とどうなっていますか',
+      choices:[['高い',75],['低い',25],['普通',50]] },
+    { key:'q2', img:'lifeline_curve', s:'s8',
+      q:'生命線の張りは、どれくらいですか',
+      hint:'親指側にどれくらい大きく張り出しているか。手のひらの真ん中あたりまで来ていれば「大きい」です。',
+      choices:[['大きい',75],['少ない',25],['普通',50]] },
+    { key:'q3', img:'lifeline_direction', s:'s9',
+      q:'生命線の終わりは、どちらへ向かっていますか',
+      hint:'手首まで下りてきた先が、小指のほうへ流れるか、親指の付け根へ回るか、まっすぐ手首へ行くか。',
+      choices:[['小指方面',75],['親指方面',25],['手首方面',50]] },
+    { key:'q4', img:'headline_length', s:'s5',
+      q:'頭脳線の長さは、どれくらいですか',
+      hint:'頭脳線は、手のひらを横切る2本のうち「下のほう」の線です。青い点線のところまで届いているかで見ます。',
+      choices:[['長い',75],['短い',25],['普通',50]] },
+    // この問いはつまみに直結させない。「くっついている」ならマスカケなので、結果で別に扱う
+    { key:'q5', img:'headline_emotion_distance', s:null,
+      q:'頭脳線と感情線は、どれくらい離れていますか',
+      hint:'手のひらを横切る2本の線（赤＝感情線／青＝頭脳線）の間隔です。1本につながって見える場合は「くっついている」を選んでください。',
+      choices:[['近い','near'],['遠い','far'],['くっついている','masukake']] },
+    { key:'q6', img:'headline_life_distance', s:'s4',
+      q:'頭脳線の始まりは、生命線とどうなっていますか',
       hint:'2本の線の「出発点」の関係です。ここは読みが大きく変わるところなので、よく見てください。',
-      choices:[['離れている',75],['少しだけ重なっている',50],['しっかりくっついている',25]] },
-    { key:'q6',  s:'s6',  q:'頭脳線は、どちらへ向かっていますか',
+      choices:[['離れている',75],['同じくらい',50],['くっついている',25]] },
+    { key:'q7', img:'headline_direction', s:'s6',
+      q:'頭脳線は、どちらへ向かっていますか',
       hint:'先端が手首のほうへ下がっているか、まっすぐ横へ抜けているか。',
-      choices:[['ほぼ水平にまっすぐ',75],['ゆるやかに下がる',50],['大きく下がる',20]] },
-    { key:'q7',  s:'s2',  q:'感情線の長さは',
-      hint:'感情線は、手のひらを横切る2本のうち「上のほう」の線です。小指側から、どこまで伸びていますか。',
-      choices:[['長い（人差し指のほうまで）',75],['ふつう',50],['短い（中指の手前で止まる）',25]] },
-    { key:'q8',  s:'s1',  q:'感情線は、どのあたりを通っていますか',
+      choices:[['まっすぐ',75],['斜め',50],['大きく下がる',20]] },
+    { key:'q8', img:'heartline_length', s:'s2',
+      q:'感情線の長さは、どれくらいですか',
+      hint:'感情線は、手のひらを横切る2本のうち「上のほう」の線です。青い点線のところまで届いているかで見ます。',
+      choices:[['長い',75],['短い',25],['普通',50]] },
+    { key:'q9', img:'heartline_height', s:'s1',
+      q:'感情線は、どのあたりを通っていますか',
       hint:'指の付け根に近いところを通るか、手のひらの中ほどを通るか。',
-      choices:[['高い（指の付け根に近い）',75],['ふつう',50],['低い（手のひらの中ほど）',25]] },
-    { key:'q9',  s:'s3',  q:'感情線の先は、どうなっていますか',
+      choices:[['高い',75],['低い',25],['普通',50]] },
+    { key:'q10', img:'heartline_direction', s:'s3',
+      q:'感情線の先は、どうなっていますか',
       hint:'先端が上を向いて跳ねるか、まっすぐ伸びるか、下を向くか。',
-      choices:[['上向きに跳ねる',80],['まっすぐ',55],['下向きに落ちる',20]] },
-    { key:'q10', s:'s10', q:'手のひらの形は',
-      hint:'手首から指の付け根までの「縦」と、手のひらの「横幅」を比べてください。',
-      choices:[['縦長',75],['どちらとも言えない',50],['幅広（四角い）',25]] },
-    { key:'q11', s:'s11', q:'指の長さは',
-      hint:'手のひらの縦の長さと、中指の長さを比べます。中指のほうが長ければ「長い」。',
-      choices:[['長い',75],['ふつう',50],['短い',25]] },
-    // 12問目はつまみに直結させない。「くっついている」ならマスカケなので、結果で別に扱う
-    { key:'q12', s:null,  q:'頭脳線と感情線は、離れていますか',
-      hint:'手のひらを横切る2本の線の間隔です。1本につながって見える場合は、いちばん下を選んでください。',
-      choices:[['はっきり離れている','far'],['間が狭い','near'],['1本につながって見える','masukake']] },
+      choices:[['まっすぐ',55],['上まで上がっている',85],['中間',50],['下がっている',20]] },
+    { key:'q11', img:'hand_shape', s:'s10',
+      q:'手のひらの形は、どちらに近いですか',
+      hint:'指を除いた「手のひらだけ」の形です。縦に長いか、四角いか。',
+      choices:[['長方形',75],['正方形',25]] },
+    { key:'q12', img:'finger_length', s:'s11',
+      q:'指の長さは、どちらに近いですか',
+      hint:'手のひらの縦の長さと、中指の長さを比べます。中指が同等以上なら「長い」です。',
+      choices:[['長い',75],['短い',25]] },
   ];
 
   const answers = {};
@@ -924,8 +970,15 @@ import Layout from '../layouts/Layout.astro';
     el('sd-count').textContent = `${qi + 1} / ${QUESTIONS.length}`;
     el('sd-q').textContent = Q.q;
     el('sd-hint').textContent = Q.hint;
+    const fig = el('sd-figure');
+    fig.innerHTML = `<img src="/shindan/${Q.img}.webp" alt="${Q.q}" width="800" height="450" decoding="async">`;
+    // 次の問いの画像を先読みしておく（押した瞬間に出るように）
+    const nx = QUESTIONS[qi + 1];
+    if (nx) { const pre = new Image(); pre.src = `/shindan/${nx.img}.webp`; }
     const box = el('sd-choices');
     box.innerHTML = '';
+    // 画像は選択肢が横に並んでいるので、ボタンも同じ列数にして対応を取る
+    box.dataset.cols = String(Q.choices.length);
     Q.choices.forEach(([label, val]) => {
       const b = document.createElement('button');
       b.type = 'button';
@@ -1398,7 +1451,7 @@ import Layout from '../layouts/Layout.astro';
     pick.push(`${G('hand-shape','手の形')}は${band(v10,'幅広','中間','縦長')}、${G('finger','指')}は${band(v11,'短め','ふつう','長め')}です。`);
 
     // マスカケ（12問目で「1本につながって見える」を選んだとき）
-    const masukake = answers.q12 === 'masukake';
+    const masukake = answers.q5 === 'masukake';   // 画像の並びに合わせて q12 → q5 に移動
     const masukakeHtml = masukake ? `
       <div class="sd-note">
         <p><strong>${G('masukake-line','マスカケ')}ですね。</strong>「珍しい強運の線」と言われることが多い線です。</p>
