@@ -142,100 +142,117 @@ const kanaRows = ['あ行', 'か行', 'さ行', 'た行', 'な行', 'は行', '�
   </div>
 </Layout>
 
-<script>
-  const searchInput = document.getElementById('glossary-search') as HTMLInputElement | null;
-  const sortSelect = document.getElementById('glossary-sort') as HTMLSelectElement | null;
-  const grid = document.getElementById('terms-grid');
-  const noResults = document.getElementById('no-results');
-  const catBtns = Array.from(document.querySelectorAll('.cat-btn'));
-  const kanaBtns = Array.from(document.querySelectorAll('.kana-btn'));
-  const cards = Array.from(document.querySelectorAll('.term-link-wrapper')) as HTMLElement[];
+<script is:inline data-astro-rerun>
+  // ページ切り替え（ClientRouter）でDOMが入れ替わっても効くよう、毎回この関数で組み直す
+  function setupGlossary() {
+    const searchInput = document.getElementById('glossary-search');
+    const sortSelect = document.getElementById('glossary-sort');
+    const grid = document.getElementById('terms-grid');
+    if (!grid) return; // 用語集一覧ページ以外では何もしない
+    if (grid.dataset.glossaryBound === 'true') return;
 
-  const filterToggleBtn = document.getElementById('mobile-filter-toggle');
-  const indexSection = document.getElementById('filter-index-section');
+    const noResults = document.getElementById('no-results');
+    const catBtns = Array.from(document.querySelectorAll('.cat-btn'));
+    const kanaBtns = Array.from(document.querySelectorAll('.kana-btn'));
+    const cards = Array.from(document.querySelectorAll('.term-link-wrapper'));
 
-  const kanaMap: Record<string, RegExp> = {
-    'あ行': /^[ぁ-おゔ]/, 'か行': /^[か-ごゕゖ]/, 'さ行': /^[さ-ぞ]/,
-    'た行': /^[た-ど]/, 'な行': /^[な-の]/, 'は行': /^[は-ぽ]/,
-    'ま行': /^[ま-も]/, 'や行': /^[ゃ-よ]/, 'ら行': /^[ら-ろ]/, 'わ行': /^[ゎ-ん]/,
-  };
+    const filterToggleBtn = document.getElementById('mobile-filter-toggle');
+    const indexSection = document.getElementById('filter-index-section');
 
-  // 現在の絞り込み状態（カテゴリーと五十音は併用可）
-  let activeCat = 'all';
-  let activeKana = 'all';
+    const kanaMap = {
+      'あ行': /^[ぁ-おゔ]/, 'か行': /^[か-ごゕゖ]/, 'さ行': /^[さ-ぞ]/,
+      'た行': /^[た-ど]/, 'な行': /^[な-の]/, 'は行': /^[は-ぽ]/,
+      'ま行': /^[ま-も]/, 'や行': /^[ゃ-よ]/, 'ら行': /^[ら-ろ]/, 'わ行': /^[ゎ-ん]/,
+    };
 
-  function apply() {
-    const query = (searchInput?.value || '').toLowerCase().trim();
+    // 現在の絞り込み状態（カテゴリーと五十音は併用可）
+    let activeCat = 'all';
+    let activeKana = 'all';
 
-    // 1) 絞り込み
-    const visible = cards.filter((card) => {
-      const name = (card.dataset.name || '').toLowerCase();
-      const reading = card.dataset.reading || '';
-      const category = card.dataset.category || '';
-      const okSearch = !query || name.includes(query) || reading.includes(query);
-      const okCat = activeCat === 'all' || category === activeCat;
-      const okKana = activeKana === 'all' || (kanaMap[activeKana] ? kanaMap[activeKana].test(reading) : false);
-      return okSearch && okCat && okKana;
-    });
+    function apply() {
+      const query = (searchInput?.value || '').toLowerCase().trim();
 
-    // 2) 並び替え
-    const sort = sortSelect?.value || 'default';
-    if (sort === 'kana') {
-      visible.sort((a, b) => (a.dataset.reading || '').localeCompare(b.dataset.reading || '', 'ja'));
-    } else if (sort === 'category') {
-      visible.sort((a, b) =>
-        (a.dataset.category || '').localeCompare(b.dataset.category || '', 'ja') ||
-        (a.dataset.reading || '').localeCompare(b.dataset.reading || '', 'ja'));
-    } else {
-      visible.sort((a, b) => Number(a.dataset.index) - Number(b.dataset.index));
+      // 1) 絞り込み
+      const visible = cards.filter((card) => {
+        const name = (card.dataset.name || '').toLowerCase();
+        const reading = card.dataset.reading || '';
+        const category = card.dataset.category || '';
+        const okSearch = !query || name.includes(query) || reading.includes(query);
+        const okCat = activeCat === 'all' || category === activeCat;
+        const okKana = activeKana === 'all' || (kanaMap[activeKana] ? kanaMap[activeKana].test(reading) : false);
+        return okSearch && okCat && okKana;
+      });
+
+      // 2) 並び替え
+      const sort = sortSelect?.value || 'default';
+      if (sort === 'kana') {
+        visible.sort((a, b) => (a.dataset.reading || '').localeCompare(b.dataset.reading || '', 'ja'));
+      } else if (sort === 'category') {
+        visible.sort((a, b) =>
+          (a.dataset.category || '').localeCompare(b.dataset.category || '', 'ja') ||
+          (a.dataset.reading || '').localeCompare(b.dataset.reading || '', 'ja'));
+      } else {
+        visible.sort((a, b) => Number(a.dataset.index) - Number(b.dataset.index));
+      }
+
+      // 3) 反映（非表示にしてから、表示分を並び順どおり再配置）
+      cards.forEach((c) => { c.style.display = 'none'; });
+      visible.forEach((c) => { c.style.display = 'block'; grid?.appendChild(c); });
+
+      if (noResults) noResults.classList.toggle('hidden', visible.length > 0);
     }
 
-    // 3) 反映（非表示にしてから、表示分を並び順どおり再配置）
-    cards.forEach((c) => { c.style.display = 'none'; });
-    visible.forEach((c) => { c.style.display = 'block'; grid?.appendChild(c); });
-
-    if (noResults) noResults.classList.toggle('hidden', visible.length > 0);
-  }
-
-  function setActive(btns: Element[], target: Element) {
-    btns.forEach((b) => b.classList.remove('active'));
-    target.classList.add('active');
-  }
-
-  searchInput?.addEventListener('input', apply);
-  sortSelect?.addEventListener('change', apply);
-
-  catBtns.forEach((btn) => btn.addEventListener('click', () => {
-    activeCat = (btn as HTMLElement).dataset.cat || 'all';
-    setActive(catBtns, btn);
-    apply();
-    closeMobileMenu();
-  }));
-
-  kanaBtns.forEach((btn) => btn.addEventListener('click', () => {
-    activeKana = (btn as HTMLElement).dataset.kana || 'all';
-    setActive(kanaBtns, btn);
-    apply();
-    closeMobileMenu();
-  }));
-
-  function closeMobileMenu() {
-    if (window.innerWidth <= 768 && indexSection && indexSection.classList.contains('active')) {
-      indexSection.classList.remove('active');
-      if (filterToggleBtn) filterToggleBtn.innerHTML = '絞り込み・並び替え ▼';
+    function setActive(btns, target) {
+      btns.forEach((b) => b.classList.remove('active'));
+      target.classList.add('active');
     }
+
+    function closeMobileMenu() {
+      if (window.innerWidth <= 768 && indexSection && indexSection.classList.contains('active')) {
+        indexSection.classList.remove('active');
+        if (filterToggleBtn) filterToggleBtn.innerHTML = '絞り込み・並び替え ▼';
+      }
+    }
+
+    searchInput?.addEventListener('input', apply);
+    sortSelect?.addEventListener('change', apply);
+
+    catBtns.forEach((btn) => btn.addEventListener('click', () => {
+      activeCat = btn.dataset.cat || 'all';
+      setActive(catBtns, btn);
+      apply();
+      closeMobileMenu();
+    }));
+
+    kanaBtns.forEach((btn) => btn.addEventListener('click', () => {
+      activeKana = btn.dataset.kana || 'all';
+      setActive(kanaBtns, btn);
+      apply();
+      closeMobileMenu();
+    }));
+
+    if (filterToggleBtn && indexSection) {
+      filterToggleBtn.addEventListener('click', () => {
+        indexSection.classList.toggle('active');
+        filterToggleBtn.innerHTML = indexSection.classList.contains('active')
+          ? '絞り込み・並び替え ▲' : '絞り込み・並び替え ▼';
+      });
+    }
+
+    grid.dataset.glossaryBound = 'true';
+
+    // 初期表示
+    apply();
   }
 
-  if (filterToggleBtn && indexSection) {
-    filterToggleBtn.addEventListener('click', () => {
-      indexSection.classList.toggle('active');
-      filterToggleBtn.innerHTML = indexSection.classList.contains('active')
-        ? '絞り込み・並び替え ▲' : '絞り込み・並び替え ▼';
-    });
+  // 直接開いたとき
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupGlossary);
+  } else {
+    setupGlossary();
   }
-
-  // 初期表示
-  apply();
+  // サイト内のリンクから移動してきたとき（ClientRouter）
+  document.addEventListener('astro:page-load', setupGlossary);
 </script>
 
 <style>
