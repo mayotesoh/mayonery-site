@@ -20,7 +20,18 @@ jobs:
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v4
-      
+
+      # 鑑定書（お客様個人のもの）は非公開リポジトリに置いてある。
+      # 中身は暗号化済みだが、**このリポジトリには入れない**ので、ビルド時だけ取ってくる。
+      # 鍵は読み取り専用のデプロイキー。鑑定書が1件も無くてもビルドは通る。
+      - name: Checkout 鑑定書（非公開リポジトリ）
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          repository: mayotesoh/mayonery-kantei
+          ssh-key: ${{ secrets.KANTEI_DEPLOY_KEY }}
+          path: .kantei
+
       - name: Install, build, and upload your site
         uses: withastro/action@v3
         with:

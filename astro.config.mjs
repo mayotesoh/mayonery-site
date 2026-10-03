@@ -9,7 +9,15 @@ export default defineConfig({
     site: 'https://mayonery.jp',
     
     // 🌟 MDXとサイトマップの機能を有効化
-    integrations: [mdx(), sitemap()],
+    integrations: [
+        mdx(),
+        sitemap({
+            // 鑑定書（お客様個人のもの）は sitemap に載せない。載ると検索エンジンに拾われる。
+            // **`/kantei/` は「手相鑑定」の公開ページなので、ここで除外してはいけない。**
+            // そのため鑑定書は `/kanteisho/` という別の場所に置いてある
+            filter: (page) => !page.includes('/kanteisho/'),
+        }),
+    ],
 
     fonts: [
         {

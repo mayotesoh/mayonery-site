@@ -29,6 +29,24 @@
 - Drive→用語集、SNS下書き、自動ブログ等の自動化コードは GAS 側にある
 - スクリプトプロパティ設定は `gas/Config.gs` のコメント参照。X の認証情報(`X_API_KEY`等)は投入済みの見込み／Threads は開発者登録が難航中で保留
 
+## 鑑定書ページ `/kanteisho/<token>/`（2026-10-02 追加）
+
+お客様個人の手相鑑定書。**中身は暗号化されていて、合言葉を入れないと読めない。**
+
+- **なぜ暗号化するか**：このサイトは GitHub Pages で、**パスワード保護もアクセス制限もできない**。
+  URLが分かれば誰でもアクセスできるので、配信するのは暗号文だけにして、復号はブラウザの中でやる
+- 暗号は AES-256-GCM。鍵は PBKDF2-HMAC-SHA256（31万回）で合言葉から作る。復号はブラウザ標準の WebCrypto
+- データは**非公開リポジトリ `mayotesoh/mayonery-kantei`**。
+  `deploy.yml` が読み取り専用のデプロイキー（Secrets の `KANTEI_DEPLOY_KEY`）で `.kantei/` に取ってくる。
+  **`.kantei/` は .gitignore 済み。このリポジトリにお客様のデータは一切入らない**
+- ページは `src/pages/kanteisho/[token]/index.html.ts`（静的エンドポイント）。
+  **殻のHTMLをここに書き写さないこと。** 正本は `クロード広場/鑑定書/tools/encrypt.py` の `SHELL` で、
+  非公開リポジトリの `shell.html` はその書き出し。片方だけ直すと復号できなくなる
+- **sitemap から除外済み**（`astro.config.mjs` の `filter`）。ページにも `noindex` を入れてある。
+  **サイト内のどこからもリンクしないこと**（`/kantei/` は別物の公開ページ。混同しない）
+- 鑑定書の追加・取り下げは `クロード広場/鑑定書/tools/publish.py`。サイト側は何もしなくてよい
+- 鑑定書が0件でも、非公開リポジトリが取れなくてもビルドは通る（`continue-on-error` と空配列）
+
 ## 既知の注意点
 - 用語集は `公開ステータス=下書き` の分をサイト非表示にする設計
 - YouTube埋め込みは `youtube-nocookie.com/embed` ＋ iframe `allow="...encrypted-media..."`（Firefoxで「再生できません」になるのを回避）

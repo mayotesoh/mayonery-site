@@ -32,3 +32,7 @@ gas/
 # Python cache
 __pycache__/
 *.pyc
+
+# 鑑定書の暗号文（非公開リポジトリ mayotesoh/mayonery-kantei をビルド時に取ってくる）
+# お客様個人のものなので、**このリポジトリには絶対に入れない**
+.kantei/
