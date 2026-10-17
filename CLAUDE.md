@@ -59,7 +59,7 @@
 - 過去メモは `C:\Users\mayonery\.claude\projects\C--Users-mayonery-------mayonery-site\memory\` にコピー済み（`mayonery-architecture.md` / `gemini-quota-gotcha.md`）
 
 ## 講座LP（2026-09-18 公開）
-- `public/lp/honkouza/`（手相本講座・深緑）／`public/lp/tesou-video/`（全7章セット・藍）／`public/lp/session/`（鑑定攻略セッション・栗）。**Astroを通さない静的HTML**。CSSは `lp-` 接頭辞、共通の style.css＋ページ別CSS。GAタグ入り
+- `public/lp/honkouza/`（手相学大全（マンツーマン）・深緑）／`public/lp/tesou-video/`（全7章セット・藍）／`public/lp/session/`（鑑定攻略セッション・栗）。**Astroを通さない静的HTML**。CSSは `lp-` 接頭辞、共通の style.css＋ページ別CSS。GAタグ入り
 - 制作資料（戦略・コピー・調査）は `../lp-honkouza/`・`../lp-video7/`（非公開フォルダ）。公開版の正本はこのリポジトリ側
 - 講座一覧→LPの対応は `src/pages/kouza/index.astro` と `[slug].astro` の `LP_BY_SLUG`
 - 用語集・クイズ・ブログ末尾の案内は `src/components/LearnCta.astro`（→ /lp/tesou-video/）
