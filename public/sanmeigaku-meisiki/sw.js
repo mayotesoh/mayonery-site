@@ -1,7 +1,7 @@
 // オフライン用。一度開いたら電波がなくても動く。
 // 開くたびに裏で新しい版を取りに行き、次に開いたときから新しい版になる（stale-while-revalidate）。
-// 4db438ed1c は tools/build_web.py が中身のハッシュに置き換える。版が変わると古いキャッシュは消える。
-const CACHE = 'meishiki-4db438ed1c';
+// d8afcca418 は tools/build_web.py が中身のハッシュに置き換える。版が変わると古いキャッシュは消える。
+const CACHE = 'meishiki-d8afcca418';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

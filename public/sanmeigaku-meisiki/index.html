@@ -37,7 +37,7 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg); color:var(--ink); font-family:"Hiragino Sans","Yu Gothic UI","Noto Sans JP",system-ui,sans-serif; line-height:1.6; font-size:15px}
+body{background:var(--bg); color:var(--ink); font-family:var(--font, "Hiragino Sans","Yu Gothic UI","Noto Sans JP",system-ui,sans-serif); line-height:1.6; font-size:15px}
 .wrap{max-width:980px; margin:0 auto; padding:20px 16px 64px}
 header h1{font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif; font-weight:600; font-size:26px; margin:0 0 2px; letter-spacing:.06em}
 header p{margin:0; color:var(--sub); font-size:13px}
@@ -105,7 +105,9 @@ table{border-collapse:collapse; width:100%; font-size:14px}
 th,td{border-bottom:1px solid var(--line); padding:6px 6px; text-align:center}
 th{font-weight:500; color:var(--sub); font-size:12px}
 .kanshi{font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif; font-size:22px; letter-spacing:.1em}
-.zou span{display:inline-block; min-width:1.4em; color:var(--sub)}
+.zou span{display:block; min-width:1.4em; color:var(--sub); line-height:1.5}
+.zou span.on{display:block}
+body.zou-h .zou span{display:inline-block}
 .zou span.on{color:var(--ink); font-weight:700; border-bottom:2px solid var(--gold)}
 .tag{display:inline-block; font-size:11px; padding:1px 7px; border-radius:999px; background:var(--accent-soft); color:var(--accent); margin-left:4px; vertical-align:middle}
 .tag.alert{background:var(--warn-bg); color:var(--warn)}
@@ -168,15 +170,90 @@ details.partnerbox .partner{border-top:0; padding-top:0}
   .bnav:empty{display:none}
 }
 @media print{ .bnav{display:none} }
+/* 設定パネル */
+header{display:flex; align-items:flex-start; gap:12px}
+header .htext{flex:1}
+.cfgbtn{font:inherit; font-size:14px; padding:7px 14px; border-radius:999px; border:1px solid var(--line); background:var(--paper); color:var(--ink); cursor:pointer; white-space:nowrap}
+.cfgbtn[aria-expanded="true"]{background:var(--accent); color:var(--paper); border-color:var(--accent)}
+#settings{margin-top:14px; display:none}
+#settings.on{display:block}
+#settings h2{font-size:15px; margin:0 0 10px}
+#settings .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px 22px}
+#settings .row label.t{display:block; font-size:12px; color:var(--sub); margin-bottom:4px}
+#settings .seg{flex-wrap:wrap}
+.swatches{display:flex; gap:8px; flex-wrap:wrap}
+.swatches button{width:30px; height:30px; border-radius:50%; border:2px solid var(--line); cursor:pointer; padding:0}
+.swatches button[aria-pressed="true"]{outline:3px solid var(--gold); outline-offset:2px}
+.pcolor{display:flex; gap:14px; align-items:center; flex-wrap:wrap; font-size:13px}
+.pcolor input[type=color]{width:42px; height:30px; border:1px solid var(--line); border-radius:6px; background:none; padding:0 2px; cursor:pointer}
+#settings .foot{display:flex; gap:14px; align-items:center; margin-top:14px; font-size:12px; color:var(--sub); flex-wrap:wrap}
+/* ドラッグ中、指やマウスについてくる写し */
+.drag-ghost{position:fixed; z-index:60; pointer-events:none; margin:0 !important; max-height:240px; overflow:hidden; opacity:.94; transform:rotate(1.2deg) scale(.97); box-shadow:0 18px 40px rgba(0,0,0,.35); border:2px solid var(--accent) !important;
+  -webkit-mask-image:linear-gradient(#000 70%, transparent); mask-image:linear-gradient(#000 70%, transparent); transition:transform .08s}
+#result .card.lifting{opacity:.35; outline:2px dashed var(--accent); outline-offset:-2px}
 @media print{ .chooser, form.panel, footer, .grip{display:none} body{background:#fff} .card{break-inside:avoid} }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>算命学 命式ノート</h1>
-    <p>生年月日から命式を出して、見たい項目だけを並べて表示します。</p>
+    <div class="htext">
+      <h1>算命学 命式ノート</h1>
+      <p>生年月日から命式を出して、見たい項目だけを並べて表示します。</p>
+    </div>
+    <button type="button" class="cfgbtn" id="cfgBtn" aria-expanded="false" aria-controls="settings">⚙ 設定</button>
   </header>
+
+  <section class="panel" id="settings" aria-label="設定">
+    <h2>表示の設定 <small style="font-weight:400;color:var(--sub);font-size:12px">このブラウザに保存されます</small></h2>
+    <div class="grid">
+      <div class="row"><label class="t">柱・運勢の並び</label>
+        <div class="seg" role="radiogroup">
+          <input type="radio" name="c_pillar" id="cpD" value="dmy"><label for="cpD">日 → 月 → 年</label>
+          <input type="radio" name="c_pillar" id="cpY" value="ymd"><label for="cpY">年 → 月 → 日</label>
+        </div></div>
+      <div class="row"><label class="t">蔵干の並べ方</label>
+        <div class="seg" role="radiogroup">
+          <input type="radio" name="c_zou" id="czV" value="v"><label for="czV">縦</label>
+          <input type="radio" name="c_zou" id="czH" value="h"><label for="czH">横</label>
+        </div></div>
+      <div class="row"><label class="t">文字の大きさ</label>
+        <div class="seg" role="radiogroup">
+          <input type="radio" name="c_size" id="csS" value="s"><label for="csS">小</label>
+          <input type="radio" name="c_size" id="csM" value="m"><label for="csM">標準</label>
+          <input type="radio" name="c_size" id="csL" value="l"><label for="csL">大</label>
+          <input type="radio" name="c_size" id="csX" value="xl"><label for="csX">特大</label>
+        </div></div>
+      <div class="row"><label class="t">フォント</label>
+        <div class="seg" role="radiogroup">
+          <input type="radio" name="c_font" id="cfG" value="gothic"><label for="cfG">ゴシック</label>
+          <input type="radio" name="c_font" id="cfU" value="ud"><label for="cfU">UD</label>
+          <input type="radio" name="c_font" id="cfR" value="maru"><label for="cfR">丸ゴシック</label>
+          <input type="radio" name="c_font" id="cfM" value="mincho"><label for="cfM">明朝</label>
+        </div></div>
+      <div class="row"><label class="t">画面の明るさ</label>
+        <div class="seg" role="radiogroup">
+          <input type="radio" name="c_theme" id="ctA" value="auto"><label for="ctA">端末に合わせる</label>
+          <input type="radio" name="c_theme" id="ctL" value="light"><label for="ctL">ライト</label>
+          <input type="radio" name="c_theme" id="ctD" value="dark"><label for="ctD">ダーク</label>
+        </div></div>
+      <div class="row"><label class="t">五行の色</label>
+        <div class="seg" role="radiogroup">
+          <input type="radio" name="c_gogyo" id="cgS" value="std"><label for="cgS">標準</label>
+          <input type="radio" name="c_gogyo" id="cgT" value="trad"><label for="cgT">伝統色</label>
+          <input type="radio" name="c_gogyo" id="cgN" value="mono"><label for="cgN">色なし</label>
+        </div></div>
+      <div class="row"><label class="t">アクセントの色（ボタン・印）</label>
+        <div class="swatches" id="accentSw"></div></div>
+      <div class="row"><label class="t">枠の色（自分・相手）</label>
+        <div class="pcolor">
+          <label><span class="dotA"></span>自分 <input type="color" id="cPa"></label>
+          <label><span class="dotB"></span>相手 <input type="color" id="cPb"></label>
+          <button type="button" class="linkbtn" id="cPreset">標準に戻す</button>
+        </div></div>
+    </div>
+    <div class="foot"><button type="button" class="linkbtn" id="cfgReset">設定をすべて初期値に戻す</button><span>並びの設定を変えると、運勢のカード（日運・月運・年運・大運）の並びと表の列の順もそろえ直します。</span></div>
+  </section>
 
   <form class="panel" id="f" autocomplete="off">
     <div class="field">
@@ -891,10 +968,10 @@ var esc = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return {
 var SECTIONS = [
   { id:'inzan',   label:'陰占',         basic:true,  render:renderInzan },
   { id:'yousen',  label:'陽占（人体図）', basic:true,  render:renderYousen },
-  { id:'daiun',   label:'大運',         basic:true,  render:renderDaiun, wide:true },
-  { id:'nenun',   label:'年運',         basic:true,  render:renderNenun, wide:true },
-  { id:'getsuun', label:'月運',         basic:false, render:renderGetsuun, wide:true },
   { id:'nichiun', label:'日運',         basic:false, render:renderNichiun, wide:true },
+  { id:'getsuun', label:'月運',         basic:false, render:renderGetsuun, wide:true },
+  { id:'nenun',   label:'年運',         basic:true,  render:renderNenun, wide:true },
+  { id:'daiun',   label:'大運',         basic:true,  render:renderDaiun, wide:true },
   { id:'tenchu',  label:'天中殺・宿命中殺', basic:true, render:renderTenchu },
   { id:'isou',    label:'位相法',       basic:false, render:renderIsou },
   { id:'ijou',    label:'異常干支',     basic:false, render:renderIjou },
@@ -907,9 +984,71 @@ var store = {
   get: function(k, d){ try { var v = localStorage.getItem('meishiki.' + k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
   set: function(k, v){ try { localStorage.setItem('meishiki.' + k, JSON.stringify(v)); } catch(e){} }
 };
+// ---- 設定 ----
+var CFG_DEFAULT = { pillar:'dmy', zou:'v', size:'m', font:'gothic', theme:'auto', gogyo:'std', accent:'ai', pa:'', pb:'' };
+var firstCfg = !store.get('cfg', null);
+var cfg = Object.assign({}, CFG_DEFAULT, store.get('cfg', {}));
+var ACCENTS = {   // [ライトの色, ライトの淡色, ダークの色, ダークの淡色]
+  ai:      ['#2c4a7a', '#e3e9f3', '#8fb0e6', '#263247'],
+  shu:     ['#b5452d', '#f7e3dc', '#f08a6e', '#3f2620'],
+  midori:  ['#2f6b4f', '#dfeee6', '#7fcca5', '#1f3a2d'],
+  murasaki:['#5b4a91', '#e8e3f4', '#b3a2ec', '#2f2848'],
+  sumi:    ['#333842', '#e6e6e8', '#d0d3d9', '#2c2f36']
+};
+var ACCENT_NAME = { ai:'藍', shu:'朱', midori:'緑', murasaki:'紫', sumi:'墨' };
+var GOGYO_SET = {   // 木火土金水 [ライト5色], [ダーク5色]
+  trad: [['#1f7a6b', '#c0392b', '#a77b12', '#8a8f98', '#23262e'], ['#5fc2b0', '#ff7b6b', '#e2b74d', '#e8e8e8', '#a9b4ff']],
+  mono: [['var(--ink)', 'var(--ink)', 'var(--ink)', 'var(--ink)', 'var(--ink)'], ['var(--ink)', 'var(--ink)', 'var(--ink)', 'var(--ink)', 'var(--ink)']]
+};
+var FONTS = {
+  gothic: '"Hiragino Sans","Yu Gothic UI","Noto Sans JP",system-ui,sans-serif',
+  ud:     '"BIZ UDPGothic","BIZ UDGothic","Hiragino Sans","Yu Gothic UI","Noto Sans JP",sans-serif',
+  maru:   '"Hiragino Maru Gothic ProN","Zen Maru Gothic","M PLUS Rounded 1c","BIZ UDPGothic","Yu Gothic UI",sans-serif',
+  mincho: '"Hiragino Mincho ProN","Yu Mincho","BIZ UDPMincho","Noto Serif JP",serif'
+};
+var ZOOM = { s: 0.9, m: 1, l: 1.12, xl: 1.25 };
+var PA_DEFAULT = ['#2c4a7a', '#8fb0e6'], PB_DEFAULT = ['#b0445e', '#ee8ba0'];
+function applyCfg(){
+  var root = document.documentElement;
+  if (cfg.theme === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', cfg.theme);
+  document.body.classList.toggle('zou-h', cfg.zou === 'h');
+  var a = ACCENTS[cfg.accent] || ACCENTS.ai, g = GOGYO_SET[cfg.gogyo];
+  var vars = function(dark){
+    var v = '--accent:' + a[dark ? 2 : 0] + ';--accent-soft:' + a[dark ? 3 : 1] + ';';
+    if (g) g[dark ? 1 : 0].forEach(function(c, i){ v += '--g' + i + ':' + c + ';'; });
+    if (cfg.pa) v += '--pa:' + cfg.pa + ';';
+    if (cfg.pb) v += '--pb:' + cfg.pb + ';';
+    return v;
+  };
+  var css = ':root{' + vars(false) + '--font:' + FONTS[cfg.font] + '}' +
+            '@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){' + vars(true) + '}}' +
+            ':root[data-theme="dark"]{' + vars(true) + '}' +
+            '.wrap{zoom:' + (ZOOM[cfg.size] || 1) + '}';
+  var el = document.getElementById('cfgStyle');
+  if (!el) { el = document.createElement('style'); el.id = 'cfgStyle'; document.head.appendChild(el); }
+  el.textContent = css;
+}
+// 柱の並び。日→月→年 なら ['day','month','year']
+function pillarOrder(){ return cfg.pillar === 'ymd' ? ['year', 'month', 'day'] : ['day', 'month', 'year']; }
+// 運勢カードの並び（小さい運から＝日→月→年→大運、または逆）
+function unOrder(){ return cfg.pillar === 'ymd' ? ['daiun', 'nenun', 'getsuun', 'nichiun'] : ['nichiun', 'getsuun', 'nenun', 'daiun']; }
+// 運勢の4枚が今いる位置はそのままに、中身だけ設定の順に入れ替える
+function applyUnOrder(){
+  var want = unOrder(), slots = [];
+  order.forEach(function(id, i){ if (want.indexOf(id) >= 0) slots.push(i); });
+  slots.forEach(function(pos, k){ order[pos] = want[k]; });
+  store.set('order', order);
+}
+// 関係タグ・文脈の列の並べ替え用。「日支」「月運」「大運」などの先頭の字で順位を決める
+function relRank(label){
+  var c = String(label).charAt(0);
+  var r = cfg.pillar === 'ymd' ? { 大:0, 年:1, 月:2, 日:3 } : { 日:0, 月:1, 年:2, 大:3 };
+  return label === '宿命' || String(label).indexOf('＋') >= 0 ? -1 : (c in r ? r[c] : 9);
+}
 var defaultOrder = SECTIONS.map(function(s){ return s.id; });
 var order = sanitizeOrder(store.get('order', defaultOrder));
 var visible = store.get('visible', null) || SECTIONS.filter(function(s){ return s.basic; }).map(function(s){ return s.id; });
+if (firstCfg) applyUnOrder();   // 以前の既定（大運→年運→月運→日運）で保存されている人も、日→月→年 にそろえる
 function sanitizeOrder(o){
   var ids = defaultOrder.slice();
   var out = (Array.isArray(o) ? o : []).filter(function(x){ return ids.indexOf(x) >= 0; });
@@ -917,6 +1056,55 @@ function sanitizeOrder(o){
   return out;
 }
 function byId(id){ return SECTIONS.filter(function(s){ return s.id === id; })[0]; }
+
+// ---- 設定パネル ----
+(function(){
+  var btn = document.getElementById('cfgBtn'), panel = document.getElementById('settings');
+  btn.addEventListener('click', function(){
+    var on = !panel.classList.contains('on');
+    panel.classList.toggle('on', on); btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+  });
+  var sw = document.getElementById('accentSw');
+  Object.keys(ACCENTS).forEach(function(k){
+    var b = document.createElement('button');
+    b.type = 'button'; b.dataset.k = k; b.title = ACCENT_NAME[k]; b.setAttribute('aria-label', 'アクセント ' + ACCENT_NAME[k]);
+    b.style.background = ACCENTS[k][0];
+    b.addEventListener('click', function(){ cfg.accent = k; save(); });
+    sw.appendChild(b);
+  });
+  function isDark(){ return document.documentElement.getAttribute('data-theme') === 'dark' || (cfg.theme === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches); }
+  function sync(){
+    ['pillar', 'zou', 'size', 'font', 'theme', 'gogyo'].forEach(function(n){
+      document.querySelectorAll('input[name=c_' + n + ']').forEach(function(r){ r.checked = r.value === cfg[n]; });
+    });
+    sw.querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.k === cfg.accent ? 'true' : 'false'); });
+    var d = isDark() ? 1 : 0;
+    document.getElementById('cPa').value = cfg.pa || PA_DEFAULT[d];
+    document.getElementById('cPb').value = cfg.pb || PB_DEFAULT[d];
+  }
+  function save(){
+    store.set('cfg', cfg); applyCfg(); sync(); drawChips(); if (current) draw();
+  }
+  ['pillar', 'zou', 'size', 'font', 'theme', 'gogyo'].forEach(function(n){
+    document.querySelectorAll('input[name=c_' + n + ']').forEach(function(r){
+      r.addEventListener('change', function(){
+        cfg[n] = r.value;
+        if (n === 'pillar') applyUnOrder();
+        save();
+      });
+    });
+  });
+  document.getElementById('cPa').addEventListener('input', function(){ cfg.pa = this.value; store.set('cfg', cfg); applyCfg(); });
+  document.getElementById('cPb').addEventListener('input', function(){ cfg.pb = this.value; store.set('cfg', cfg); applyCfg(); });
+  document.getElementById('cPreset').addEventListener('click', function(){ cfg.pa = ''; cfg.pb = ''; save(); });
+  document.getElementById('cfgReset').addEventListener('click', function(){
+    var keepPillar = cfg.pillar;
+    cfg = Object.assign({}, CFG_DEFAULT);
+    if (keepPillar !== cfg.pillar) applyUnOrder();
+    save();
+  });
+  applyCfg(); sync();
+})();
 
 // ---- チップ ----
 var chipsEl = document.getElementById('chips');
@@ -959,7 +1147,7 @@ function drawChips(){
 }
 document.getElementById('allOn').onclick = function(){ visible = defaultOrder.slice(); store.set('visible', visible); drawChips(); draw(); };
 document.getElementById('basic').onclick = function(){ visible = SECTIONS.filter(function(s){ return s.basic; }).map(function(s){ return s.id; }); store.set('visible', visible); drawChips(); draw(); };
-document.getElementById('reset').onclick = function(){ order = defaultOrder.slice(); store.set('order', order); drawChips(); draw(); };
+document.getElementById('reset').onclick = function(){ order = defaultOrder.slice(); applyUnOrder(); drawChips(); draw(); };
 
 // ---- 入力 ----
 // ---- 生年月日の入力（1つの欄で、西暦8桁・区切りあり・和暦を受け付ける） ----
@@ -1187,10 +1375,27 @@ function renderAishou(){
     e.preventDefault();
     drag = { id: g.dataset.grip, sec: g.closest('section'), grip: g, target: null, before: false };
     try { g.setPointerCapture(e.pointerId); } catch(_) {}
+    // 写し（ゴースト）を作って指・マウスに追従させる。.wrap の拡大率に合わせる
+    var z = ZOOM[cfg.size] || 1, r0 = drag.sec.getBoundingClientRect();
+    var ghost = drag.sec.cloneNode(true);
+    ghost.classList.add('drag-ghost'); ghost.classList.remove('lifting');
+    ghost.removeAttribute('data-sec'); ghost.setAttribute('aria-hidden', 'true');
+    var w = Math.min(r0.width, 460);
+    ghost.style.width = (w / z) + 'px'; ghost.style.zoom = z;
+    drag.ghost = ghost; drag.z = z;
+    drag.offX = Math.min(e.clientX - r0.left, w - 20); drag.offY = Math.min(e.clientY - r0.top, 40);
+    document.body.appendChild(ghost);
+    moveGhost(e.clientX, e.clientY);
     drag.sec.classList.add('lifting'); res.classList.add('dragging');
   });
+  function moveGhost(x, y){
+    if (!drag || !drag.ghost) return;
+    drag.ghost.style.left = ((x - drag.offX) / drag.z) + 'px';
+    drag.ghost.style.top = ((y - drag.offY) / drag.z) + 'px';
+  }
   res.addEventListener('pointermove', function(e){
     if (!drag) return;
+    moveGhost(e.clientX, e.clientY);
     edgeScroll(e.clientY);
     var el = document.elementFromPoint(e.clientX, e.clientY);
     var t = el && el.closest('#result section.card');
@@ -1206,6 +1411,7 @@ function renderAishou(){
   function end(){
     if (!drag) return;
     var d = drag; drag = null;
+    if (d.ghost && d.ghost.parentNode) d.ghost.parentNode.removeChild(d.ghost);
     clearInterval(scrollTimer); scrollTimer = null;
     clearMarks(); res.classList.remove('dragging'); d.sec.classList.remove('lifting');
     if (d.target) {
@@ -1235,7 +1441,7 @@ function renderAishou(){
 var PNAME = { year:'年', month:'月', day:'日' };
 function renderInzan(r){
   var z = r.inzan;
-  var cols = ['day','month','year'];
+  var cols = pillarOrder();
   var h = '<h2>陰占 <small>' + esc(r.input.y + '年' + r.input.m + '月' + r.input.d + '日') + '</small></h2><table><tr><th></th>';
   cols.forEach(function(c){ h += '<th>' + PNAME[c] + '</th>'; });
   h += '</tr><tr><th>干</th>';
@@ -1311,9 +1517,13 @@ function unTable(head, rows, cells){
 }
 function isoCell(list){
   if (!list || !list.length) return '<td class="iso"></td>';
+  list = list.map(function(x, i){ return { x: x, i: i }; })
+    .sort(function(a, b){ return (relRank(a.x.with) - relRank(b.x.with)) || (a.i - b.i); })
+    .map(function(o){ return o.x; });
   return '<td class="iso">' + list.map(function(x){ return '<span class="tag' + (x.kind === '散' ? ' alert' : '') + '">' + esc(x.with === '宿命' ? x.name : x.with + ' ' + x.name) + '</span>'; }).join(' ') + '</td>';
 }
 var ISO_NOTE = '「宿命との関係」は運の干支を命式の年・月・日の柱と比べた位相法（年支＝命式の年の支、日干＝命式の日の干）。三合会局・方三位は、命式にある2つの支に運が残りの1つを持ってきたときに「成立」と出します。';
+function ctxKeys(keys){ return keys.slice().sort(function(a, b){ return relRank(a) - relRank(b); }); }
 function ctxCell(x, k){ return '<span class="ctx">' + (x.ctx && x.ctx[k] ? x.ctx[k] : '—') + '</span>'; }
 var UN_NOTE = '「運どうしの関係」は、その行の運をより大きい単位の運（年運なら大運、月運なら年運と大運、日運なら月運・年運・大運）と比べた位相法。どの大運に当たるかは「大運の切り替え」の設定で決めます（誕生日＝満年齢、立春＝干支の年の数え方）。宿命・大運・年運などをまたいで三合会局・方三位がそろうときも「成立」と出します。';
 function ganshiCell(g){ return '<span class="kanshi" style="font-size:17px">' + g + '</span>'; }
@@ -1322,7 +1532,8 @@ function renderNenun(r){
   var kanNow = kanYearOf(TODAY_DN);
   rows.forEach(function(x){ x.now = x.year === kanNow; x.nowLabel = '今年'; });
   var h = '<h2>年運 <small>立春で切り替わります</small></h2>' + nav('nen-12', un.nenFrom + '〜' + (un.nenFrom + 11) + '年', 'nen+12', 'nen0');
-  h += unTable(['西暦', '年齢', '干支', '大運'], rows, function(x){ return [x.year, x.age >= 0 ? x.age + '歳' : '—', ganshiCell(x.ganshi), ctxCell(x, '大運')]; });
+  var cx = ctxKeys(['大運']);
+  h += unTable(['西暦', '年齢', '干支'].concat(cx), rows, function(x){ return [x.year, x.age >= 0 ? x.age + '歳' : '—', ganshiCell(x.ganshi)].concat(cx.map(function(k){ return ctxCell(x, k); })); });
   return h + '<p class="note">年齢はその年の誕生日を迎えたときの満年齢。主星はその年の干、従星はその年の支を日干（' + r.inzan.day.kan + '）と比べたもの。赤字は天中殺（' + r.tenchu + '）の年。' + ISO_NOTE + UN_NOTE + (r.daiun ? '' : '性別を選ぶと大運との関係も出ます。') + '</p>';
 }
 function md(t){ return t.m + '/' + t.d; }
@@ -1330,7 +1541,8 @@ function renderGetsuun(r){
   var rows = S.getsuun(r, un.getsuY);
   rows.forEach(function(x){ x.now = TODAY_DN >= x.fromDn && TODAY_DN <= x.toDn; x.nowLabel = '今月'; });
   var h = '<h2>月運 <small>節入りで切り替わります</small></h2>' + nav('getsu-1', un.getsuY + '年（立春〜）', 'getsu+1', 'getsu0');
-  h += unTable(['期間', '節', '干支', '大運'], rows, function(x){ return [md(x.from) + '〜' + md(x.to), x.setsu, ganshiCell(x.ganshi), ctxCell(x, '大運')]; });
+  var cx = ctxKeys(['年運', '大運']);
+  h += unTable(['期間', '節', '干支'].concat(cx), rows, function(x){ return [md(x.from) + '〜' + md(x.to), x.setsu, ganshiCell(x.ganshi)].concat(cx.map(function(k){ return ctxCell(x, k); })); });
   return h + '<p class="note">' + un.getsuY + '年の立春から翌年の立春前日まで。期間は節入りの日を初日としています。赤字は天中殺の月。' + UN_NOTE + '</p>';
 }
 function renderNichiun(r){
@@ -1338,7 +1550,8 @@ function renderNichiun(r){
   rows.forEach(function(x){ x.now = x.dn === TODAY_DN; x.nowLabel = '今日'; });
   var h = '<h2>日運</h2>' + nav('nichi-1', un.nichiY + '年' + un.nichiM + '月', 'nichi+1', 'nichi0');
   if (!rows.length) return h + '<p class="empty">対応範囲外の月です。</p>';
-  h += unTable(['日', '曜', '干支', '月運'], rows, function(x){ return [x.date.d, '<span class="' + (x.wday === 0 ? 'sun' : x.wday === 6 ? 'sat' : '') + '">' + WDAY[x.wday] + '</span>', ganshiCell(x.ganshi), ctxCell(x, '月運')]; });
+  var cx = ctxKeys(['月運', '年運', '大運']);
+  h += unTable(['日', '曜', '干支'].concat(cx), rows, function(x){ return [x.date.d, '<span class="' + (x.wday === 0 ? 'sun' : x.wday === 6 ? 'sat' : '') + '">' + WDAY[x.wday] + '</span>', ganshiCell(x.ganshi)].concat(cx.map(function(k){ return ctxCell(x, k); })); });
   return h + '<p class="note">赤字は天中殺（' + r.tenchu + '）の日。12日のうち2日巡ってきます。' + UN_NOTE + '</p>';
 }
 document.getElementById('result').addEventListener('click', function(e){
