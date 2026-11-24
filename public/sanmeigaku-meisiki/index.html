@@ -21,19 +21,19 @@
   --gold:#a8812f; --warn:#8a4b12; --warn-bg:#fbf0e1;
   --g0:#3f8a4f; --g1:#c2453a; --g2:#a0782c; --g3:#7d8590; --g4:#2f5f9e;
   --radius:12px;
-  --pa:#2c4a7a; --pb:#b0445e; --pc:#6a55a8;
+  --pa:#2c4a7a; --pb:#b0445e; --pc:#6a55a8; --cf:#c0392b; --cm:#2c4a7a;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#15171c; --paper:#1d2027; --ink:#e7e4dc; --sub:#a3a8b3; --line:#343844; --accent:#8fb0e6; --accent-soft:#263247;
     --gold:#d4ae5c; --warn:#f0b878; --warn-bg:#352718;
-    --g0:#6fc283; --g1:#ec7d72; --g2:#d6ad5c; --g3:#aeb5bf; --g4:#79a6e6; --pa:#8fb0e6; --pb:#ee8ba0; --pc:#b6a3ec;
+    --g0:#6fc283; --g1:#ec7d72; --g2:#d6ad5c; --g3:#aeb5bf; --g4:#79a6e6; --pa:#8fb0e6; --pb:#ee8ba0; --pc:#b6a3ec; --cf:#ef8173; --cm:#8fb0e6;
   }
 }
 :root[data-theme="dark"]{
   --bg:#15171c; --paper:#1d2027; --ink:#e7e4dc; --sub:#a3a8b3; --line:#343844; --accent:#8fb0e6; --accent-soft:#263247;
   --gold:#d4ae5c; --warn:#f0b878; --warn-bg:#352718;
-  --g0:#6fc283; --g1:#ec7d72; --g2:#d6ad5c; --g3:#aeb5bf; --g4:#79a6e6; --pa:#8fb0e6; --pb:#ee8ba0; --pc:#b6a3ec;
+  --g0:#6fc283; --g1:#ec7d72; --g2:#d6ad5c; --g3:#aeb5bf; --g4:#79a6e6; --pa:#8fb0e6; --pb:#ee8ba0; --pc:#b6a3ec; --cf:#ef8173; --cm:#8fb0e6;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -72,8 +72,8 @@ button.go:hover{filter:brightness(1.08)}
 #result{margin-top:18px; display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px}
 #result .card.wide{grid-column:1/-1}
 #result .card{position:relative}
-#result.two .card.pa{border-left:5px solid var(--pa)}
-#result.two .card.pb{border-left:5px solid var(--pb)}
+#result .card.pa{border-left:5px solid var(--pa)}
+#result .card.pb{border-left:5px solid var(--pb)}
 #result .card.pc{border-left:5px solid var(--pc)}
 @media (min-width:700px){ #result.pairgrid{grid-template-columns:1fr 1fr} }
 .who{display:inline-block; white-space:nowrap; flex-shrink:0; font-size:11px; font-weight:600; letter-spacing:.02em; padding:1px 9px; border-radius:999px; color:var(--paper); background:var(--pa); align-self:center}
@@ -170,6 +170,33 @@ details.partnerbox .partner{border-top:0; padding-top:0}
   .bnav:empty{display:none}
 }
 @media print{ .bnav{display:none} }
+/* 性別ボタンの色（女性＝赤、男性＝青。設定で変更可） */
+#sexF:checked + label, #sexBF:checked + label{background:var(--cf); color:#fff}
+#sexM:checked + label, #sexBM:checked + label{background:var(--cm); color:#fff}
+/* 用語にカーソルを合わせると出る小窓 */
+.gl{cursor:help; text-decoration:underline dotted; text-decoration-color:var(--line); text-underline-offset:4px; text-decoration-thickness:1.5px}
+.gl:hover,.gl:focus-visible{text-decoration-color:var(--accent); outline:none}
+.gltip{position:fixed; z-index:70; max-width:300px; background:var(--paper); color:var(--ink); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:10px; padding:10px 12px; font-size:13px; line-height:1.6; box-shadow:0 10px 28px rgba(0,0,0,.25); pointer-events:none; display:none}
+.gltip.on{display:block}
+.gltip b{font-size:15px; letter-spacing:.04em}
+.gltip .meta{color:var(--sub); font-size:12px; margin:2px 0 4px}
+/* 用語の索引 */
+.gtabs{display:flex; gap:6px; flex-wrap:wrap; margin:8px 0 10px}
+.gtabs button{font:inherit; font-size:13px; padding:5px 11px; border-radius:999px; border:1px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer}
+.gtabs button[aria-pressed="true"]{background:var(--accent); color:var(--paper); border-color:var(--accent)}
+.gsearch{font:inherit; font-size:16px; width:100%; max-width:360px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink)}
+.glist{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:8px 18px; margin:0}
+.glist > div{border-bottom:1px solid var(--line); padding:6px 0}
+.glist dt{font-weight:600; letter-spacing:.04em}
+.glist dt small{font-weight:400; color:var(--sub); margin-left:6px; font-size:12px}
+.glist dd{margin:2px 0 0; font-size:13px}
+/* 解説 */
+.kai{margin:0; display:grid; gap:10px}
+.kai > div{border-left:3px solid var(--line); padding:2px 0 2px 12px}
+.kai dt{font-weight:600}
+.kai dt small{font-weight:400; color:var(--sub); font-size:12px; margin-left:6px}
+.kai dd{margin:2px 0 0; font-size:14px}
+.kai h3{font-size:13px; color:var(--sub); margin:8px 0 0; font-weight:600; letter-spacing:.06em}
 /* 設定パネル */
 header{display:flex; align-items:flex-start; gap:12px}
 header .htext{flex:1}
@@ -245,12 +272,13 @@ header .htext{flex:1}
         </div></div>
       <div class="row"><label class="t">アクセントの色（ボタン・印）</label>
         <div class="swatches" id="accentSw"></div></div>
-      <div class="row"><label class="t">枠の色（自分・相手）</label>
+      <div class="row"><label class="t">性別の色（枠・名前札・性別ボタン）</label>
         <div class="pcolor">
-          <label><span class="dotA"></span>自分 <input type="color" id="cPa"></label>
-          <label><span class="dotB"></span>相手 <input type="color" id="cPb"></label>
+          <label>女性 <input type="color" id="cF"></label>
+          <label>男性 <input type="color" id="cM"></label>
           <button type="button" class="linkbtn" id="cPreset">標準に戻す</button>
-        </div></div>
+        </div>
+        <div style="font-size:12px;color:var(--sub);margin-top:4px">2人とも同じ性別のときは、相手を淡い色にします</div></div>
     </div>
     <div class="foot"><button type="button" class="linkbtn" id="cfgReset">設定をすべて初期値に戻す</button><span>並びの設定を変えると、運勢のカード（日運・月運・年運・大運）の並びと表の列の順もそろえ直します。</span></div>
   </section>
@@ -957,6 +985,143 @@ if (typeof module !== 'undefined') module.exports = SETSU_DATA;
 
 </script>
 <script>
+/* ---- glossary.js ---- */
+/*
+ * 算命学の用語の意味（索引・ツールチップ・解説カード用）
+ * ------------------------------------------------------------------
+ * 文章はこのツールのために書き下ろしたもの。他サイトの解説文を下敷きにしていない（引き継ぎ書 2-8）。
+ * 占いの解釈は流派・鑑定者で幅があるので、断定せず「〜とされます」の言い回しにそろえる。
+ * 計算に関わる事実（五行・陰陽・点数・季節）は engine.js と同じ値。
+ */
+(function (root) {
+  'use strict';
+
+  var GOGYO = {
+    木: { kw: '成長・伸びる力・向上心', note: '春・東。まっすぐ伸びる性質。五常では「仁」' },
+    火: { kw: '表現・明るさ・情熱', note: '夏・南。外へ広がり照らす性質。五常では「礼」' },
+    土: { kw: '安定・育む・まとめる', note: '季節の変わり目・中央。受け止めて育てる性質。五常では「信」' },
+    金: { kw: '決断・けじめ・実り', note: '秋・西。固く引き締める性質。五常では「義」' },
+    水: { kw: '知恵・柔軟・流れ', note: '冬・北。形を変えてしみ込む性質。五常では「智」' }
+  };
+
+  // 十干: 自然物のたとえ＋キーワード
+  var KAN = {
+    甲: { gogyo: '木', yin: '陽', image: '大樹', kw: 'まっすぐ・一本気・向上心', role: '曲がらずに伸びていこうとする力' },
+    乙: { gogyo: '木', yin: '陰', image: '草花・つる草', kw: 'しなやか・協調・粘り強さ', role: '周りに合わせながら根を張る強さ' },
+    丙: { gogyo: '火', yin: '陽', image: '太陽', kw: '明るさ・おおらか・開放的', role: '分け隔てなく周りを照らす明るさ' },
+    丁: { gogyo: '火', yin: '陰', image: '灯火', kw: '繊細・内に秘めた情熱・集中', role: '身近なものを温める静かな情熱' },
+    戊: { gogyo: '土', yin: '陽', image: '山', kw: 'どっしり・包容力・動じない', role: '動かずに受け止める大きさ' },
+    己: { gogyo: '土', yin: '陰', image: '田畑', kw: '育てる・面倒見・現実的', role: '人やものを育てていく力' },
+    庚: { gogyo: '金', yin: '陽', image: '鉄・原石', kw: '決断力・行動・たくましさ', role: '迷いを断ち切って進む力' },
+    辛: { gogyo: '金', yin: '陰', image: '宝石・磨かれた金属', kw: '美意識・繊細・誇り', role: '磨かれて光る感性とこだわり' },
+    壬: { gogyo: '水', yin: '陽', image: '海・大河', kw: 'スケールの大きさ・自由・行動範囲の広さ', role: '大きく流れて広がっていく力' },
+    癸: { gogyo: '水', yin: '陰', image: '雨・霧', kw: 'しっとり・知恵・浸透力', role: '静かにしみ込んで潤す力' }
+  };
+
+  // 十二支: 五行・節月・季節のイメージ（事実は engine.js の暦と同じ）
+  var SHI = {
+    子: { gogyo: '水', month: '12月ごろ（大雪〜）', season: '冬の盛り', dir: '北', kw: '静かに蓄える・始まりの前の充電' },
+    丑: { gogyo: '土', month: '1月ごろ（小寒〜）', season: '冬の終わり', dir: '北北東', kw: '忍耐・地道な準備' },
+    寅: { gogyo: '木', month: '2月ごろ（立春〜）', season: '春の始まり', dir: '東北東', kw: '芽吹き・勢い・新しい出発' },
+    卯: { gogyo: '木', month: '3月ごろ（啓蟄〜）', season: '春の盛り', dir: '東', kw: 'のびやか・広がり' },
+    辰: { gogyo: '土', month: '4月ごろ（清明〜）', season: '春の終わり', dir: '東南東', kw: '移り変わり・変化の受け皿' },
+    巳: { gogyo: '火', month: '5月ごろ（立夏〜）', season: '夏の始まり', dir: '南南東', kw: '熱を帯びる・内に秘めた力' },
+    午: { gogyo: '火', month: '6月ごろ（芒種〜）', season: '夏の盛り', dir: '南', kw: '華やか・活発' },
+    未: { gogyo: '土', month: '7月ごろ（小暑〜）', season: '夏の終わり', dir: '南南西', kw: '熟成・じっくり育てる' },
+    申: { gogyo: '金', month: '8月ごろ（立秋〜）', season: '秋の始まり', dir: '西南西', kw: '切り替え・実りへ向かう' },
+    酉: { gogyo: '金', month: '9月ごろ（白露〜）', season: '秋の盛り', dir: '西', kw: '収穫・磨き上げる' },
+    戌: { gogyo: '土', month: '10月ごろ（寒露〜）', season: '秋の終わり', dir: '西北西', kw: '守り・締めくくり' },
+    亥: { gogyo: '水', month: '11月ごろ（立冬〜）', season: '冬の始まり', dir: '北北西', kw: '内にこもる・次への備え' }
+  };
+
+  // 十大主星: 本能の分類は五行で決まる（木＝守備、火＝伝達、土＝引力、金＝攻撃、水＝習得）
+  var STAR = {
+    貫索星: { gogyo: '木', yin: '陽', instinct: '守備本能', kw: '自立・マイペース・自分の世界を守る', role: '自分のペースを守り、ひとりでやり抜こうとする姿勢' },
+    石門星: { gogyo: '木', yin: '陰', instinct: '守備本能', kw: '協調・仲間・社交性', role: '仲間をつくり、輪の中で自分を生かす力' },
+    鳳閣星: { gogyo: '火', yin: '陽', instinct: '伝達本能', kw: '自然体・楽しむ・おおらかな表現', role: '肩の力を抜いて楽しみ、思ったことを自然に表す姿勢' },
+    調舒星: { gogyo: '火', yin: '陰', instinct: '伝達本能', kw: '繊細な感性・芸術性・こだわり', role: '細やかな感性と、自分なりのこだわり' },
+    禄存星: { gogyo: '土', yin: '陽', instinct: '引力本能', kw: '愛情・奉仕・人を惹きつける', role: '人の役に立とうとする温かさと面倒見' },
+    司禄星: { gogyo: '土', yin: '陰', instinct: '引力本能', kw: '堅実・蓄積・家庭的', role: 'コツコツ積み上げる堅実さ' },
+    車騎星: { gogyo: '金', yin: '陽', instinct: '攻撃本能', kw: '行動力・正直・スピード', role: 'まず動く行動力と、まっすぐな正直さ' },
+    牽牛星: { gogyo: '金', yin: '陰', instinct: '攻撃本能', kw: '責任感・名誉・きちんとする', role: '期待に応えようとする責任感と品の良さ' },
+    龍高星: { gogyo: '水', yin: '陽', instinct: '習得本能', kw: '冒険・改革・自由な発想', role: '型にとらわれず、新しいことに踏み込む発想' },
+    玉堂星: { gogyo: '水', yin: '陰', instinct: '習得本能', kw: '知性・学び・伝統を大切にする', role: '筋道を立てて学ぼうとする知性' }
+  };
+
+  // 十二大従星: 人の一生の段階になぞらえる。点数は数理法と同じ
+  var JUNI = {
+    天報星: { pt: 3, stage: '胎児', kw: '多才・変化・切り替えの早さ' },
+    天印星: { pt: 6, stage: '赤ちゃん', kw: '無邪気・人から可愛がられる' },
+    天貴星: { pt: 9, stage: '児童', kw: '品の良さ・自尊心・学ぶ姿勢' },
+    天恍星: { pt: 7, stage: '思春期', kw: '夢・ロマン・外の世界への憧れ' },
+    天南星: { pt: 10, stage: '青年', kw: '物おじしない・批判精神・行動' },
+    天禄星: { pt: 11, stage: '壮年', kw: '慎重・現実的・バランス感覚' },
+    天将星: { pt: 12, stage: '家長（頂点）', kw: '最大のエネルギー・統率力・器の大きさ' },
+    天堂星: { pt: 8, stage: '老人', kw: '落ち着き・自制・見守る' },
+    天胡星: { pt: 4, stage: '病人', kw: '感受性・夢想・芸術的な感覚' },
+    天極星: { pt: 2, stage: '死人', kw: '純粋・無欲・こだわらない' },
+    天庫星: { pt: 5, stage: '墓に入る', kw: '探究心・一途・伝統や先祖とのつながり' },
+    天馳星: { pt: 1, stage: 'あの世', kw: '瞬発力・スピード・追い込まれて力が出る' }
+  };
+
+  // 人体図の位置（向かい合った形。図の左列が本人の右手）
+  var POS = {
+    north: { name: '頭', mean: '目上の人・親', kw: '目上との関わり方、考え方の土台' },
+    center: { name: '胸（中心星）', mean: '自分自身', kw: 'その人らしさの中心。人体図の要' },
+    south: { name: '腹', mean: '目下の人・子ども', kw: '年下や部下との関わり方' },
+    west: { name: '右手', mean: '配偶者・パートナー', kw: '家庭やパートナーとの関わり方' },
+    east: { name: '左手', mean: '兄弟・友人・同僚', kw: '横のつながり、仲間との関わり方' },
+    shoulder: { name: '左肩', mean: '初年期（若い頃）', kw: '親元にいる頃のエネルギー' },
+    leftFoot: { name: '左足', mean: '中年期', kw: '働き盛りの頃のエネルギー' },
+    rightFoot: { name: '右足', mean: '晩年期', kw: '人生の後半のエネルギー' }
+  };
+
+  // 位相法・干合などの用語
+  var TERM = {
+    支合: { kind: '合', kw: '2つの支が結びつく合。まとまり・協力の関係とされます' },
+    半会: { kind: '合', kw: '三合会局のうち2支がそろう形。広がり・発展の関係とされます' },
+    大半会: { kind: '合', kw: '天干が同じで地支が半会。結びつきがいっそう強いとされます' },
+    三合会局: { kind: '合', kw: '三合の3支がそろう強い合。大きなまとまりを生むとされます' },
+    方三位: { kind: '合', kw: '同じ季節の3支がそろう形。その季節の気が集まるとされます' },
+    律音: { kind: '合', kw: '干支がまったく同じ組み合わせ。同じ気が重なるとされます' },
+    干合: { kind: '合', kw: '2つの天干が結びつく合。引き合い・結びつきの関係とされます' },
+    対冲: { kind: '散', kw: '正反対の支どうしがぶつかる散法。動き・変化が起こりやすいとされます' },
+    納音: { kind: '散', kw: '天干が同じで地支が対冲。一度区切りがついて形が変わるとされます' },
+    天剋地冲: { kind: '散', kw: '天干が剋し合い地支も冲する、強い散法。大きな変動の象徴とされます' },
+    刑: { kind: '散', kw: '互いを傷つけ合うとされる散法。生貴刑・旺気刑・庫気刑・自刑がある' },
+    害: { kind: '散', kw: '噛み合わなさ・すれ違いを表す散法とされます' },
+    破: { kind: '散', kw: 'こわす・崩す力を表す散法とされます' },
+    天中殺: { kind: '', kw: '日干支で決まる、12のうち2つの支が欠ける時期。年・月・日・大運にめぐってくる' },
+    大運天中殺: { kind: '', kw: '天中殺の支が大運でめぐる20年間' },
+    宿命中殺: { kind: '', kw: '天中殺の支が、生まれつき命式の中にある状態' },
+    異常干支: { kind: '', kw: '干と支の組み合わせに特別な性質があるとされる13の干支' },
+    中心星: { kind: '', kw: '人体図の胸の位置の十大主星。その人らしさの中心とされます' },
+    蔵干: { kind: '', kw: '十二支の中に蔵される干。節入りからの日数で、どの干を使うかが決まる' }
+  };
+
+  var TENCHU = {
+    子丑: { months: '12月・1月', kw: '冬の終わりに当たる2つの支が欠ける天中殺' },
+    寅卯: { months: '2月・3月', kw: '春の前半に当たる2つの支が欠ける天中殺' },
+    辰巳: { months: '4月・5月', kw: '春の終わりから初夏の2つの支が欠ける天中殺' },
+    午未: { months: '6月・7月', kw: '夏の盛りの2つの支が欠ける天中殺' },
+    申酉: { months: '8月・9月', kw: '秋の前半に当たる2つの支が欠ける天中殺' },
+    戌亥: { months: '10月・11月', kw: '秋の終わりから初冬の2つの支が欠ける天中殺' }
+  };
+
+  var TENUN = {
+    北天運: '縦の線と横の線の両方に精神星（鳳閣・調舒・龍高・玉堂）がある型。考えることが先に立ち、才能は芸術・学問など日常の外に出やすいとされます。全体の約6割を占める最も多い型',
+    西天運: '縦の線にだけ精神星がある型。考えてから動く、設計や企画に向くとされます',
+    東天運: '横の線にだけ精神星がある型。動きながら考える、現場や実務に向くとされます',
+    南天運: '5つの星がすべて現実星の型。勘で動き、才能は日常生活の中で生きるとされます'
+  };
+
+  var api = { GOGYO: GOGYO, KAN: KAN, SHI: SHI, STAR: STAR, JUNI: JUNI, POS: POS, TERM: TERM, TENCHU: TENCHU, TENUN: TENUN };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.SanmeiGlossary = api;
+})(this);
+
+</script>
+<script>
 (function(){
 'use strict';
 var S = window.Sanmei;
@@ -978,16 +1143,19 @@ var SECTIONS = [
   { id:'suuri',   label:'数理法',       basic:false, render:renderSuuri },
   { id:'shugo',   label:'守護神',       basic:false, render:renderShugo },
   { id:'sainou',  label:'才能（四天運・剋数）', basic:false, render:renderSainou },
-  { id:'aishou',  label:'相性（2人の関係）', basic:true, pair:true, render:null, wide:true }
+  { id:'aishou',  label:'相性（2人の関係）', basic:true, pair:true, render:null, wide:true },
+  { id:'kaisetsu', label:'解説', basic:true, render:renderKaisetsu, wide:true },
+  { id:'glossary', label:'用語の索引', basic:false, global:true, render:null, wide:true }
 ];
 var store = {
   get: function(k, d){ try { var v = localStorage.getItem('meishiki.' + k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
   set: function(k, v){ try { localStorage.setItem('meishiki.' + k, JSON.stringify(v)); } catch(e){} }
 };
 // ---- 設定 ----
-var CFG_DEFAULT = { pillar:'dmy', zou:'v', size:'m', font:'gothic', theme:'auto', gogyo:'std', accent:'ai', pa:'', pb:'' };
+var CFG_DEFAULT = { pillar:'dmy', zou:'v', size:'m', font:'gothic', theme:'auto', gogyo:'std', accent:'ai', cf:'', cm:'' };
 var firstCfg = !store.get('cfg', null);
 var cfg = Object.assign({}, CFG_DEFAULT, store.get('cfg', {}));
+delete cfg.pa; delete cfg.pb;   // 旧版の「自分・相手の色」は「性別の色」に置き換えた
 var ACCENTS = {   // [ライトの色, ライトの淡色, ダークの色, ダークの淡色]
   ai:      ['#2c4a7a', '#e3e9f3', '#8fb0e6', '#263247'],
   shu:     ['#b5452d', '#f7e3dc', '#f08a6e', '#3f2620'],
@@ -1007,7 +1175,7 @@ var FONTS = {
   mincho: '"Hiragino Mincho ProN","Yu Mincho","BIZ UDPMincho","Noto Serif JP",serif'
 };
 var ZOOM = { s: 0.9, m: 1, l: 1.12, xl: 1.25 };
-var PA_DEFAULT = ['#2c4a7a', '#8fb0e6'], PB_DEFAULT = ['#b0445e', '#ee8ba0'];
+var CF_DEFAULT = ['#c0392b', '#ef8173'], CM_DEFAULT = ['#2c4a7a', '#8fb0e6'];   // [ライト, ダーク]
 function applyCfg(){
   var root = document.documentElement;
   if (cfg.theme === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', cfg.theme);
@@ -1016,8 +1184,8 @@ function applyCfg(){
   var vars = function(dark){
     var v = '--accent:' + a[dark ? 2 : 0] + ';--accent-soft:' + a[dark ? 3 : 1] + ';';
     if (g) g[dark ? 1 : 0].forEach(function(c, i){ v += '--g' + i + ':' + c + ';'; });
-    if (cfg.pa) v += '--pa:' + cfg.pa + ';';
-    if (cfg.pb) v += '--pb:' + cfg.pb + ';';
+    if (cfg.cf) v += '--cf:' + cfg.cf + ';';
+    if (cfg.cm) v += '--cm:' + cfg.cm + ';';
     return v;
   };
   var css = ':root{' + vars(false) + '--font:' + FONTS[cfg.font] + '}' +
@@ -1027,6 +1195,16 @@ function applyCfg(){
   var el = document.getElementById('cfgStyle');
   if (!el) { el = document.createElement('style'); el.id = 'cfgStyle'; document.head.appendChild(el); }
   el.textContent = css;
+  applySexColors();
+}
+// 自分・相手の枠の色を性別から決める。同じ性別の2人なら相手を淡くする
+function applySexColors(){
+  var f = document.getElementById('f');
+  var a = f && f.sex ? f.sex.value : 'F', b = f && f.sexB ? f.sexB.value : 'M';
+  var v = function(x){ return x === 'M' ? 'var(--cm)' : 'var(--cf)'; };
+  var root = document.documentElement.style;
+  root.setProperty('--pa', v(a));
+  root.setProperty('--pb', a === b ? 'color-mix(in srgb, ' + v(b) + ' 50%, var(--paper))' : v(b));
 }
 // 柱の並び。日→月→年 なら ['day','month','year']
 function pillarOrder(){ return cfg.pillar === 'ymd' ? ['year', 'month', 'day'] : ['day', 'month', 'year']; }
@@ -1079,8 +1257,8 @@ function byId(id){ return SECTIONS.filter(function(s){ return s.id === id; })[0]
     });
     sw.querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.k === cfg.accent ? 'true' : 'false'); });
     var d = isDark() ? 1 : 0;
-    document.getElementById('cPa').value = cfg.pa || PA_DEFAULT[d];
-    document.getElementById('cPb').value = cfg.pb || PB_DEFAULT[d];
+    document.getElementById('cF').value = cfg.cf || CF_DEFAULT[d];
+    document.getElementById('cM').value = cfg.cm || CM_DEFAULT[d];
   }
   function save(){
     store.set('cfg', cfg); applyCfg(); sync(); drawChips(); if (current) draw();
@@ -1094,9 +1272,9 @@ function byId(id){ return SECTIONS.filter(function(s){ return s.id === id; })[0]
       });
     });
   });
-  document.getElementById('cPa').addEventListener('input', function(){ cfg.pa = this.value; store.set('cfg', cfg); applyCfg(); });
-  document.getElementById('cPb').addEventListener('input', function(){ cfg.pb = this.value; store.set('cfg', cfg); applyCfg(); });
-  document.getElementById('cPreset').addEventListener('click', function(){ cfg.pa = ''; cfg.pb = ''; save(); });
+  document.getElementById('cF').addEventListener('input', function(){ cfg.cf = this.value; store.set('cfg', cfg); applyCfg(); });
+  document.getElementById('cM').addEventListener('input', function(){ cfg.cm = this.value; store.set('cfg', cfg); applyCfg(); });
+  document.getElementById('cPreset').addEventListener('click', function(){ cfg.cf = ''; cfg.cm = ''; save(); });
   document.getElementById('cfgReset').addEventListener('click', function(){
     var keepPillar = cfg.pillar;
     cfg = Object.assign({}, CFG_DEFAULT);
@@ -1199,7 +1377,7 @@ document.getElementById('birth').addEventListener('input', function(){ showHint(
 var WIDE = window.matchMedia ? window.matchMedia('(min-width:641px)').matches : true;
 document.getElementById('adv').open = WIDE;
 document.getElementById('pbox').open = WIDE;
-var SHORT = { inzan:'陰占', yousen:'陽占', daiun:'大運', nenun:'年運', getsuun:'月運', nichiun:'日運', tenchu:'天中殺', isou:'位相法', ijou:'異常干支', suuri:'数理法', shugo:'守護神', sainou:'才能', aishou:'相性' };
+var SHORT = { kaisetsu:'解説', glossary:'索引', inzan:'陰占', yousen:'陽占', daiun:'大運', nenun:'年運', getsuun:'月運', nichiun:'日運', tenchu:'天中殺', isou:'位相法', ijou:'異常干支', suuri:'数理法', shugo:'守護神', sainou:'才能', aishou:'相性' };
 function buildNav(){
   var nav = document.getElementById('bnav');
   if (!current) { nav.innerHTML = ''; return; }
@@ -1253,6 +1431,7 @@ function applyNames(){
   document.getElementById('vmAL').textContent = a + 'だけ';
   document.getElementById('vmBL').textContent = b + 'だけ';
 }
+['sex','sexB'].forEach(function(n){ Array.prototype.forEach.call(form[n], function(r){ r.addEventListener('change', applySexColors); }); });
 ['sex','school','dsw'].forEach(function(n){
   Array.prototype.forEach.call(form[n], function(r){ r.addEventListener('change', function(){ if (current) form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit')); }); });
 });
@@ -1264,7 +1443,8 @@ function run(v, sex, school, dsw, vb, sexB){
     people = [{ res: current, cls: 'pa' }];
     if (vb) { var q = vb.split('-').map(Number); people.push({ res: S.calc(q[0], q[1], q[2], opt(sexB)), cls: 'pb' }); }
   } catch(err){ current = null; people = []; document.getElementById('result').innerHTML = '<p class="warn">' + esc(err.message) + '</p>'; return; }
-  applyNames();
+  applyNames(); applySexColors();
+  if (!store.get('kaisetsuSeen', false)) { if (visible.indexOf('kaisetsu') < 0) visible.push('kaisetsu'); store.set('visible', visible); store.set('kaisetsuSeen', true); drawChips(); }
   // 相手を初めて入れたときは「相性」を表示に加える
   if (people[1] && !store.get('aishouSeen', false)) { if (visible.indexOf('aishou') < 0) visible.push('aishou'); store.set('visible', visible); store.set('aishouSeen', true); drawChips(); }
   document.getElementById('viewmode').classList.toggle('on', people.length > 1);
@@ -1298,15 +1478,17 @@ function draw(){
   el.classList.toggle('pairgrid', two && mode === 'item');
   var who = mode === 'a' ? [0] : mode === 'b' ? [1] : [0, 1];
   var card = function(s, pi){
-    var cls = s.pair ? 'pc' : people[pi].cls;
-    return '<section class="card panel ' + cls + (s.wide ? ' wide' : '') + '" data-sec="' + s.id + '" data-p="' + (s.pair ? 'pair' : pi) + '">' + cardInner(s, pi) + '</section>';
+    var cls = s.global ? 'pg' : s.pair ? 'pc' : people[pi].cls;
+    return '<section class="card panel ' + cls + (s.wide ? ' wide' : '') + '" data-sec="' + s.id + '" data-p="' + (s.global || s.pair ? 'pair' : pi) + '">' + cardInner(s, pi) + '</section>';
   };
   if (mode === 'person') {
-    who.forEach(function(pi){ shown.forEach(function(id){ var s = byId(id); if (!s.pair) html += card(s, pi); }); });
+    who.forEach(function(pi){ shown.forEach(function(id){ var s = byId(id); if (!s.pair && !s.global) html += card(s, pi); }); });
     if (shown.indexOf('aishou') >= 0) html += card(byId('aishou'), 0);
+    if (shown.indexOf('glossary') >= 0) html += card(byId('glossary'), 0);
   } else {
     shown.forEach(function(id){
       var s = byId(id);
+      if (s.global) { html += card(s, 0); return; }
       if (s.pair) { if (two && mode === 'item') html += card(s, 0); return; }
       who.forEach(function(pi){ html += card(s, pi); });
     });
@@ -1317,7 +1499,8 @@ function draw(){
 
 function cardInner(s, pi){
   var body;
-  if (s.pair) body = renderAishou();
+  if (s.global) body = renderGlossary();
+  else if (s.pair) body = renderAishou();
   else {
     body = s.render(people[pi].res);
     if (people.length > 1) body = body.replace('<h2>', '<h2><span class="who ' + people[pi].cls + '">' + esc(people[pi].name) + '</span>');
@@ -1438,6 +1621,49 @@ function renderAishou(){
   });
 })();
 
+var G = window.SanmeiGlossary;
+function gl(type, name, inner){ return '<span class="gl" tabindex="0" data-gl="' + type + '|' + esc(name) + '">' + (inner == null ? esc(name) : inner) + '</span>'; }
+// 「刑（生貴刑）」「三合会局（水）成立」などから用語の見出しを取り出す
+function termKey(name){
+  var keys = Object.keys(G.TERM).sort(function(a, b){ return b.length - a.length; });
+  for (var i = 0; i < keys.length; i++) if (String(name).indexOf(keys[i]) === 0) return keys[i];
+  return null;
+}
+function glHtml(type, name){
+  var e, h = '<b>' + esc(name) + '</b>';
+  if (type === 'star' && (e = G.STAR[name])) h += '<div class="meta">十大主星・' + e.gogyo + '・' + e.yin + '・' + e.instinct + '</div>' + esc(e.kw);
+  else if (type === 'juni' && (e = G.JUNI[name])) h += '<div class="meta">十二大従星・' + e.stage + '・エネルギー' + e.pt + '点</div>' + esc(e.kw);
+  else if (type === 'kan' && (e = G.KAN[name])) h += '<div class="meta">十干・' + e.gogyo + '・' + e.yin + '・たとえると「' + e.image + '」</div>' + esc(e.kw);
+  else if (type === 'shi' && (e = G.SHI[name])) h += '<div class="meta">十二支・' + e.gogyo + '・' + e.month + '・' + e.dir + '</div>' + esc(e.season + '。' + e.kw);
+  else if (type === 'gogyo' && (e = G.GOGYO[name])) h += '<div class="meta">五行</div>' + esc(e.kw) + '<br><span style="color:var(--sub)">' + esc(e.note) + '</span>';
+  else if (type === 'term' && (e = G.TERM[name])) h += (e.kind ? '<div class="meta">' + (e.kind === '合' ? '合法（結びつく）' : '散法（離れる）') + '</div>' : '') + esc(e.kw);
+  else if (type === 'tenchu' && (e = G.TENCHU[name])) h += '天中殺<div class="meta">毎年 ' + e.months + ' が月の天中殺</div>' + esc(e.kw);
+  else if (type === 'tenun' && G.TENUN[name]) h += '<div class="meta">四天運</div>' + esc(G.TENUN[name]);
+  else return '';
+  return h;
+}
+// 小窓: マウスは乗せるだけ、スマホはタップ、キーボードはフォーカスで出す
+(function(){
+  var tip = document.createElement('div'); tip.className = 'gltip'; tip.setAttribute('role', 'tooltip'); document.body.appendChild(tip);
+  var cur = null;
+  function show(el){
+    var d = el.getAttribute('data-gl').split('|'), h = glHtml(d[0], d[1]);
+    if (!h) return;
+    cur = el; tip.innerHTML = h; tip.classList.add('on');
+    var r = el.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+    var x = Math.min(Math.max(8, r.left + r.width / 2 - tw / 2), innerWidth - tw - 8);
+    var y = r.bottom + 8; if (y + th > innerHeight - 8) y = Math.max(8, r.top - th - 8);
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  function hide(){ cur = null; tip.classList.remove('on'); }
+  document.addEventListener('pointerover', function(e){ if (e.pointerType === 'touch') return; var el = e.target.closest && e.target.closest('.gl'); if (el) show(el); });
+  document.addEventListener('pointerout', function(e){ if (e.pointerType === 'touch') return; var el = e.target.closest && e.target.closest('.gl'); if (el && !el.contains(e.relatedTarget)) hide(); });
+  document.addEventListener('click', function(e){ var el = e.target.closest && e.target.closest('.gl'); if (el) { if (cur === el) hide(); else show(el); } else hide(); });
+  document.addEventListener('focusin', function(e){ var el = e.target.closest && e.target.closest('.gl'); if (el) show(el); });
+  document.addEventListener('focusout', function(e){ if (e.target.closest && e.target.closest('.gl')) hide(); });
+  window.addEventListener('scroll', hide, { passive: true });
+})();
+
 var PNAME = { year:'年', month:'月', day:'日' };
 function renderInzan(r){
   var z = r.inzan;
@@ -1445,12 +1671,12 @@ function renderInzan(r){
   var h = '<h2>陰占 <small>' + esc(r.input.y + '年' + r.input.m + '月' + r.input.d + '日') + '</small></h2><table><tr><th></th>';
   cols.forEach(function(c){ h += '<th>' + PNAME[c] + '</th>'; });
   h += '</tr><tr><th>干</th>';
-  cols.forEach(function(c){ h += '<td class="kanshi ' + KCLS(z[c].kan) + '">' + z[c].kan + '</td>'; });
+  cols.forEach(function(c){ h += '<td class="kanshi ' + KCLS(z[c].kan) + '">' + gl('kan', z[c].kan) + '</td>'; });
   h += '</tr><tr><th>支</th>';
-  cols.forEach(function(c){ h += '<td class="kanshi">' + z[c].shi + '</td>'; });
+  cols.forEach(function(c){ h += '<td class="kanshi">' + gl('shi', z[c].shi) + '</td>'; });
   h += '</tr><tr><th>蔵干</th>';
   cols.forEach(function(c){
-    h += '<td class="zou">' + z.zoukanAll[c].map(function(k){ return '<span class="' + (k === z[c].zoukan ? 'on' : '') + '">' + k + '</span>'; }).join('') + '</td>';
+    h += '<td class="zou">' + z.zoukanAll[c].map(function(k){ return '<span class="' + (k === z[c].zoukan ? 'on' : '') + '">' + gl('kan', k) + '</span>'; }).join('') + '</td>';
   });
   h += '</tr></table>';
   h += '<p class="note">節入り：' + esc(r.setsu.name + ' ' + r.setsu.at) + '（生まれた日は' + r.setsu.dayCount + '日目）。下線が今回使う蔵干です。日干は <b class="' + KCLS(z.day.kan) + '">' + z.day.kan + '</b>（' + S.GOGYO[S.ELEM[z.day.kan]] + '・' + (S.YIN[z.day.kan] ? '陰' : '陽') + '）。</p>';
@@ -1461,7 +1687,7 @@ function cell(pos, name, kind, extra){
   if (!name) return '<div class="cell void"></div>';
   var cls = kind === 'main' ? 'main' : 'sub';
   var col = kind === 'main' ? GCLS(name) : '';
-  return '<div class="cell ' + cls + (extra || '') + '"><div class="pos">' + pos + '</div><div class="name ' + col + '">' + name + '</div></div>';
+  return '<div class="cell ' + cls + (extra || '') + '"><div class="pos">' + pos + '</div><div class="name ' + col + '">' + gl(kind === 'main' ? 'star' : 'juni', name) + '</div></div>';
 }
 function renderYousen(r){
   var s = r.stars, j = r.juni;
@@ -1470,7 +1696,7 @@ function renderYousen(r){
   h += cell('右手', s.west, 'main') + cell('胸（中心星）', s.center, 'main', ' center') + cell('左手', s.east, 'main');
   h += cell('右足・晩年', j.rightFoot, 'sub') + cell('腹', s.south, 'main') + cell('左足・中年', j.leftFoot, 'sub');
   h += '</div><div class="legend"><span>実線：十大主星</span><span>点線：十二大従星</span>' +
-       S.GOGYO.map(function(g, i){ return '<span class="g' + i + '">● ' + g + '</span>'; }).join('') + '</div>';
+       S.GOGYO.map(function(g, i){ return '<span class="g' + i + '">● ' + gl('gogyo', g) + '</span>'; }).join('') + '</div>';
   return h;
 }
 
@@ -1488,7 +1714,7 @@ function renderDaiun(r){
   d.rows.forEach(function(x, k){
     var next = d.rows[k + 1];
     var now = a >= x.age && (!next || a < next.age) && a >= 0;
-    h += '<tr class="' + (x.tenchu ? 'tc' : '') + '"><td class="' + (now ? 'now' : '') + '">' + x.age + '〜</td><td class="kanshi" style="font-size:17px">' + x.ganshi + '</td><td class="' + GCLS(x.star) + '">' + x.star + '</td><td>' + x.juni + '</td><td>' + (x.tenchu ? '<span class="tag alert">大運天中殺</span>' : '') + (now ? '<span class="tag">現在</span>' : '') + '</td>' + isoCell(x.isou) + '</tr>';
+    h += '<tr class="' + (x.tenchu ? 'tc' : '') + '"><td class="' + (now ? 'now' : '') + '">' + x.age + '〜</td><td class="kanshi" style="font-size:17px">' + x.ganshi + '</td><td class="' + GCLS(x.star) + '">' + gl('star', x.star) + '</td><td>' + gl('juni', x.juni) + '</td><td>' + (x.tenchu ? '<span class="tag alert">' + gl('term', '大運天中殺') + '</span>' : '') + (now ? '<span class="tag">現在</span>' : '') + '</td>' + isoCell(x.isou) + '</tr>';
   });
   h += '</table></div><p class="note">' + (d.forward ? '次の節入りまで' : '前の節入りから') + d.days + '日。日数を3で割って運の始まる年齢を出します。' +
        (d.school === 'takao' ? '高尾式は節入り当日を数えず、四捨五入します（公開資料による。参考値）。' : '朱学院式は誕生日を含めて数え、切り上げます。') +
@@ -1510,7 +1736,7 @@ function unTable(head, rows, cells){
   var h = '<div style="overflow-x:auto"><table class="daiun"><tr>' + head.map(function(x){ return '<th>' + x + '</th>'; }).join('') + '<th>主星</th><th>従星</th><th></th><th class="iso">宿命との関係</th><th class="iso">運どうしの関係</th></tr>';
   rows.forEach(function(x){
     h += '<tr class="' + (x.tenchu ? 'tc' : '') + '">' + cells(x).map(function(c, i){ return '<td' + (i === 0 && x.now ? ' class="now"' : '') + '>' + c + '</td>'; }).join('') +
-         '<td class="' + GCLS(x.star) + '">' + x.star + '</td><td>' + x.juni + '</td><td>' +
+         '<td class="' + GCLS(x.star) + '">' + gl('star', x.star) + '</td><td>' + gl('juni', x.juni) + '</td><td>' +
          (x.tenchu ? '<span class="tag alert">天中殺</span>' : '') + (x.now ? '<span class="tag">' + (x.nowLabel || '今') + '</span>' : '') + '</td>' + isoCell(x.isou) + isoCell(x.unRel) + '</tr>';
   });
   return h + '</table></div>';
@@ -1520,7 +1746,7 @@ function isoCell(list){
   list = list.map(function(x, i){ return { x: x, i: i }; })
     .sort(function(a, b){ return (relRank(a.x.with) - relRank(b.x.with)) || (a.i - b.i); })
     .map(function(o){ return o.x; });
-  return '<td class="iso">' + list.map(function(x){ return '<span class="tag' + (x.kind === '散' ? ' alert' : '') + '">' + esc(x.with === '宿命' ? x.name : x.with + ' ' + x.name) + '</span>'; }).join(' ') + '</td>';
+  return '<td class="iso">' + list.map(function(x){ var k = termKey(x.name), t = esc(x.with === '宿命' ? x.name : x.with + ' ' + x.name); return '<span class="tag' + (x.kind === '散' ? ' alert' : '') + '">' + (k ? gl('term', k, t) : t) + '</span>'; }).join(' ') + '</td>';
 }
 var ISO_NOTE = '「宿命との関係」は運の干支を命式の年・月・日の柱と比べた位相法（年支＝命式の年の支、日干＝命式の日の干）。三合会局・方三位は、命式にある2つの支に運が残りの1つを持ってきたときに「成立」と出します。';
 function ctxKeys(keys){ return keys.slice().sort(function(a, b){ return relRank(a) - relRank(b); }); }
@@ -1579,8 +1805,90 @@ document.getElementById('result').addEventListener('click', function(e){
   if (s && sec) { var nb = sec.querySelector('[data-un="' + a + '"]'); if (nb) nb.focus(); }
 });
 
+// ---- 解説（その人の命式に合わせた短い目安） ----
+function nextTenchuYears(tc){
+  var out = [], y = TODAY.y;
+  for (var k = 0; k < 14 && out.length < 2; k++) { var Y = y + k; if (tc.indexOf(S.SHI[((Y - 4) % 12 + 12) % 12]) >= 0) out.push(Y); }
+  return out;
+}
+function kaiItem(title, sub, body){ return '<div><dt>' + title + (sub ? '<small>' + sub + '</small>' : '') + '</dt><dd>' + body + '</dd></div>'; }
+function renderKaisetsu(r){
+  var st = r.stars, j = r.juni, z = r.inzan, h = '<h2>解説 <small>命式のキーワード</small></h2><dl class="kai">';
+  var dk = G.KAN[z.day.kan], ds = G.SHI[z.day.shi];
+  h += '<h3>本人の芯</h3>';
+  h += kaiItem('日干は ' + gl('kan', z.day.kan), dk.gogyo + '・' + dk.yin + '・「' + dk.image + '」',
+    '自分自身を表す干。' + esc(dk.image) + 'にたとえられ、' + esc(dk.kw) + 'が持ち味とされます。');
+  var cs = G.STAR[st.center];
+  h += kaiItem('中心星（胸）は ' + gl('star', st.center), cs.gogyo + '・' + cs.instinct,
+    '人体図の真ん中で、その人らしさの中心とされる星。' + esc(cs.role) + 'が土台にあるとされます。');
+  h += kaiItem('日支は ' + gl('shi', z.day.shi), ds.gogyo + '・' + ds.season,
+    '日支は配偶者や家庭、自分の足元を表すとされる場所。' + esc(ds.season) + 'の支で、' + esc(ds.kw) + 'のイメージを持ちます。');
+  h += '<h3>人体図の星</h3>';
+  [['north'], ['west'], ['east'], ['south']].forEach(function(p){
+    var k = p[0], ps = G.POS[k], e = G.STAR[st[k]];
+    h += kaiItem(ps.name + 'に ' + gl('star', st[k]), ps.mean,
+      esc(ps.mean) + 'との関わりで、' + esc(e.role) + 'が出やすいとされます。');
+  });
+  h += '<h3>人生の時期（十二大従星）</h3>';
+  [['shoulder'], ['leftFoot'], ['rightFoot']].forEach(function(p){
+    var k = p[0], ps = G.POS[k], e = G.JUNI[j[k]];
+    h += kaiItem(esc(ps.mean) + 'は ' + gl('juni', j[k]), ps.name + '・' + e.stage + '・' + e.pt + '点',
+      esc(e.kw) + 'が出やすい時期とされます（人の一生になぞらえると「' + e.stage + '」の段階の星）。');
+  });
+  h += '<h3>めぐり</h3>';
+  var ny = nextTenchuYears(r.tenchu), te = G.TENCHU[r.tenchu];
+  h += kaiItem(gl('tenchu', r.tenchu, r.tenchu + '天中殺'), '12年に2年',
+    (ny[0] === TODAY.y ? '今年（' + ny[0] + '年）が天中殺の年です。' : '次の天中殺の年は ' + ny.join('年・') + '年。') + '毎年 ' + te.months + ' は月の天中殺です。');
+  if (G.TENUN[r.tenun]) h += kaiItem(gl('tenun', r.tenun), '才能の範囲', esc(G.TENUN[r.tenun]) + '。');
+  h += '</dl><p class="note">一般的なキーワードをもとにした簡単な目安です。実際の鑑定では、星どうしの組み合わせや運のめぐりを合わせて読みます。言葉に点線がある所は、カーソルを合わせる（スマホはタップする）と意味が出ます。</p>';
+  return h;
+}
+
+// ---- 用語の索引（全員共通の1枚） ----
+var glState = { cat: 'star', q: '' };
+var GCATS = [['star', '十大主星'], ['juni', '十二大従星'], ['kan', '十干'], ['shi', '十二支'], ['gogyo', '五行'], ['pos', '人体図の位置'], ['term', '位相法・用語'], ['tenchu', '天中殺'], ['tenun', '四天運']];
+function glEntries(cat){
+  var out = [];
+  if (cat === 'star') Object.keys(G.STAR).forEach(function(k){ var e = G.STAR[k]; out.push([k, e.gogyo + '・' + e.yin + '・' + e.instinct, e.kw]); });
+  if (cat === 'juni') Object.keys(G.JUNI).forEach(function(k){ var e = G.JUNI[k]; out.push([k, e.stage + '・' + e.pt + '点', e.kw]); });
+  if (cat === 'kan') Object.keys(G.KAN).forEach(function(k){ var e = G.KAN[k]; out.push([k, e.gogyo + '・' + e.yin + '・' + e.image, e.kw]); });
+  if (cat === 'shi') Object.keys(G.SHI).forEach(function(k){ var e = G.SHI[k]; out.push([k, e.gogyo + '・' + e.month + '・' + e.dir, e.season + '。' + e.kw]); });
+  if (cat === 'gogyo') Object.keys(G.GOGYO).forEach(function(k){ var e = G.GOGYO[k]; out.push([k, '五行', e.kw + '。' + e.note]); });
+  if (cat === 'pos') Object.keys(G.POS).forEach(function(k){ var e = G.POS[k]; out.push([e.name, e.mean, e.kw]); });
+  if (cat === 'term') Object.keys(G.TERM).forEach(function(k){ var e = G.TERM[k]; out.push([k, e.kind ? (e.kind === '合' ? '合法' : '散法') : '用語', e.kw]); });
+  if (cat === 'tenchu') Object.keys(G.TENCHU).forEach(function(k){ var e = G.TENCHU[k]; out.push([k + '天中殺', '月の天中殺は ' + e.months, e.kw]); });
+  if (cat === 'tenun') Object.keys(G.TENUN).forEach(function(k){ out.push([k, '四天運', G.TENUN[k]]); });
+  return out;
+}
+function glListHtml(){
+  var q = glState.q.trim(), list = [];
+  if (q) GCATS.forEach(function(c){ glEntries(c[0]).forEach(function(e){ if ((e[0] + e[1] + e[2]).indexOf(q) >= 0) list.push(e.concat(c[1])); }); });
+  else list = glEntries(glState.cat);
+  if (!list.length) return '<p class="empty">見つかりませんでした。</p>';
+  return '<dl class="glist">' + list.map(function(e){ return '<div><dt>' + esc(e[0]) + '<small>' + esc(e[1]) + (e[3] ? '・' + esc(e[3]) : '') + '</small></dt><dd>' + esc(e[2]) + '</dd></div>'; }).join('') + '</dl>';
+}
+function renderGlossary(){
+  var h = '<h2>用語の索引 <small>星・干支・位相法の意味</small></h2>';
+  h += '<input type="search" class="gsearch" id="glq" placeholder="言葉で探す（例：玉堂、対冲、水）" value="' + esc(glState.q) + '" aria-label="用語を探す">';
+  h += '<div class="gtabs" role="group" aria-label="分類">' + GCATS.map(function(c){ return '<button type="button" data-gcat="' + c[0] + '" aria-pressed="' + (!glState.q && glState.cat === c[0] ? 'true' : 'false') + '">' + c[1] + '</button>'; }).join('') + '</div>';
+  h += '<div id="glList">' + glListHtml() + '</div>';
+  return h + '<p class="note">キーワードは一般的な意味をもとにした目安です。流派や鑑定者によって読み方に幅があります。</p>';
+}
+document.getElementById('result').addEventListener('click', function(e){
+  var b = e.target.closest('[data-gcat]'); if (!b) return;
+  glState.cat = b.dataset.gcat; glState.q = '';
+  var sec = b.closest('section'); if (sec) { sec.querySelector('#glq').value = ''; sec.querySelectorAll('[data-gcat]').forEach(function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); sec.querySelector('#glList').innerHTML = glListHtml(); }
+});
+document.getElementById('result').addEventListener('input', function(e){
+  if (e.target.id !== 'glq') return;
+  glState.q = e.target.value;
+  var sec = e.target.closest('section');
+  sec.querySelectorAll('[data-gcat]').forEach(function(x){ x.setAttribute('aria-pressed', !glState.q && x.dataset.gcat === glState.cat ? 'true' : 'false'); });
+  sec.querySelector('#glList').innerHTML = glListHtml();
+});
+
 function renderTenchu(r){
-  var h = '<h2>天中殺・宿命中殺</h2><dl class="kv"><dt>天中殺</dt><dd><b>' + r.tenchu + '天中殺</b></dd></dl>';
+  var h = '<h2>天中殺・宿命中殺</h2><dl class="kv"><dt>天中殺</dt><dd><b>' + gl('tenchu', r.tenchu, r.tenchu + '天中殺') + '</b></dd></dl>';
   if (r.shukumei) {
     h += r.shukumei.length ? '<p style="margin:10px 0 0">' + r.shukumei.map(function(x){ return '<span class="tag alert">' + esc(x.name) + '</span>'; }).join(' ') + '</p>'
                            : '<p class="note">宿命中殺はありません。</p>';
