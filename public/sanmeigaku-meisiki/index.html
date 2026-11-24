@@ -196,6 +196,10 @@ details.partnerbox .partner{border-top:0; padding-top:0}
 .kai dt{font-weight:600}
 .kai dt small{font-weight:400; color:var(--sub); font-size:12px; margin-left:6px}
 .kai dd{margin:2px 0 0; font-size:14px}
+.yomi{margin-top:12px; border-top:1px dashed var(--line); padding-top:8px}
+.yomi > summary{cursor:pointer; color:var(--accent); font-size:13px; font-weight:600; padding:4px 0; list-style-position:inside}
+.yomi[open] > summary{margin-bottom:8px}
+.yomi .kai dd{font-size:13.5px}
 .kai h3{font-size:13px; color:var(--sub); margin:8px 0 0; font-weight:600; letter-spacing:.06em}
 /* 設定パネル */
 header{display:flex; align-items:flex-start; gap:12px}
@@ -1115,7 +1119,66 @@ if (typeof module !== 'undefined') module.exports = SETSU_DATA;
     南天運: '5つの星がすべて現実星の型。勘で動き、才能は日常生活の中で生きるとされます'
   };
 
-  var api = { GOGYO: GOGYO, KAN: KAN, SHI: SHI, STAR: STAR, JUNI: JUNI, POS: POS, TERM: TERM, TENCHU: TENCHU, TENUN: TENUN };
+  // 陰占の柱（年・月・日）が表す場所
+  var PILLAR = {
+    year: { name: '年柱', mean: '親・目上・若い頃の環境', short: '親・目上' },
+    month: { name: '月柱', mean: '社会・兄弟・働き盛りの環境', short: '社会・兄弟' },
+    day: { name: '日柱', mean: '自分自身と配偶者・家庭', short: '自分・家庭' }
+  };
+  // 柱どうしの組み合わせ（位相法で、どこに合・散が起きているか）
+  var PAIR = {
+    'year-month': '親・目上と、社会・兄弟のあいだ',
+    'month-day': '社会・仕事と、自分・家庭のあいだ',
+    'year-day': '親・目上と、自分・家庭のあいだ'
+  };
+
+  // 宿命中殺。どれも「欠け」と決めつけず、常識の枠に収まりにくい力として読む書き方にそろえる
+  var SHUKUMEI = {
+    生年中殺: '年支が天中殺に入る形。親・目上や若い頃の環境で、決まった型に収まらない経験をしやすいとされます。早くから自分の考えで動く力にもなります',
+    生月中殺: '月支が天中殺に入る形。社会・兄弟・仕事の面で、ありきたりの枠に収まらない動き方になりやすいとされます',
+    生日中殺: '日支が年干支の天中殺に入る形。配偶者・家庭のあり方が独自の形になりやすいとされます',
+    日座中殺: '日柱が甲戌・乙亥の人。自分の足元に天中殺の気があり、人に頼らず自分の力で道をつくる生き方になりやすいとされます',
+    日居中殺: '日柱が甲辰・乙巳の人。配偶者・家庭の場所に天中殺の気がかかり、家庭のかたちが人とは違うものになりやすいとされます',
+    宿命二中殺: '生年中殺と生月中殺の両方を持つ形。若い頃から社会に出るまで、型にはまらない道を歩みやすいとされます',
+    互換中殺: '生年中殺と生日中殺の両方を持つ形。年と日で天中殺が入れ替わるように交差し、親と自分・家庭の関係が独特になりやすいとされます',
+    全中殺: '生年・生月・日座の中殺がそろう形。常識の枠にとらわれない、振れ幅の大きな生き方になりやすいとされます（構成は流派で異なります）',
+    同中殺: '年干支と日干支の天中殺が同じ形。同じ気の欠けが重なり、その性質がはっきり出やすいとされます'
+  };
+
+  // 異常干支（13種）。種類ごとの性質
+  var IJOU = {
+    通常: '干と支の気の流れが、ほかの干支とは違う組み合わせ。発想や感性が個性的に出やすいとされます',
+    暗合: '支に蔵された干が天干と干合する組み合わせ。表に見える姿とは別の顔を内側に持つとされます',
+    日柱: '異常干支は日柱にあるときに、その人らしさとして最もはっきり出るとされます'
+  };
+
+  // 八門法の5つの方位。日干との関係で、十大主星の本能と対応する
+  var HACHIMON = {
+    螣陀: { dir: '中央', rel: '日干と同じ五行', instinct: '守備本能', kw: '自分を守り、自分のペースを貫く力が強い型とされます' },
+    玄武: { dir: '北', rel: '日干を生む五行', instinct: '習得本能', kw: '学ぶ・考える・知恵を蓄える力が強い型とされます' },
+    朱雀: { dir: '南', rel: '日干が生む五行', instinct: '伝達本能', kw: '表現する・伝える力が強い型とされます' },
+    青龍: { dir: '東', rel: '日干が剋す五行', instinct: '引力本能', kw: '人や財を引き寄せ、育てる力が強い型とされます' },
+    白虎: { dir: '西', rel: '日干を剋す五行', instinct: '攻撃本能', kw: '行動し、責任を引き受けて前へ出る力が強い型とされます' }
+  };
+  var SUURI = {
+    total: [   // 総エネルギーの目安（区切りは目安。流派で幅がある）
+      [0, 150, '控えめ', '周りとの調和の中で力を発揮しやすいとされます'],
+      [150, 200, '標準的', '状況に合わせて力の出し入れがしやすいとされます'],
+      [200, 250, '多め', '自分から動くほど力が出やすいとされます'],
+      [250, 9999, 'とても多い', '大きな器を持ち、エネルギーを使い切る場を持つとよいとされます']
+    ],
+    youkei: '東（引力）と南（伝達）が強い陽型は、外へ向かって働きかける力が強いとされます',
+    inkei: '西（攻撃）と北（習得）が強い陰型は、内に蓄えてから動く力が強いとされます',
+    junkei: '北と南（習得・伝達＝精神面）が強い順型は、考えや表現で生きる傾向とされます',
+    gyakkei: '東と西（引力・攻撃＝現実面）が強い逆型は、行動や実務で生きる傾向とされます'
+  };
+  var SHUGO = {
+    choukou: '調候守護神は、生まれた季節の寒暖・乾湿のかたよりを整える干。その干の気を意識すると巡りが整いやすいとされます',
+    zentai: '全体守護神（参考）は、命式に足りない五行を補うという考え方で選んだもの'
+  };
+
+  var api = { GOGYO: GOGYO, KAN: KAN, SHI: SHI, STAR: STAR, JUNI: JUNI, POS: POS, TERM: TERM, TENCHU: TENCHU, TENUN: TENUN,
+              PILLAR: PILLAR, PAIR: PAIR, SHUKUMEI: SHUKUMEI, IJOU: IJOU, HACHIMON: HACHIMON, SUURI: SUURI, SHUGO: SHUGO };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.SanmeiGlossary = api;
 })(this);
@@ -1500,9 +1563,9 @@ function draw(){
 function cardInner(s, pi){
   var body;
   if (s.global) body = renderGlossary();
-  else if (s.pair) body = renderAishou();
+  else if (s.pair) body = renderAishou() + yomiHtml(s, people[0].res, 0);
   else {
-    body = s.render(people[pi].res);
+    body = s.render(people[pi].res) + yomiHtml(s, people[pi].res, pi);
     if (people.length > 1) body = body.replace('<h2>', '<h2><span class="who ' + people[pi].cls + '">' + esc(people[pi].name) + '</span>');
   }
   return '<button type="button" class="grip" data-grip="' + s.id + '" title="ドラッグで並べ替え" aria-label="' + esc(s.label) + 'を並べ替え（矢印キーで移動）">⠿</button>' + body;
@@ -1639,6 +1702,7 @@ function glHtml(type, name){
   else if (type === 'term' && (e = G.TERM[name])) h += (e.kind ? '<div class="meta">' + (e.kind === '合' ? '合法（結びつく）' : '散法（離れる）') + '</div>' : '') + esc(e.kw);
   else if (type === 'tenchu' && (e = G.TENCHU[name])) h += '天中殺<div class="meta">毎年 ' + e.months + ' が月の天中殺</div>' + esc(e.kw);
   else if (type === 'tenun' && G.TENUN[name]) h += '<div class="meta">四天運</div>' + esc(G.TENUN[name]);
+  else if (type === 'shukumei' && G.SHUKUMEI[name]) h += '<div class="meta">宿命中殺</div>' + esc(G.SHUKUMEI[name]);
   else return '';
   return h;
 }
@@ -1812,41 +1876,191 @@ function nextTenchuYears(tc){
   return out;
 }
 function kaiItem(title, sub, body){ return '<div><dt>' + title + (sub ? '<small>' + sub + '</small>' : '') + '</dt><dd>' + body + '</dd></div>'; }
-function renderKaisetsu(r){
-  var st = r.stars, j = r.juni, z = r.inzan, h = '<h2>解説 <small>命式のキーワード</small></h2><dl class="kai">';
-  var dk = G.KAN[z.day.kan], ds = G.SHI[z.day.shi];
-  h += '<h3>本人の芯</h3>';
-  h += kaiItem('日干は ' + gl('kan', z.day.kan), dk.gogyo + '・' + dk.yin + '・「' + dk.image + '」',
-    '自分自身を表す干。' + esc(dk.image) + 'にたとえられ、' + esc(dk.kw) + 'が持ち味とされます。');
-  var cs = G.STAR[st.center];
-  h += kaiItem('中心星（胸）は ' + gl('star', st.center), cs.gogyo + '・' + cs.instinct,
-    '人体図の真ん中で、その人らしさの中心とされる星。' + esc(cs.role) + 'が土台にあるとされます。');
-  h += kaiItem('日支は ' + gl('shi', z.day.shi), ds.gogyo + '・' + ds.season,
-    '日支は配偶者や家庭、自分の足元を表すとされる場所。' + esc(ds.season) + 'の支で、' + esc(ds.kw) + 'のイメージを持ちます。');
-  h += '<h3>人体図の星</h3>';
-  [['north'], ['west'], ['east'], ['south']].forEach(function(p){
-    var k = p[0], ps = G.POS[k], e = G.STAR[st[k]];
-    h += kaiItem(ps.name + 'に ' + gl('star', st[k]), ps.mean,
-      esc(ps.mean) + 'との関わりで、' + esc(e.role) + 'が出やすいとされます。');
+function kaiCore(r){
+  var st = r.stars, z = r.inzan, dk = G.KAN[z.day.kan], ds = G.SHI[z.day.shi], cs = G.STAR[st.center];
+  return kaiItem('日干は ' + gl('kan', z.day.kan), dk.gogyo + '・' + dk.yin + '・「' + dk.image + '」',
+      '自分自身を表す干。' + esc(dk.image) + 'にたとえられ、' + esc(dk.kw) + 'が持ち味とされます。') +
+    kaiItem('中心星（胸）は ' + gl('star', st.center), cs.gogyo + '・' + cs.instinct,
+      '人体図の真ん中で、その人らしさの中心とされる星。' + esc(cs.role) + 'が土台にあるとされます。') +
+    kaiItem('日支は ' + gl('shi', z.day.shi), ds.gogyo + '・' + ds.season,
+      '日支は配偶者や家庭、自分の足元を表すとされる場所。' + esc(ds.season) + 'の支で、' + esc(ds.kw) + 'のイメージを持ちます。');
+}
+function kaiBody(r){
+  var st = r.stars, h = '';
+  ['north', 'west', 'east', 'south'].forEach(function(k){
+    var ps = G.POS[k], e = G.STAR[st[k]];
+    h += kaiItem(ps.name + 'に ' + gl('star', st[k]), ps.mean, esc(ps.mean) + 'との関わりで、' + esc(e.role) + 'が出やすいとされます。');
   });
-  h += '<h3>人生の時期（十二大従星）</h3>';
-  [['shoulder'], ['leftFoot'], ['rightFoot']].forEach(function(p){
-    var k = p[0], ps = G.POS[k], e = G.JUNI[j[k]];
-    h += kaiItem(esc(ps.mean) + 'は ' + gl('juni', j[k]), ps.name + '・' + e.stage + '・' + e.pt + '点',
+  return h;
+}
+function kaiJuni(r){
+  var j = r.juni, h = '';
+  ['shoulder', 'leftFoot', 'rightFoot'].forEach(function(k){
+    var ps = G.POS[k], e = G.JUNI[j[k]];
+    h += kaiItem(esc(ps.mean) + 'は ' + gl('juni', j[k]), ps.name + '・' + e.pt + '点',
       esc(e.kw) + 'が出やすい時期とされます（人の一生になぞらえると「' + e.stage + '」の段階の星）。');
   });
-  h += '<h3>めぐり</h3>';
+  return h;
+}
+function kaiTenchu(r){
   var ny = nextTenchuYears(r.tenchu), te = G.TENCHU[r.tenchu];
-  h += kaiItem(gl('tenchu', r.tenchu, r.tenchu + '天中殺'), '12年に2年',
+  return kaiItem(gl('tenchu', r.tenchu, r.tenchu + '天中殺'), '12年に2年',
     (ny[0] === TODAY.y ? '今年（' + ny[0] + '年）が天中殺の年です。' : '次の天中殺の年は ' + ny.join('年・') + '年。') + '毎年 ' + te.months + ' は月の天中殺です。');
+}
+function renderKaisetsu(r){
+  var h = '<h2>解説 <small>命式のキーワード</small></h2><dl class="kai">';
+  h += '<h3>本人の芯</h3>' + kaiCore(r);
+  h += '<h3>人体図の星</h3>' + kaiBody(r);
+  h += '<h3>人生の時期（十二大従星）</h3>' + kaiJuni(r);
+  h += '<h3>めぐり</h3>' + kaiTenchu(r);
   if (G.TENUN[r.tenun]) h += kaiItem(gl('tenun', r.tenun), '才能の範囲', esc(G.TENUN[r.tenun]) + '。');
-  h += '</dl><p class="note">一般的なキーワードをもとにした簡単な目安です。実際の鑑定では、星どうしの組み合わせや運のめぐりを合わせて読みます。言葉に点線がある所は、カーソルを合わせる（スマホはタップする）と意味が出ます。</p>';
+  h += '</dl><p class="note">一般的なキーワードをもとにした簡単な目安です。実際の鑑定では、星どうしの組み合わせや運のめぐりを合わせて読みます。各カードの下の「読み解き」にも、その技法ごとの解説があります。言葉に点線がある所は、カーソルを合わせる（スマホはタップする）と意味が出ます。</p>';
   return h;
 }
 
+// ---- 読み解き（各カードの下に開閉式で付く、その結果に合わせた解説） ----
+var yomiOpen = {};
+function firstSentence(t){ var i = String(t).indexOf('。'); return i >= 0 ? t.slice(0, i + 1) : t + '。'; }
+// 関係タグの一覧を「どことの、何の関係か」の文にする
+function relItems(list, max){
+  var h = '';
+  (list || []).slice(0, max || 6).forEach(function(x){
+    var k = termKey(x.name), e = k && G.TERM[k];
+    h += kaiItem((x.with && x.with !== '宿命' ? esc(x.with) + ' と ' : '') + (k ? gl('term', k, esc(x.name)) : esc(x.name)), x.kind === '散' ? '散法' : '合法',
+      e ? esc(firstSentence(e.kw)) : '');
+  });
+  return h;
+}
+function unSummary(label, row){
+  var e = G.STAR[row.star], j = G.JUNI[row.juni], h = '';
+  h += kaiItem(label + 'は ' + gl('star', row.star), row.ganshi + '・' + e.instinct, esc(e.role) + 'が表に出やすい時期とされます。');
+  h += kaiItem('従星は ' + gl('juni', row.juni), j.pt + '点', esc(j.kw) + 'のエネルギーが加わるとされます。');
+  if (row.tenchu) h += kaiItem(gl('term', '天中殺'), '', '天中殺の支がめぐる時期です。新しく始めるより、整える・見直すことに向くとされます。');
+  if (row.isou && row.isou.length) h += '<h3>命式との関係</h3>' + relItems(row.isou, 4);
+  if (row.unRel && row.unRel.length) h += '<h3>ほかの運との関係</h3>' + relItems(row.unRel, 4);
+  return h;
+}
+var PAIRKEY = { '年・月': 'year-month', '月・日': 'month-day', '年・日': 'year-day' };
+function yomiFor(id, r, pi){
+  var h = '', z = r.inzan;
+  if (id === 'inzan') {
+    pillarOrder().forEach(function(c){
+      var P = G.PILLAR[c], k = G.KAN[z[c].kan], sh = G.SHI[z[c].shi];
+      h += kaiItem(P.name + 'は ' + gl('kan', z[c].kan) + gl('shi', z[c].shi), P.mean,
+        z[c].kan + 'は「' + esc(k.image) + '」（' + esc(k.kw) + '）、' + z[c].shi + 'は' + esc(sh.season) + '（' + esc(sh.kw) + '）。' + esc(P.short) + 'にまつわる場面に、この気が表れるとされます。');
+    });
+    h += kaiItem(gl('term', '蔵干'), '', '支の中に蔵された干で、表には出にくい内面の要素とされます。下線の付いた干が、生まれた日の日数で選ばれた蔵干で、陽占の星はこの干から出します。');
+  }
+  else if (id === 'yousen') {
+    var cs = G.STAR[r.stars.center];
+    h = kaiItem('中心星（胸）は ' + gl('star', r.stars.center), cs.gogyo + '・' + cs.instinct, '人体図の真ん中で、その人らしさの中心とされる星。' + esc(cs.role) + 'が土台にあるとされます。') + kaiBody(r) + kaiJuni(r);
+  }
+  else if (id === 'daiun') {
+    var d = r.daiun; if (!d) return '';
+    var a = ageNow(r), cur = null, nxt = null;
+    d.rows.forEach(function(x, k){ var n = d.rows[k + 1]; if (a >= x.age && (!n || a < n.age)) { cur = x; nxt = n || null; } });
+    if (cur) { h += unSummary('今の大運（' + cur.age + '歳〜）', cur) + '<h3>大運の流れ</h3>'; if (nxt) h += kaiItem('次の大運', nxt.age + '歳から', nxt.ganshi + '（' + gl('star', nxt.star) + '）に切り替わります。'); }
+    else h += '<h3>大運の流れ</h3>' + kaiItem('大運の始まり', d.start + '歳から', '最初の大運は ' + d.rows[0].ganshi + '（' + gl('star', d.rows[0].star) + '）です。');
+    var tc = d.rows.filter(function(x){ return x.tenchu; });
+    if (tc.length) h += kaiItem(gl('term', '大運天中殺'), tc[0].age + '〜' + (tc[tc.length - 1].age + 9) + '歳', '天中殺の支が大運でめぐる20年。環境の変化が起こりやすく、そのぶん視野が広がる時期とも読まれます。');
+    h += kaiItem('大運とは', d.forward ? '順行' : '逆行', '10年ごとに切り替わる運の流れ。月柱の干支から順番に進み、その10年の土台の空気を表すとされます。');
+  }
+  else if (id === 'nenun') {
+    var Y = kanYearOf(TODAY_DN), ry = S.nenun(r, Y, 1)[0];
+    if (ry) h = unSummary('今年（' + Y + '年・' + ry.ganshi + '）', ry);
+  }
+  else if (id === 'getsuun') {
+    var rm = S.getsuun(r, kanYearOf(TODAY_DN)).filter(function(x){ return TODAY_DN >= x.fromDn && TODAY_DN <= x.toDn; })[0];
+    if (rm) h = unSummary('今月（' + rm.setsu + '〜・' + rm.ganshi + '）', rm);
+  }
+  else if (id === 'nichiun') {
+    var rd = S.nichiun(r, TODAY.y, TODAY.m).filter(function(x){ return x.dn === TODAY_DN; })[0];
+    if (rd) h = unSummary('今日（' + TODAY.m + '/' + TODAY.d + '・' + rd.ganshi + '）', rd);
+  }
+  else if (id === 'tenchu') {
+    h += kaiTenchu(r);
+    if (r.shukumei && r.shukumei.length) r.shukumei.forEach(function(x){ if (G.SHUKUMEI[x.name]) h += kaiItem(gl('term', '宿命中殺', esc(x.name)), '宿命中殺', esc(G.SHUKUMEI[x.name]) + '。'); });
+    else h += kaiItem('宿命中殺', 'なし', '生まれつきの中殺はありません。天中殺の時期は、年・月・日・大運でめぐってきます。');
+    h += kaiItem('天中殺の受け止め方', '', '天中殺は「悪い時期」と決めつけるものではなく、ふだんの枠が外れて、思いがけない動きが起こりやすい時期とされます。');
+  }
+  else if (id === 'isou') {
+    if (!r.isou.length) h += kaiItem('目立った合・散なし', '', '命式の支どうしに強い結びつきやぶつかりが少なく、それぞれの柱の気が独立して働くとされます。');
+    r.isou.forEach(function(x){
+      var k = termKey(x.name), e = k && G.TERM[k], where = PAIRKEY[x.where] ? G.PAIR[PAIRKEY[x.where]] : '年・月・日の3つの柱';
+      h += kaiItem(esc(x.where) + ' に ' + (k ? gl('term', k, esc(x.name)) : esc(x.name)), x.kind === '散' ? '散法' : '合法',
+        esc(where) + 'に起きる関係。' + (e ? esc(e.kw) : '') + '。');
+    });
+  }
+  else if (id === 'ijou') {
+    if (!r.ijou.length) return kaiItem('異常干支なし', '', '命式の3つの柱に異常干支はありません。');
+    r.ijou.forEach(function(x){
+      h += kaiItem(esc(x.ganshi) + '（' + PNAME[x.pillar] + '柱）', x.kind === '暗合' ? '暗合異常干支' : '通常異常干支',
+        esc(G.IJOU[x.kind === '暗合' ? '暗合' : '通常']) + '。' + (x.pillar === 'day' ? esc(G.IJOU.日柱) + '。' : ''));
+    });
+  }
+  else if (id === 'suuri') {
+    var su = r.suuri, band = G.SUURI.total.filter(function(b){ return su.total >= b[0] && su.total < b[1]; })[0];
+    if (band) h += kaiItem('総エネルギー ' + su.total + '点', band[2] + '（目安）', esc(band[3]) + '。');
+    su.hachimonType.split('・').forEach(function(t){ var e = G.HACHIMON[t]; if (e) h += kaiItem('八門法は ' + t, e.dir + '・' + e.rel + '・' + e.instinct, esc(e.kw) + '。'); });
+    if (su.youin === '陽型') h += kaiItem('陽型', '東南が強い', esc(G.SUURI.youkei) + '。');
+    if (su.youin === '陰型') h += kaiItem('陰型', '西北が強い', esc(G.SUURI.inkei) + '。');
+    if (su.junGyaku === '順型') h += kaiItem('順型', '縦が強い', esc(G.SUURI.junkei) + '。');
+    if (su.junGyaku === '逆型') h += kaiItem('逆型', '横が強い', esc(G.SUURI.gyakkei) + '。');
+    var mx = Math.max.apply(null, su.gogyo), mn = Math.min.apply(null, su.gogyo);
+    h += kaiItem('五行のかたより', '', '最も多いのは' + S.GOGYO.filter(function(g, i){ return su.gogyo[i] === mx; }).map(function(g){ return gl('gogyo', g); }).join('・') +
+      '、最も少ないのは' + S.GOGYO.filter(function(g, i){ return su.gogyo[i] === mn; }).map(function(g){ return gl('gogyo', g); }).join('・') + '。多い五行の性質が表に出やすく、少ない五行は意識して補うとよいとされます。');
+  }
+  else if (id === 'shugo') {
+    var g = r.shugo;
+    g.firstStar.split('・').forEach(function(t){ var m = /^(.)（(.+)）$/.exec(t); if (m) h += kaiItem('第一の調候守護神 ' + gl('kan', m[1]), m[2], '十大主星に直すと' + gl('star', m[2]) + '。' + esc(G.STAR[m[2]].role) + 'を意識すると巡りが整いやすいとされます。'); });
+    h += kaiItem('調候守護神とは', '', esc(G.SHUGO.choukou) + '。');
+    if (g.zentai.items.length) h += kaiItem('全体守護神（参考）', g.zentai.items.map(function(x){ return x.gogyo; }).join('・'), esc(G.SHUGO.zentai) + '。' + esc(g.zentai.why) + '。');
+  }
+  else if (id === 'sainou') {
+    if (G.TENUN[r.tenun]) h += kaiItem(gl('tenun', r.tenun), '才能の範囲', esc(G.TENUN[r.tenun]) + '。');
+    var P = [['north', '頭'], ['west', '右手'], ['center', '胸'], ['east', '左手'], ['south', '腹']], kmax = Math.max.apply(null, P.map(function(p){ return r.koku[p[0]]; }));
+    if (kmax > 0) P.filter(function(p){ return r.koku[p[0]] === kmax; }).forEach(function(p){
+      var st = r.stars[p[0]];
+      h += kaiItem('才能星は ' + gl('star', st), p[1] + '・剋数' + kmax, '剋し合う相手が最も多い星が才能星とされます。' + esc(G.STAR[st].role) + 'が才能として磨かれやすいとされます。');
+    });
+    if (r.ryouden) h += kaiItem('了殿の型', '中心星に剋4本', '中心の星に剋が集まる形。同じ形の人は約2.3%です。');
+  }
+  else if (id === 'aishou') {
+    if (!people[1]) return '';
+    var ra = S.aishou(people[0].res, people[1].res), nA = people[0].name, nB = people[1].name;
+    var nm = function(t){ return String(t).replace(/A/g, nA).replace(/B/g, nB); };
+    ra.chusatsu.forEach(function(x){
+      var why = x.name === '相互中殺' ? 'お互いが相手の天中殺の支を持つ関係。強く引き合う一方で、相手の存在で常識の枠が外れやすいとされます'
+              : x.name === '同中殺' ? '同じ天中殺を持つ2人。時期の感覚や価値観が重なりやすいとされます'
+              : nm(x.why) + '。入られる側にとって、相手が思いがけない変化を運んでくる関係とされます';
+      h += kaiItem(esc(x.name), '天中殺どうし', esc(why) + '。');
+    });
+    ra.pairs.filter(function(x){ return x.a === 'day' && x.b === 'day'; }).forEach(function(x){
+      var k = termKey(x.name), e = k && G.TERM[k];
+      h += kaiItem('日柱どうしに ' + (k ? gl('term', k, esc(x.name)) : esc(x.name)), '本人どうし', (e ? esc(e.kw) : '') + '。2人の関係そのものに表れやすいとされます。');
+    });
+    ra.both.forEach(function(x){ h += kaiItem('2人で ' + esc(x.name), '合法', '2人の支が合わさって初めてまとまる形。一緒にいると大きな力になりやすいとされます。'); });
+    if (!h) h = kaiItem('目立った重なりなし', '', '天中殺どうしの重なりや日柱どうしの合・散はありません。柱どうしの関係の表を参考にしてください。');
+  }
+  return h;
+}
+function yomiHtml(s, r, pi){
+  if (s.global || s.id === 'kaisetsu') return '';
+  var body = '';
+  try { body = yomiFor(s.id, r, pi); } catch(e) { body = ''; }
+  if (!body) return '';
+  var key = s.id + ':' + pi;
+  return '<details class="yomi" data-yomi="' + key + '"' + (yomiOpen[key] ? ' open' : '') + '><summary>読み解き</summary><dl class="kai">' + body + '</dl>' +
+    '<p class="note">一般的なキーワードをもとにした目安です。断定するものではありません。</p></details>';
+}
+document.getElementById('result').addEventListener('toggle', function(e){
+  var d = e.target; if (!d.dataset || !d.dataset.yomi) return;
+  yomiOpen[d.dataset.yomi] = d.open;
+}, true);
+
 // ---- 用語の索引（全員共通の1枚） ----
 var glState = { cat: 'star', q: '' };
-var GCATS = [['star', '十大主星'], ['juni', '十二大従星'], ['kan', '十干'], ['shi', '十二支'], ['gogyo', '五行'], ['pos', '人体図の位置'], ['term', '位相法・用語'], ['tenchu', '天中殺'], ['tenun', '四天運']];
+var GCATS = [['star', '十大主星'], ['juni', '十二大従星'], ['kan', '十干'], ['shi', '十二支'], ['gogyo', '五行'], ['pos', '人体図の位置'], ['pillar', '陰占の柱'], ['term', '位相法・用語'], ['tenchu', '天中殺'], ['shukumei', '宿命中殺'], ['ijou', '異常干支'], ['hachimon', '数理法（八門）'], ['tenun', '四天運']];
 function glEntries(cat){
   var out = [];
   if (cat === 'star') Object.keys(G.STAR).forEach(function(k){ var e = G.STAR[k]; out.push([k, e.gogyo + '・' + e.yin + '・' + e.instinct, e.kw]); });
@@ -1858,6 +2072,10 @@ function glEntries(cat){
   if (cat === 'term') Object.keys(G.TERM).forEach(function(k){ var e = G.TERM[k]; out.push([k, e.kind ? (e.kind === '合' ? '合法' : '散法') : '用語', e.kw]); });
   if (cat === 'tenchu') Object.keys(G.TENCHU).forEach(function(k){ var e = G.TENCHU[k]; out.push([k + '天中殺', '月の天中殺は ' + e.months, e.kw]); });
   if (cat === 'tenun') Object.keys(G.TENUN).forEach(function(k){ out.push([k, '四天運', G.TENUN[k]]); });
+  if (cat === 'pillar') Object.keys(G.PILLAR).forEach(function(k){ var e = G.PILLAR[k]; out.push([e.name, '陰占', e.mean]); });
+  if (cat === 'shukumei') Object.keys(G.SHUKUMEI).forEach(function(k){ out.push([k, '宿命中殺', G.SHUKUMEI[k]]); });
+  if (cat === 'ijou') { out.push(['通常異常干支', '甲戌・乙亥・戊戌・庚子・辛亥・丁巳', G.IJOU.通常]); out.push(['暗合異常干支', '辛巳・壬午・丙戌・丁亥・戊子・癸巳・己亥', G.IJOU.暗合]); }
+  if (cat === 'hachimon') Object.keys(G.HACHIMON).forEach(function(k){ var e = G.HACHIMON[k]; out.push([k, e.dir + '・' + e.rel + '・' + e.instinct, e.kw]); });
   return out;
 }
 function glListHtml(){
@@ -1890,7 +2108,7 @@ document.getElementById('result').addEventListener('input', function(e){
 function renderTenchu(r){
   var h = '<h2>天中殺・宿命中殺</h2><dl class="kv"><dt>天中殺</dt><dd><b>' + gl('tenchu', r.tenchu, r.tenchu + '天中殺') + '</b></dd></dl>';
   if (r.shukumei) {
-    h += r.shukumei.length ? '<p style="margin:10px 0 0">' + r.shukumei.map(function(x){ return '<span class="tag alert">' + esc(x.name) + '</span>'; }).join(' ') + '</p>'
+    h += r.shukumei.length ? '<p style="margin:10px 0 0">' + r.shukumei.map(function(x){ return '<span class="tag alert">' + gl('shukumei', x.name) + '</span>'; }).join(' ') + '</p>'
                            : '<p class="note">宿命中殺はありません。</p>';
     r.shukumei.forEach(function(x){ if (x.why) h += '<p class="note">' + esc(x.name) + '：' + esc(x.why) + '</p>'; });
   }
