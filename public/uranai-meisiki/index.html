@@ -204,8 +204,9 @@ details.partnerbox .partner{border-top:0; padding-top:0}
 .yomi .kai dd{font-size:13.5px}
 .kai h3{font-size:13px; color:var(--sub); margin:8px 0 0; font-weight:600; letter-spacing:.06em}
 /* 設定パネル */
-header{display:flex; align-items:flex-start; gap:12px}
-header .htext{flex:1}
+header{display:flex; align-items:flex-start; gap:8px 8px; flex-wrap:wrap}
+header .htext{flex:1 1 260px; min-width:0}
+@media (max-width:640px){ header .htext{flex-basis:100%} header .cfgbtn{font-size:13px; padding:6px 11px} }
 .cfgbtn{font:inherit; font-size:14px; padding:7px 14px; border-radius:999px; border:1px solid var(--line); background:var(--paper); color:var(--ink); cursor:pointer; white-space:nowrap}
 .cfgbtn[aria-expanded="true"]{background:var(--accent); color:var(--paper); border-color:var(--accent)}
 #settings{margin-top:14px; display:none}
@@ -256,6 +257,28 @@ header .htext{flex:1}
 .systabs button[aria-selected="true"]{color:var(--accent); border-bottom-color:var(--accent)}
 .systabs button:focus-visible{outline:2px solid var(--gold); outline-offset:-2px}
 .stwrap{position:relative}
+.loadbtn{font:inherit; font-size:12px; font-weight:600; padding:4px 10px; border-radius:999px; border:1px solid var(--line); background:var(--bg); color:var(--accent); cursor:pointer; margin-left:6px; vertical-align:2px; white-space:nowrap}
+#profBox{position:fixed; inset:0; z-index:72; background:rgba(0,0,0,.45); display:none; align-items:flex-start; justify-content:center; padding:8vh 12px 12px}
+#profBox.on{display:flex}
+#profBox .pbx{background:var(--paper); color:var(--ink); border:1px solid var(--line); border-radius:12px; width:min(560px, 100%); max-height:80vh; display:flex; flex-direction:column; box-shadow:0 12px 40px rgba(0,0,0,.35)}
+#profBox header{display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid var(--line)}
+#profBox header b{flex:1; font-size:15px}
+#profBox .pq{margin:10px 14px 4px; font:inherit; font-size:15px; padding:6px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink)}
+#profBox ul{list-style:none; margin:0; padding:4px 8px 12px; overflow:auto}
+#profBox li{display:flex; align-items:center; gap:8px; padding:8px 6px; border-bottom:1px solid var(--line)}
+#profBox li .pn{flex:1; min-width:0} #profBox li .pn b{display:block} #profBox li .pn small{color:var(--sub)}
+#profBox li button{font:inherit; font-size:13px; padding:5px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer; white-space:nowrap}
+#profBox li button.pl{background:var(--accent); color:var(--paper); border-color:var(--accent); font-weight:600}
+#profBox .pe{padding:16px 14px; color:var(--sub); font-size:14px}
+#profBox .pnote{font-size:11px; color:var(--sub); margin:0; padding:0 14px 10px}
+.savedmsg{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:80; background:var(--ink); color:var(--paper); padding:8px 16px; border-radius:999px; font-size:13px; box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.systabs button[hidden]{display:none}
+.sysvis{display:flex; flex-wrap:wrap; gap:4px 12px}
+.sysv{display:inline-flex; align-items:center; gap:4px; font-size:14px; cursor:pointer}
+#tesouApp{margin-top:16px; display:grid; gap:12px}
+.tesouIntro p{margin:4px 0 0} .tesouIntro h2{margin-top:0} .tesouIntro a{color:var(--accent)}
+.tesouf{width:100%; height:calc(100vh - 110px); min-height:560px; border:1px solid var(--line); border-radius:var(--radius); background:#111; display:block}
+@media (max-width:640px){ .tesouf{height:calc(100vh - 130px); min-height:520px} }
 .stwrap.canR .systabs{-webkit-mask-image:linear-gradient(to right, #000 calc(100% - 64px), transparent); mask-image:linear-gradient(to right, #000 calc(100% - 64px), transparent)}
 .stwrap.canL .systabs{-webkit-mask-image:linear-gradient(to left, #000 calc(100% - 64px), transparent); mask-image:linear-gradient(to left, #000 calc(100% - 64px), transparent)}
 .stwrap.canL.canR .systabs{-webkit-mask-image:linear-gradient(to right, transparent, #000 56px, #000 calc(100% - 64px), transparent); mask-image:linear-gradient(to right, transparent, #000 56px, #000 calc(100% - 64px), transparent)}
@@ -453,6 +476,7 @@ input.sman{width:64px; font-size:16px; padding:3px 6px; text-align:center}
       <h1 id="appTitle">命式ツール</h1>
       <p id="appLead">生年月日から命式を出して、見たい項目だけを並べて表示します。</p>
     </div>
+    <button type="button" class="cfgbtn" id="infoSaveBtn" title="入力中の基本情報（相手の分も）をこのブラウザに保存します">💾 基本情報を保存</button>
     <button type="button" class="cfgbtn" id="cfgBtn" aria-expanded="false" aria-controls="settings">⚙ 設定</button>
   </header>
   <div class="systabs" role="tablist" aria-label="占術の切り替え">
@@ -461,6 +485,8 @@ input.sman{width:64px; font-size:16px; padding:3px 6px; text-align:center}
   <section class="panel" id="settings" aria-label="設定">
     <h2>表示の設定 <small style="font-weight:400;color:var(--sub);font-size:12px">このブラウザに保存されます</small></h2>
     <div class="grid">
+      <div class="row"><label class="t">タブに出す占術</label>
+        <div class="sysvis" id="sysVis" role="group" aria-label="タブに出す占術"></div></div>
       <div class="row"><label class="t">柱・運勢の並び</label>
         <div class="seg" role="radiogroup">
           <input type="radio" name="c_pillar" id="cpD" value="dmy"><label for="cpD">日 → 月 → 年</label>
@@ -533,7 +559,7 @@ input.sman{width:64px; font-size:16px; padding:3px 6px; text-align:center}
   </section>
 
   <form class="panel only-sanmei only-shichu only-kyusei only-horo only-suhi only-seimei" id="f" autocomplete="off">
-    <h2 class="ftitle">基本情報 <small>占術を切り替えても、このまま使います</small></h2>
+    <h2 class="ftitle">基本情報 <small>占術を切り替えても、このまま使います</small> <button type="button" class="loadbtn" id="infoLoadBtn" aria-haspopup="dialog">📂 保存した情報を読み込む</button></h2>
     <div class="field">
       <label for="birth"><span class="dotA"></span>生年月日</label>
       <input type="text" id="birth" inputmode="numeric" autocomplete="off" placeholder="例 19830514 / S58.5.14" aria-describedby="birthHint" required>
@@ -554,7 +580,7 @@ input.sman{width:64px; font-size:16px; padding:3px 6px; text-align:center}
     <div class="field">
       <label for="seiA">名前（漢字・任意）</label>
       <div class="namepair"><input type="text" class="nmk" id="seiA" maxlength="10" placeholder="姓 山田" aria-label="姓"><input type="text" class="nmk" id="meiA" maxlength="10" placeholder="名 花子" aria-label="名"></div>
-      <div class="birth-hint">画面の見出しと<span class="only-seimei">姓名判断</span><span class="only-sanmei only-shichu only-kyusei only-horo only-suhi">姓名判断のタブ</span>に使います（保存されません）</div>
+      <div class="birth-hint">画面の見出しと<span class="only-seimei">姓名判断</span><span class="only-sanmei only-shichu only-kyusei only-horo only-suhi">姓名判断のタブ</span>に使います（「基本情報を保存」でこのブラウザに保存できます）</div>
     </div>
     <div class="field">
       <label for="nmA">よみ（かな・ローマ字・任意）</label>
@@ -733,7 +759,7 @@ input.sman{width:64px; font-size:16px; padding:3px 6px; text-align:center}
     <div class="field">
       <label for="seiB">相手の名前（漢字・任意）</label>
       <div class="namepair"><input type="text" class="nmk" id="seiB" maxlength="10" placeholder="姓 佐藤" aria-label="相手の姓"><input type="text" class="nmk" id="meiB" maxlength="10" placeholder="名 太郎" aria-label="相手の名"></div>
-      <div class="birth-hint">画面の見出しと<span class="only-seimei">姓名判断</span><span class="only-sanmei only-shichu only-kyusei only-horo only-suhi">姓名判断のタブ</span>に使います（保存されません）</div>
+      <div class="birth-hint">画面の見出しと<span class="only-seimei">姓名判断</span><span class="only-sanmei only-shichu only-kyusei only-horo only-suhi">姓名判断のタブ</span>に使います（「基本情報を保存」でこのブラウザに保存できます）</div>
     </div>
     <div class="field">
       <label for="nmB">相手のよみ（かな・ローマ字・任意）</label>
@@ -753,10 +779,11 @@ input.sman{width:64px; font-size:16px; padding:3px 6px; text-align:center}
     </div>
     </details>
     <button class="go" type="submit">命式を出す</button>
-    <p class="privacy">計算はすべてこのページの中で行います。入力した生年月日や名前はどこにも送信・保存されません。</p>
+    <p class="privacy">計算はすべてこのページの中で行います。入力した生年月日や名前はどこにも送信されません。「基本情報を保存」を押したときだけ、このブラウザの中に保存します。</p>
   </form>
 
   <section id="tarotApp" class="only-tarot" aria-label="タロット"></section>
+  <section id="tesouApp" class="only-tesou" aria-label="手相"></section>
 
   <section class="chooser only-sanmei only-shichu only-kyusei only-horo only-suhi only-seimei" id="chooser" aria-label="表示する項目">
     <div class="bar" id="chips" aria-label="表示する項目"></div>
@@ -1214,6 +1241,27 @@ if (typeof module !== 'undefined') module.exports = SETSU_DATA;
     CHOUKOU[r[0]] = [SHI.split('').map(function (s, i) { return r[1][(i + 1) % 12]; }),
                      SHI.split('').map(function (s, i) { return r[2][(i + 1) % 12]; })];
   });
+  // 窮通宝鑑（調候用神）。2026-11-27 原文（維基文庫「穷通宝鉴」・NCC「窮通寶鑑」）を1マスずつ読み、通行の早見表（余春台・徐楽吾系）・新浪の注釈表と突き合わせたもの。
+  // 列は寅月〜丑月。1つ目の配列＝原文に従った順（はっきり書いてあるマスは原文、読み方で分かれるマスは通行表の順）、2つ目＝通行の早見表。
+  // 120マス中102マスは原文と早見表の第一・第二が一致。食い違い（d）と読み方で分かれる（a）は KQ_STATUS。詳細は引き継ぎ書 2-24
+  var KQ_SRC = [
+    ['甲', ['丙癸','庚丙丁戊己','庚壬','癸丁庚','癸丁庚','丁庚','丁庚','丁丙庚','丁癸庚','庚丁丙戊','丁庚丙','庚丁'], ['丙癸','庚丙丁戊己','庚丁壬','癸丁庚','癸丁庚','癸丁庚','庚丁壬','庚丁丙','庚甲丁壬癸','庚丁丙戊','丁庚丙','丁庚丙']],
+    ['乙', ['丙癸','丙癸','癸丙戊','癸','癸丙','癸丙','丙癸己','癸丙丁','癸辛','丙戊','丙','丙'], ['丙癸','丙癸','癸丙戊','癸','癸丙','癸丙','丙癸己','癸丙丁','癸辛','丙戊','丙','丙']],
+    ['丙', ['壬庚','壬己','壬甲','壬庚癸','壬庚','壬庚','壬戊','壬癸','甲壬','甲戊庚壬','壬戊己','壬甲'], ['壬庚','壬己','壬甲','壬庚癸','壬庚','壬庚','壬戊','壬癸','甲壬','甲戊庚壬','壬戊己','壬甲']],
+    ['丁', ['庚甲','庚甲','甲庚','甲庚','壬庚癸','甲壬庚','甲庚丙戊','甲庚丙戊','甲庚戊','甲庚','甲庚','甲庚'], ['甲庚','庚甲','甲庚','甲庚','壬庚癸','甲壬庚','甲庚丙戊','甲庚丙戊','甲庚戊','甲庚','甲庚','甲庚']],
+    ['戊', ['丙甲癸','丙甲癸','甲丙癸','甲丙癸','壬甲丙','癸丙甲','丙癸甲','丙癸','甲癸丙','甲丙','丙甲','丙甲'], ['丙甲癸','丙甲癸','甲丙癸','甲丙癸','壬甲丙','癸丙甲','丙癸甲','丙癸','甲丙癸','甲丙','丙甲','丙甲']],
+    ['己', ['丙庚甲','甲癸丙','丙癸甲','癸丙','癸丙','癸丙','癸丙辛','癸丙辛','甲癸丙','丙甲戊','丙甲戊','丙甲戊'], ['丙庚甲','甲癸丙','丙癸甲','癸丙','癸丙','癸丙','丙癸','丙癸','甲丙癸','丙甲戊','丙甲戊','丙甲戊']],
+    ['庚', ['丙甲丁','丁甲庚丙','甲丁壬癸','壬戊丙丁','壬癸','丁甲','丁甲','丁甲丙','甲壬','丁丙甲','丁甲丙','丙丁甲'], ['戊甲壬丙丁','丁甲庚丙','甲丁壬癸','壬戊丙丁','壬癸','丁甲','丁甲','丁甲丙','甲壬','丁丙','丁甲丙','丙丁甲']],
+    ['辛', ['己壬庚','壬甲','壬甲','壬甲癸','壬己癸','壬庚甲','壬甲戊','壬甲','壬甲','壬丙','丙壬戊甲','丙壬戊己'], ['己壬庚','壬甲','壬甲','壬甲癸','壬己癸','壬庚甲','壬甲戊','壬甲','壬甲','壬丙','丙戊壬甲','丙壬戊己']],
+    ['壬', ['庚丙戊','戊辛庚','甲庚','壬辛庚癸','癸庚辛','辛甲癸','戊丁','甲庚','甲丙','戊丙庚','戊丙','丙丁甲'], ['庚丙戊','戊辛庚','甲庚','壬辛庚癸','癸庚辛','辛甲','戊丁','甲庚','甲丙','戊丙庚','戊丙','丙丁甲']],
+    ['癸', ['辛丙','庚辛','丙辛甲','辛','庚辛壬癸','庚辛壬癸','丁','辛丙','辛甲壬癸','庚辛戊丁','丙辛','丙丁'], ['辛丙','庚辛','丙辛甲','辛','庚辛壬癸','庚辛壬癸','丁','辛丙','辛甲壬癸','庚辛戊丁','丙辛','丙丁']]
+  ];
+  var KQ_STATUS = {"甲卯": "a", "甲辰": "d", "甲未": "d", "甲申": "d", "甲酉": "d", "甲戌": "d", "甲丑": "d", "乙申": "a", "丁寅": "d", "丁酉": "a", "戊戌": "d", "己寅": "a", "己申": "d", "己酉": "d", "己戌": "d", "庚寅": "d", "辛午": "a", "辛子": "d"};
+  var CHOUKOU_KQ = {}, CHOUKOU_STD = {};
+  KQ_SRC.forEach(function (r) {   // 寅始まり → 子始まり
+    CHOUKOU_KQ[r[0]] = SHI.split('').map(function (s, i) { return r[1][(i + 10) % 12].split(''); });
+    CHOUKOU_STD[r[0]] = SHI.split('').map(function (s, i) { return r[2][(i + 10) % 12].split(''); });
+  });
   var SHI_ELEM = [4, 2, 0, 0, 2, 1, 1, 2, 3, 3, 2, 4];
   // 全体守護神（参考判定）。sanmei-stock の例から読み取れる方針だけを機械化したもの:
   //  陰占の天干3つ＋地支3つ（蔵干は数えない）の五行を数え、0個の五行があればそれを補う。
@@ -1229,14 +1277,21 @@ if (typeof module !== 'undefined') module.exports = SETSU_DATA;
     if (excess.length) why += '。' + excess.map(function (e) { return GOGYO[e] + 'が' + cnt[e] + '個'; }).join('・') + 'と多い';
     return { basis: 'missing', items: missing.map(fmt), why: why };
   }
-  function shugo(res) {
+  // tbl: 'stock'（既定・sanmei-stock の高尾学館式）| 'kq'（窮通宝鑑）
+  function shugo(res, tbl) {
     var z = res.inzan, mi = SHI.indexOf(z.month.shi), t = CHOUKOU[z.day.kan];
-    var first = t[0][mi], second = t[1][mi];
+    var first = t[0][mi], second = t[1][mi], extra = null;
+    if (tbl === 'kq') {
+      var l = CHOUKOU_KQ[z.day.kan][mi], sd = CHOUKOU_STD[z.day.kan][mi];
+      first = l[0]; second = l[1] || ''; 
+      extra = { table: 'kq', rest: l.slice(2), status: KQ_STATUS[z.day.kan + z.month.shi] || '', std: sd.join('') };
+    }
     var asStar = function (s) { return s.split('・').map(function (k) { return k + '（' + star(z.day.kan, k) + '）'; }).join('・'); };
     // 全体守護神の判断材料: 陰占の天干3つ＋地支3つの五行の数（蔵干は数えない）
     var cnt = [0, 0, 0, 0, 0];
     [z.year, z.month, z.day].forEach(function (p) { cnt[ELEM[p.kan]]++; cnt[SHI_ELEM[SHI.indexOf(p.shi)]]++; });
-    return { first: first, second: second, firstStar: asStar(first), secondStar: asStar(second), gogyoCount: cnt,
+    return { first: first, second: second, firstStar: asStar(first), secondStar: second ? asStar(second) : '', table: tbl === 'kq' ? 'kq' : 'stock', kq: extra,
+             restStar: extra ? extra.rest.map(function (k) { return k + '（' + star(z.day.kan, k) + '）'; }).join('・') : '', gogyoCount: cnt,
              zentai: zentaiShugo(z.day.kan, cnt) };
   }
 
@@ -1401,7 +1456,7 @@ if (typeof module !== 'undefined') module.exports = SETSU_DATA;
     calc: calc, aishou: aishou, nenun: nenun, getsuun: getsuun, nichiun: nichiun, YEAR_MIN: YEAR_MIN, YEAR_MAX: YEAR_MAX,
     dayNum: dayNum, star: star, jushin: jushin, zoukan: zoukan, ganshiName: ganshiName, ganshiIndex: ganshiIndex,
     KAN: KAN, SHI: SHI, GOGYO: GOGYO, ELEM: ELEM, YIN: YIN, STAR_GOGYO: STAR_GOGYO, JUNI: JUNI,
-    DAIUN_RULE: DAIUN_RULE, _internal: { dayNum: dayNum, SETSU_DAY: SETSU_DAY, prevSetsuIndex: prevSetsuIndex, suuri: suuri, shugo: shugo, isou: isou, shukumei: shukumei, ganshiIndex: ganshiIndex, kouten: kouten, daiunAt: daiunAt, ageOn: ageOn, multiGou: multiGou, zentaiShugo: zentaiShugo }
+    DAIUN_RULE: DAIUN_RULE, shugoOf: function (res, tbl) { return shugo(res, tbl); }, _internal: { dayNum: dayNum, SETSU_DAY: SETSU_DAY, prevSetsuIndex: prevSetsuIndex, suuri: suuri, shugo: shugo, isou: isou, shukumei: shukumei, ganshiIndex: ganshiIndex, kouten: kouten, daiunAt: daiunAt, ageOn: ageOn, multiGou: multiGou, zentaiShugo: zentaiShugo }
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Sanmei = api;
@@ -3307,7 +3362,7 @@ var store = {
   set: function(k, v){ try { localStorage.setItem('meishiki.' + k, JSON.stringify(v)); } catch(e){} }
 };
 // ---- 設定 ----
-var CFG_DEFAULT = { pillar:'dmy', zou:'v', size:'m', font:'gothic', theme:'auto', gogyo:'std', accent:'ai', cf:'', cm:'', bg:'none', bgColor:'', bgPat:'asanoha', bgPatA:14, bgFit:'cover', bgVeil:30, card:0 };
+var CFG_DEFAULT = { hideSys:[], pillar:'dmy', zou:'v', size:'m', font:'gothic', theme:'auto', gogyo:'std', accent:'ai', cf:'', cm:'', bg:'none', bgColor:'', bgPat:'asanoha', bgPatA:14, bgFit:'cover', bgVeil:30, card:0 };
 var BG_READY = false;
 var firstCfg = !store.get('cfg', null);
 var cfg = Object.assign({}, CFG_DEFAULT, store.get('cfg', {}));
@@ -3611,6 +3666,7 @@ function run(v, sex, school, dsw, vb, sexB){
     if (vb) { people.push({ res: S.calc(q[0], q[1], q[2], opt(sexB)), cls: 'pb' }); }
   } catch(err){ current = null; people = []; document.getElementById('result').innerHTML = '<p class="warn">' + esc(err.message) + '</p>'; return; }
   people.forEach(function(pp, i){ pp.birth = i === 0 ? { y: p[0], m: p[1], d: p[2] } : { y: q[0], m: q[1], d: q[2] }; });
+  applyShugoTbl();
   calcNums(); refreshInfo();
   applyNames(); applySexColors();
   if (!store.get('kaisetsuSeen', false)) { if (visible.indexOf('kaisetsu') < 0) visible.push('kaisetsu'); store.set('visible', visible); store.set('kaisetsuSeen', true); drawChips(); }
@@ -4406,12 +4462,28 @@ function renderSuuri(r){
   h += '<p class="note">天干3つと3支の蔵干すべてについて、3支それぞれに対する十二大従星の点数（天将12〜天馳1）を足したもの。</p>';
   return h;
 }
+// 調候守護神の表の切り替え（2026-11-27 本人依頼。流派で表が違うため）。'stock'＝今までの表（高尾学館式）、'kq'＝窮通宝鑑
+var shugoTbl = store.get('shugoTbl', 'stock');
+function applyShugoTbl(){ people.forEach(function(pp){ if (pp.res && pp.res.inzan) pp.res.shugo = S.shugoOf(pp.res, shugoTbl); }); }
+document.getElementById('result').addEventListener('click', function(e){
+  var b = e.target.closest('[data-shtbl]');
+  if (!b || !current) return;
+  shugoTbl = b.dataset.shtbl; store.set('shugoTbl', shugoTbl); applyShugoTbl(); draw();
+  var nb = document.querySelector('#result [data-shtbl="' + shugoTbl + '"]'); if (nb) nb.focus();
+});
 function renderShugo(r){
   var h = '<h2>守護神</h2>';
   if (!r.shugo) return h + '<p class="empty">準備中です。</p>';
-  var g = r.shugo;
-  h += '<dl class="kv"><dt>調候 第一</dt><dd><b>' + esc(g.firstStar) + '</b></dd><dt>調候 第二</dt><dd>' + esc(g.secondStar) + '</dd></dl>';
-  h += '<p class="note">調候守護神は、日干（' + r.inzan.day.kan + '）と生まれ月（' + r.inzan.month.shi + '月）の組み合わせで決まります。</p>';
+  var g = r.shugo, kq = g.table === 'kq';
+  h += '<div class="gtabs" role="group" aria-label="調候守護神の表" style="margin:2px 0 8px">' + [['stock', '高尾学館式'], ['kq', '窮通宝鑑']].map(function(x){ return '<button type="button" data-shtbl="' + x[0] + '" aria-pressed="' + (g.table === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>';
+  h += '<dl class="kv"><dt>調候 第一</dt><dd><b>' + esc(g.firstStar) + '</b></dd><dt>調候 第二</dt><dd>' + (g.secondStar ? esc(g.secondStar) : '<span style="color:var(--sub)">なし（原文は1つだけ）</span>') + '</dd>' +
+    (kq && g.restStar ? '<dt>そのほか</dt><dd>' + esc(g.restStar) + '</dd>' : '') + '</dl>';
+  if (kq && g.kq.status) h += '<p class="note"><span class="tag alert">' + (g.kq.status === 'd' ? '資料で分かれる' : '読み方で分かれる') + '</span> ' +
+    (g.kq.status === 'd' ? 'この組み合わせは、窮通宝鑑の原文と通行の早見表で順番が違います。ここでは原文に従っています（早見表では ' + esc(g.kq.std.split('').join('・')) + '）。'
+                         : 'この組み合わせは、原文の書き方から順番が一つに決まりません。ここでは通行の早見表の順にしています。') + '</p>';
+  h += '<p class="note">調候守護神は、日干（' + r.inzan.day.kan + '）と生まれ月（' + r.inzan.month.shi + '月）の組み合わせで決まります。' +
+    (kq ? '「窮通宝鑑」は四柱推命の古典の調候用神を原文から取った表です（季節の寒暖・湿り気を整える五行）。' : '「高尾学館式」は季節ごとにまとめた表です。') +
+    '調候守護神の表は流派や先生によって違います（高尾義政の著作には表がなく、朱学院は表を公開していません）。上のボタンで表を切り替えられます。</p>';
   h += '<p style="margin:12px 0 4px;font-size:13px">陰占の五行の数 <small style="color:var(--sub)">天干3つ＋地支3つ</small></p>';
   h += '<div class="legend" style="justify-content:flex-start">' + g.gogyoCount.map(function(v, i){ return '<span class="g' + i + '">' + gl('gogyo', S.GOGYO[i]) + ' ' + v + (v === 0 ? '（なし）' : '') + '</span>'; }).join('') + '</div>';
   var zt = g.zentai;
@@ -4458,7 +4530,8 @@ var SYS_TEXT = {
   horo:   ['ホロスコープ', '生年月日・出生時刻・出生地から天体の配置を出して、見たい項目だけを並べて表示します。'],
   suhi:   ['数秘術', '生年月日とよみから数秘術の数を出して、見たい項目だけを並べて表示します。'],
   seimei: ['姓名判断', '漢字の姓と名から五格（天格・人格・地格・外格・総格）を出します。生年月日は無くても使えます。'],
-  tarot:  ['タロット', 'カードを自由に並べて、位置ごとの問いと一緒に読み解きます。']
+  tarot:  ['タロット', 'カードを自由に並べて、位置ごとの問いと一緒に読み解きます。'],
+  tesou:  ['手相', '手のひらの写真に点を打って、流年（生命線軸・縦軸）や手の形を出します。受講生の方だけ使えます。']
 };
 var SYS_IDS = Object.keys(SYS_TEXT);
 document.querySelector('.systabs').innerHTML = SYS_IDS.map(function(k){ return '<button type="button" role="tab" data-sys="' + k + '" aria-selected="false">' + SYS_TEXT[k][0] + '</button>'; }).join('');
@@ -4472,6 +4545,50 @@ document.querySelector('.systabs').innerHTML = SYS_IDS.map(function(k){ return '
   wrap.parentNode.insertBefore(hint, wrap.nextSibling);
   var upd = function(){ var max = tabs.scrollWidth - tabs.clientWidth; wrap.classList.toggle('canL', tabs.scrollLeft > 4); wrap.classList.toggle('canR', max - tabs.scrollLeft > 4); };
   tabs.addEventListener('scroll', upd, { passive: true }); window.addEventListener('resize', upd); upd(); setTimeout(upd, 300);
+})();
+// ---- 手相（手相流年ツール） ----
+// 公開版：mayonery.jp のオンライン版（暗号文だけを配っていて、IDとパスワード／合言葉を入れると開く）を枠の中で開く。
+// 自分用の版：ビルドで流年ツールをそのまま埋め込む（window.RYUNEN_LOCAL_HTML）ので、キーなしで開く。
+var RYUNEN_URL = 'https://mayonery.jp/tool/e46b4a5bdd0f8bb42d292c972d709831/';
+function tesouOpen(){
+  var app = document.getElementById('tesouApp');
+  if (!app || app.dataset.ready) return;
+  app.dataset.ready = '1';
+  var local = window.RYUNEN_LOCAL_HTML;
+  var h = '<div class="panel tesouIntro"><h2>手相の流年ツール <small>' + (local ? '自分用の版（キーなし）' : '受講生限定') + '</small></h2>';
+  h += local ? '<p class="note">自分用の版なので、キーを入れずに開いています。この版は人に渡さないでください。</p>'
+             : '<p class="note">講座でお伝えした合言葉（または受講生ごとの ID とパスワード）を下の画面に入れると使えます。「この端末で覚える」にしておくと、次からはすぐ開きます。写真はこの端末の中だけで扱い、どこにも送りません。</p>';
+  h += '<p class="note"><a href="' + (local ? '#' : RYUNEN_URL) + '" target="_blank" rel="noopener" id="tesouFull"' + (local ? ' hidden' : '') + '>別のタブで大きく開く ↗</a></p></div>';
+  h += '<iframe class="tesouf" title="手相の流年ツール" allow="clipboard-write" loading="eager"></iframe>';
+  app.innerHTML = h;
+  var f = app.querySelector('iframe');
+  if (local) {
+    try { f.srcdoc = new TextDecoder().decode(Uint8Array.from(atob(local), function(c){ return c.charCodeAt(0); })); }
+    catch (e) { f.srcdoc = '<p>流年ツールを開けませんでした。</p>'; }
+  } else f.src = RYUNEN_URL;
+}
+// ---- タブに出す占術（設定で絞る） ----
+function sysHidden(k){ return (cfg.hideSys || []).indexOf(k) >= 0; }
+function sysVisibleIds(){ return SYS_IDS.filter(function(k){ return !sysHidden(k); }); }
+function applySysVis(){
+  document.querySelectorAll('.systabs [data-sys]').forEach(function(b){ b.hidden = sysHidden(b.dataset.sys); });
+  var hint = document.querySelector('.sthint'); if (hint) hint.textContent = '占術は全' + sysVisibleIds().length + 'つ。横にスライドすると続きがあります →';
+  var box = document.getElementById('sysVis');
+  if (box) box.querySelectorAll('input').forEach(function(c){ c.checked = !sysHidden(c.value); c.disabled = c.checked && sysVisibleIds().length === 1; });
+  window.dispatchEvent(new Event('resize'));
+  if (sysHidden(SYS)) setSys(sysVisibleIds()[0]);
+}
+(function(){
+  var box = document.getElementById('sysVis');
+  if (!box) return;
+  box.innerHTML = SYS_IDS.map(function(k){ return '<label class="sysv"><input type="checkbox" value="' + k + '"> ' + SYS_TEXT[k][0] + '</label>'; }).join('');
+  box.addEventListener('change', function(e){
+    var c = e.target; if (!c.value) return;
+    var hid = (cfg.hideSys || []).filter(function(k){ return k !== c.value; });
+    if (!c.checked) hid.push(c.value);
+    if (hid.length >= SYS_IDS.length) { c.checked = true; return; }
+    cfg.hideSys = hid; store.set('cfg', cfg); applySysVis();
+  });
 })();
 function sysSuffix(){ return SYS === 'sanmei' ? '' : SYS === 'suhi' ? '/suhi' : '/sys=' + SYS; }
 function setSys(s, silent){
@@ -4487,6 +4604,7 @@ function setSys(s, silent){
   document.title = '命式ツール｜' + SYS_TEXT[SYS][0];
   drawChips();
   if (SYS === 'tarot' && typeof tDraw === 'function') tDraw();
+  if (SYS === 'tesou') tesouOpen();
   if (silent) return;
   if (hashBase && history.replaceState) history.replaceState(null, '', '#' + hashBase + sysSuffix());
   if (current) draw(); else buildNav();
@@ -4495,7 +4613,7 @@ document.querySelectorAll('.systabs [data-sys]').forEach(function(b){
   b.addEventListener('click', function(){ if (b.dataset.sys !== SYS) setSys(b.dataset.sys); });
   b.addEventListener('keydown', function(e){
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-    e.preventDefault(); setSys(SYS_IDS[(SYS_IDS.indexOf(SYS) + (e.key === 'ArrowRight' ? 1 : SYS_IDS.length - 1)) % SYS_IDS.length]);
+    e.preventDefault(); var V = sysVisibleIds(); setSys(V[(V.indexOf(SYS) + (e.key === 'ArrowRight' ? 1 : V.length - 1)) % V.length]);
     document.querySelector('.systabs [data-sys="' + SYS + '"]').focus();
   });
 });
@@ -5994,7 +6112,7 @@ function renderInfo(pi){
   h += row('年の干支', '<span class="kanshi" style="font-size:16px">' + y.kan + y.shi + '</span>');
   if (pp.num) h += row('ライフパス', '<span class="nnum">' + pp.num.lp.n + '</span>');
   h += '</dl>';
-  return h + '<p class="note">出生時刻と出生地は、四柱推命の時柱やホロスコープに使います。入力内容はどこにも送信・保存されません。</p>';
+  return h + '<p class="note">出生時刻と出生地は、四柱推命の時柱やホロスコープに使います。入力内容はどこにも送信されません（「基本情報を保存」を押したときだけ、このブラウザに保存します）。</p>';
 }
 
 // ==================== 背景（色・柄・自分の画像） ====================
@@ -6124,17 +6242,90 @@ if (!store.get('infoSeen', false)) {
   order.splice(order.indexOf('info'), 1); order.unshift('info'); store.set('order', order);
   if (visible.indexOf('info') < 0) visible.push('info'); store.set('visible', visible); store.set('infoSeen', true);
 }
+applySysVis();
 setSys(store.get('sys', 'sanmei'), true);
+if (sysHidden(SYS)) setSys(sysVisibleIds()[0], true);
 drawChips();
 fromHash();
 window.addEventListener('hashchange', fromHash);
+
+// ---- 基本情報の保存・読み込み（2026-11-27 本人依頼）。このブラウザの localStorage（meishiki.profiles）だけに置く ----
+(function(){
+  var KEY = 'profiles';
+  var list = function(){ return store.get(KEY, []); };
+  var val = function(id){ var e = document.getElementById(id); return e ? e.value.trim() : ''; };
+  var radio = function(n){ var r = form[n]; return r ? r.value : ''; };
+  function grab(X){
+    var b = X === 'A' ? val('birth') : val('birthB'), pl = readPlace(X);
+    return { birth: b, sex: radio(X === 'A' ? 'sex' : 'sexB'), time: val('time' + X), sei: val('sei' + X), mei: val('mei' + X), yomi: val('nm' + X), place: pl ? pl.code : '' };
+  }
+  function has(x){ return !!(x && (x.birth || x.sei || x.mei || x.yomi)); }
+  function toast(t){ var d = document.createElement('div'); d.className = 'savedmsg'; d.setAttribute('role', 'status'); d.textContent = t; document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 2200); }
+  function label(p){ var a = p.A, n = (a.sei + ' ' + a.mei).trim() || a.yomi; return n || a.birth || '（名前なし）'; }
+  document.getElementById('infoSaveBtn').addEventListener('click', function(){
+    var A = grab('A'), B = grab('B');
+    if (!has(A)) { toast('保存する基本情報がありません。生年月日か名前を入れてください'); return; }
+    var def = label({ A: A }) + (has(B) ? ' × ' + (label({ A: B })) : '');
+    var name = window.prompt('保存する名前（一覧に出る名前）', def);
+    if (name == null) return;
+    name = name.trim() || def;
+    var L = list(), i = L.findIndex(function(p){ return p.name === name; });
+    var rec = { name: name, A: A, B: has(B) ? B : null, saved: Date.now() };
+    if (i >= 0) { if (!window.confirm('「' + name + '」はもう保存されています。上書きしますか？')) return; L.splice(i, 1); }
+    L.unshift(rec); store.set(KEY, L.slice(0, 300));
+    toast('「' + name + '」を保存しました');
+  });
+  // 読み込みの窓
+  var box = document.createElement('div'); box.id = 'profBox'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', '保存した基本情報');
+  box.innerHTML = '<div class="pbx"><header><b>保存した基本情報</b><button type="button" class="kb" data-pa="close" aria-label="閉じる" style="font:inherit;padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer">✕</button></header>' +
+    '<input type="search" class="pq" placeholder="名前・生年月日でさがす" aria-label="さがす"><ul></ul><p class="pnote">このブラウザの中だけに保存しています（ほかの端末やブラウザには出ません）。ブラウザのデータを消すと消えます。</p></div>';
+  document.body.appendChild(box);
+  var q = box.querySelector('.pq'), ul = box.querySelector('ul');
+  function fmtB(b){ var p = parseBirth(b || ''); return p.ok ? p.label.replace(/（.*）/, '') : (b || '生年月日なし'); }
+  function drawList(){
+    var t = q.value.trim().toLowerCase(), L = list();
+    var rows = L.map(function(p, i){ return { p: p, i: i }; }).filter(function(x){ var p = x.p; return !t || (p.name + ' ' + (p.A.birth || '') + ' ' + (p.B ? (p.B.sei + p.B.mei + p.B.birth) : '')).toLowerCase().indexOf(t) >= 0; });
+    if (!L.length) { ul.innerHTML = '<li class="pe">まだ保存した基本情報はありません。入力してから、画面上の「💾 基本情報を保存」を押してください。</li>'; return; }
+    if (!rows.length) { ul.innerHTML = '<li class="pe">見つかりません。</li>'; return; }
+    ul.innerHTML = rows.map(function(x){ var p = x.p;
+      return '<li><div class="pn"><b>' + esc(p.name) + '</b><small>' + esc(fmtB(p.A.birth)) + (p.A.sex ? '・' + (p.A.sex === 'M' ? '男性' : '女性') : '') + (p.A.time ? '・' + esc(p.A.time) + '生' : '') + (p.B ? '／相手：' + esc(label({ A: p.B })) : '') + '</small></div>' +
+        '<button type="button" class="pl" data-pl="' + x.i + '">読み込む</button><button type="button" data-pd="' + x.i + '" aria-label="' + esc(p.name) + 'を削除">削除</button></li>'; }).join('');
+  }
+  function put(X, x){
+    var set = function(id, v){ var e = document.getElementById(id); if (e) { e.value = v || ''; e.dispatchEvent(new Event('input', { bubbles: true })); } };
+    x = x || { birth: '', sex: X === 'A' ? 'F' : 'M', time: '', sei: '', mei: '', yomi: '', place: '' };
+    set(X === 'A' ? 'birth' : 'birthB', x.birth);
+    if (x.sex) form[X === 'A' ? 'sex' : 'sexB'].value = x.sex;
+    set('time' + X, x.time); set('sei' + X, x.sei); set('mei' + X, x.mei); set('nm' + X, x.yomi);
+    setPlace(X, x.place);
+  }
+  function load(p){
+    put('A', p.A); put('B', p.B);
+    if (p.B) document.getElementById('pbox').open = true;
+    if (typeof applySexColors === 'function') applySexColors();
+    box.classList.remove('on');
+    var pb = parseBirth(p.A.birth || '');
+    if (pb.ok || (p.A.sei && p.A.mei)) { if (form.requestSubmit) form.requestSubmit(); else form.dispatchEvent(new Event('submit')); }
+    toast('「' + p.name + '」を読み込みました');
+  }
+  document.getElementById('infoLoadBtn').addEventListener('click', function(e){ e.preventDefault(); q.value = ''; drawList(); box.classList.add('on'); setTimeout(function(){ q.focus(); }, 30); });
+  q.addEventListener('input', drawList);
+  box.addEventListener('click', function(e){
+    if (e.target === box) { box.classList.remove('on'); return; }
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.pa === 'close') box.classList.remove('on');
+    else if (b.dataset.pl != null) load(list()[+b.dataset.pl]);
+    else if (b.dataset.pd != null) { var L = list(), p = L[+b.dataset.pd]; if (p && window.confirm('「' + p.name + '」を削除しますか？')) { L.splice(+b.dataset.pd, 1); store.set(KEY, L); drawList(); } }
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && box.classList.contains('on')) box.classList.remove('on'); });
+})();
 // 鑑定書（kantei.js）に渡す窓口。変わる値はその都度読む
 window.MeishikiApp = {
   SECTIONS: SECTIONS, SYS_TEXT: SYS_TEXT, store: store, ACCENTS: ACCENTS, TA: TA,
   cardInner: cardInner, sysOf: sysOf, byId: byId, refreshInfo: function(){ if (current && !current.seimeiOnly) { refreshInfo(); applyNames(); } }, dispName: dispName, seHasName: seHasName, timg: timg,
   current: function(){ return current; }, people: function(){ return people; }, sys: function(){ return SYS; },
   order: function(){ return order; }, visible: function(){ return visible; }, cfg: function(){ return cfg; },
-  tst: function(){ return tst; }, tcfg: function(){ return tcfg; }
+  tst: function(){ return tst; }, tcfg: function(){ return tcfg; }, sysHidden: sysHidden
 };
 })();
 </script>
@@ -6472,7 +6663,7 @@ function defClient(){ var n = dispName('A'); return n ? n + ' 様' : ''; }
 function defTopic(){ return memoData().values['相談内容'] || ''; }
 
 // 占術のグループ（基本情報＋各タブ）。タロットは別扱い
-function sysList(){ return ['info'].concat(Object.keys(SYS_TEXT).filter(function(k){ return k !== 'tarot'; })); }
+function sysList(){ return ['info'].concat(Object.keys(SYS_TEXT).filter(function(k){ return k !== 'tarot' && k !== 'tesou' && !(A.sysHidden && A.sysHidden(k)); })); }
 function groupOrder(){
   var all = sysList(), g = (st.groups || []).filter(function(k){ return all.indexOf(k) >= 0; });
   all.forEach(function(k){ if (g.indexOf(k) < 0) g.push(k); });
