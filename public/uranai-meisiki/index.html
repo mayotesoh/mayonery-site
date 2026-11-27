@@ -303,6 +303,16 @@ header .htext{flex:1}
 @media (max-width:640px){ .tboard{--tscale:.72; height:440px} .tslot select.tq{font-size:10px} .tslot .tname{display:none} .tgrid{display:flex; overflow-x:auto; gap:6px; padding-bottom:4px; scrollbar-width:thin} .tpick{flex:0 0 64px} .tdeck .gtabs button{padding:4px 9px; font-size:12px} .tfield input{width:100%} .tfield{flex:1 1 100%} }
 /* ホロスコープ */
 .hwrap{max-width:600px; margin:0 auto}
+.hwrap.multi{max-width:680px}
+.hwheel{display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; margin:2px 0 6px}
+.hwheel .gtabs{margin:0}
+.hwdate{font-size:13px; color:var(--sub); display:flex; align-items:center; gap:6px}
+.hwdate input{font:inherit; font-size:14px; padding:3px 6px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink)}
+.hchart text.hr1{fill:#c0603a} .hchart line.hr1{stroke:#c0603a}
+.hchart text.hr2{fill:#2f8a7a} .hchart line.hr2{stroke:#2f8a7a}
+.hlegend{display:flex; flex-wrap:wrap; gap:4px 14px; justify-content:center; font-size:12px; color:var(--sub); margin:4px 0 0}
+.hlegend i{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:4px; vertical-align:-1px}
+.hlegend .hk0{background:var(--ink)} .hlegend .hk1{background:#c0603a} .hlegend .hk2{background:#2f8a7a}
 .hchart{width:100%; height:auto; display:block; color:var(--ink)}
 .hchart .hl{stroke:var(--line); stroke-width:1}
 .hchart .hthin{stroke-dasharray:2 2}
@@ -334,6 +344,21 @@ dl.hasl dt{font-weight:400}
 .hbl{display:flex; flex-direction:column; line-height:1.25} .hbl small{font-size:11px; color:var(--sub)}
 .hbt{height:10px; border-radius:5px; background:var(--line); overflow:hidden} .hbt span{display:block; height:100%; border-radius:5px}
 .hbn{text-align:right; font-weight:700} .hbi{font-size:13px}
+/* 数秘術：運気のピラミッド */
+.npyr{display:block; width:100%; max-width:520px; margin:2px auto 4px}
+.npyr line{stroke:var(--line); stroke-width:1.5}
+.npyr line.o{stroke-dasharray:4 4}
+.npyr line.c{stroke:color-mix(in srgb, var(--line) 70%, transparent)}
+.npyr circle{fill:var(--paper); stroke:var(--accent); stroke-width:1.5}
+.npyr .base circle{stroke:var(--sub); fill:var(--bg)}
+.npyr .chal circle{stroke:var(--sub); stroke-dasharray:3 2}
+.npyr .now circle{fill:var(--accent); stroke:var(--accent)}
+.npyr .chal.now circle{fill:color-mix(in srgb, var(--accent) 25%, var(--paper)); stroke-dasharray:none}
+.npyr .nv{text-anchor:middle; dominant-baseline:middle; font-size:17px; font-weight:700; fill:var(--ink)}
+.npyr .base .nv, .npyr .chal .nv{font-size:14px}
+.npyr .pin.now .nv{fill:var(--paper)}
+.npyr .lb{font-size:12px; fill:var(--ink); font-weight:600}
+.npyr .sb{font-size:10.5px; fill:var(--sub)}
 /* 姓名判断 */
 .sdia{display:grid; grid-template-columns:auto auto auto auto auto; justify-content:center; column-gap:6px; row-gap:4px; margin:6px auto 0; align-items:center}
 .sdia .sch{grid-column:2}
@@ -581,6 +606,7 @@ input.sman{width:64px; font-size:16px; padding:3px 6px; text-align:center}
         <input type="radio" name="h_house" id="h_house_koch" value="koch"><label for="h_house_koch">コッホ</label>
         <input type="radio" name="h_house" id="h_house_equal" value="equal"><label for="h_house_equal">イコール</label>
         <input type="radio" name="h_house" id="h_house_whole" value="whole"><label for="h_house_whole">ホールサイン</label>
+        <input type="radio" name="h_house" id="h_house_solar" value="solar"><label for="h_house_solar">ソーラーハウス</label>
       </div>
     </div>
     <div class="field only-horo">
@@ -646,6 +672,13 @@ input.sman{width:64px; font-size:16px; padding:3px 6px; text-align:center}
       <div class="seg" role="radiogroup">
         <input type="radio" name="n_py" id="npyJ" value="jan"><label for="npyJ">1月1日</label>
         <input type="radio" name="n_py" id="npyB" value="birthday"><label for="npyB">誕生日</label>
+      </div>
+    </div>
+    <div class="field only-suhi">
+      <label>パーソナルイヤーの 11・22</label>
+      <div class="seg" role="radiogroup">
+        <input type="radio" name="n_pym" id="npymK" value="keep"><label for="npymK">残す</label>
+        <input type="radio" name="n_pym" id="npymO" value="off"><label for="npymO">1桁にする</label>
       </div>
     </div>
     <div class="field only-sanmei">
@@ -2218,6 +2251,12 @@ function houses(armc, eps, lat, method){
   if (method === 'whole') { var s0 = Math.floor(asc / 30) * 30; for (var m = 1; m <= 12; m++) c[m] = norm(s0 + 30 * (m - 1)); }
   return { cusps: c, asc: asc, mc: mc, method: used, warn: warn };
 }
+// ソーラーハウス（2026-11-27 ホロスコープの使い手の依頼）：太陽のあるサインを1室とし、サインごとに1室ずつ（サインの0度がカスプ）
+function solarHouses(pl, asc, mc){
+  var sun = pl.filter(function(p){ return p.id === 'sun'; })[0], s0 = Math.floor(norm(sun.lon) / 30) * 30, c = [null];
+  for (var n = 1; n <= 12; n++) c[n] = norm(s0 + 30 * (n - 1));
+  return { cusps: c, asc: asc, mc: mc, method: 'solar', warn: '' };
+}
 // 黄経 lon が何室か（カスプの並びで判定）
 function houseOf(lon, cusps){
   for (var n = 1; n <= 12; n++) {
@@ -2279,15 +2318,21 @@ function calc(inp){
   var ut = utOf(inp.y, inp.m, inp.d, h, mi, place.tz + (dst ? 1 : 0));
   var pl = planetsAt(ut, inp.node);
   var res = { input: inp, place: place, known: known, dst: dst, ut: ut, planets: pl, warnings: warnings, notes: notes, houses: null };
+  var solar = inp.house === 'solar';
   if (known) {
     var t = timeOf(ut), eps = ae().e_tilt(t).tobl, armc = norm(ae().SiderealTime(t) * 15 + place.lon);
-    var hs = houses(armc, eps, place.lat, inp.house || 'placidus');
+    var hs = houses(armc, eps, place.lat, solar ? 'placidus' : (inp.house || 'placidus'));
+    if (solar) hs = solarHouses(pl, hs.asc, hs.mc);
     if (hs.warn) warnings.push(hs.warn);
     res.houses = hs; res.armc = armc; res.eps = eps;
     pl.forEach(function(p){ p.house = houseOf(p.lon, hs.cusps); });
     res.angles = [{ id: 'asc', lon: hs.asc, speed: 0 }, { id: 'mc', lon: hs.mc, speed: 0 }];
   } else {
-    notes.push('出生時刻が未入力なので、正午の位置で出しています。ハウス・ASC・MC は出せません。');
+    if (solar) {   // ソーラーハウスは太陽のサインだけで決まるので、時刻なしでも出せる
+      res.houses = solarHouses(pl, null, null);
+      pl.forEach(function(p){ p.house = houseOf(p.lon, res.houses.cusps); });
+    }
+    notes.push('出生時刻が未入力なので、正午の位置で出しています。' + (solar ? 'ASC・MC は出せません（ソーラーハウスは太陽のサインで決まるので出しています）。' : 'ハウス・ASC・MC は出せません。'));
     var m0 = norm(lonAt('moon', utOf(inp.y, inp.m, inp.d, 0, 0, place.tz))), m1 = norm(lonAt('moon', utOf(inp.y, inp.m, inp.d, 23, 59, place.tz)));
     if (Math.floor(m0 / 30) !== Math.floor(m1 / 30)) warnings.push('この日は月が' + SIGNS[Math.floor(m0 / 30)][0] + 'から' + SIGNS[Math.floor(m1 / 30)][0] + 'へ移ります。月のサインは出生時刻で変わります。');
     res.moonRange = [m0, m1];
@@ -2295,6 +2340,7 @@ function calc(inp){
   }
   pl.concat(res.angles).forEach(function(p){ p.sign = Math.floor(p.lon / 30); p.deg = p.lon - p.sign * 30; });
   res.points = pl.concat(res.angles);
+  res.hasHouses = !!res.houses;
   return res;
 }
 // 今の天体（トランジット）
@@ -2390,7 +2436,7 @@ var HOUSES = [null,
   ['5室', '創造・恋愛・子ども・楽しみ'], ['6室', '日々の仕事・健康・習慣'], ['7室', 'パートナー・結婚・対人関係'], ['8室', '深い絆・共有の財産・受け継ぐもの'],
   ['9室', '学問・哲学・海外・遠くへの旅'], ['10室', '社会での立場・天職・目標'], ['11室', '友人・仲間・希望・未来'], ['12室', '無意識・隠れたもの・休息・奉仕']
 ];
-var HOUSE_SYS = { placidus: 'プラシーダス', koch: 'コッホ', equal: 'イコール（ASC起点）', whole: 'ホールサイン', porphyry: 'ポルフィリー' };
+var HOUSE_SYS = { placidus: 'プラシーダス', koch: 'コッホ', equal: 'イコール（ASC起点）', whole: 'ホールサイン', porphyry: 'ポルフィリー', solar: 'ソーラーハウス' };
 var TERM = {
   'ASC': 'アセンダント。生まれた瞬間に東の地平線と黄道が交わる点。1室の始まりで、第一印象や生まれ持った雰囲気を表します。',
   'MC': 'エムシー（天頂）。子午線と黄道が交わる南側の点。多くの方式で10室の始まりになり、社会での目標や天職を表します。',
@@ -2404,6 +2450,7 @@ var TERM = {
   'コッホ': 'MCの度数が昇ってからの時間を3等分してハウスを分ける方式。',
   'イコール': 'ASCから30度ずつ機械的に12室に分ける方式。',
   'ホールサイン': 'ASCのあるサイン全体を1室、次のサインを2室…とする方式。古典的な占星術で使われます。',
+  'ソーラーハウス': '太陽のあるサインを1室とし、そこからサインごとに2室・3室…とする方式。出生時刻が分からなくても使えるので、雑誌の星占いなどでも広く使われます。',
   'ポルフィリー': 'ASCとMCの間（象限）を3等分してハウスを分ける方式。',
   '逆行': '地球から見て、天体が黄道を逆向きに進んで見える時期。その天体のテーマが内向きに、見直しの形で出るとされます。',
   'アスペクト': '2つの天体がなす角度。0度・60度・90度・120度・180度などの特別な角度になると、2つの天体の力が影響し合うとされます。',
@@ -2419,7 +2466,7 @@ var TERM = {
   'シナストリー': '2人の出生図を重ねて、天体どうしの角度で相性を見る方法。'
 };
 var API = { norm: norm, ascOf: ascOf, mcOf: mcOf, houses: houses, houseOf: houseOf, lonOfRa: lonOfRa,
-  setAstronomy: setAstronomy, calc: calc, transit: transit, planetsAt: planetsAt, meanNode: meanNode, jpDst: jpDst, utOf: utOf,
+  setAstronomy: setAstronomy, calc: calc, solarHouses: solarHouses, transit: transit, planetsAt: planetsAt, meanNode: meanNode, jpDst: jpDst, utOf: utOf,
   aspects: aspects, balance: balance, sepOf: sepOf, ASPECTS: ASPECTS, ORB: ORB,
   SIGNS: SIGNS, ELEM: ELEM, ELEM_KW: ELEM_KW, MODE: MODE, MODE_KW: MODE_KW, PLANETS: PLANETS, PLANET_IDS: PLANET_IDS, HOUSES: HOUSES, HOUSE_SYS: HOUSE_SYS, TERM: TERM };
 
@@ -3051,7 +3098,7 @@ function calc(b, opt){
   }
   lp.steps = lpSteps;
   var bd = reduce(b.d, M); bd.day = b.d; bd.debt = debtOf(bd.trail); bd.steps = trailText(bd.trail);
-  var r = { birth: { y: b.y, m: b.m, d: b.d }, opt: { lp: opt.lp || 'all', masters: opt.masters || '33', py: opt.py || 'jan' }, M: M, lp: lp, bd: bd, name: null };
+  var r = { birth: { y: b.y, m: b.m, d: b.d }, opt: { lp: opt.lp || 'all', masters: opt.masters || '33', py: opt.py || 'jan', pym: opt.pym || 'keep' }, M: M, lp: lp, bd: bd, name: null };
 
   // 名前の数
   var pn = parseName(opt.name);
@@ -3097,9 +3144,12 @@ function periodAt(r, age){ for (var i = 0; i < r.periods.length; i++) { var p = 
 // パーソナルイヤー・マンス・デイ（9年周期。1〜9に還元）
 // py:'jan' は1月1日で切り替え、'birthday' はその年の誕生日で切り替え
 function pyYearOf(r, y, m, d){ return r.opt.py === 'birthday' && (m < r.birth.m || (m === r.birth.m && d < r.birth.d)) ? y - 1 : y; }
-function personalYear(r, Y){ return single(digitSum(Y) + digitSum(r.birth.m) + digitSum(r.birth.d)); }
+// 2026-11-27 数秘術の術者の依頼：パーソナルイヤーは 11・22 を残す（pym:'keep' が既定。'off' で1桁）。マンス・デイは1桁のまま
+function pyMasters(r){ return r.opt.pym === 'off' ? [] : [11, 22]; }
+function personalYear(r, Y){ return reduce(digitSum(Y) + digitSum(r.birth.m) + digitSum(r.birth.d), pyMasters(r)).n; }
+function cycleOf(n){ return n > 9 ? single(n) : n; }   // 9年周期の中の位置（11→2・22→4）
 function personal(r, y, m, d){
-  var Y = pyYearOf(r, y, m, d), py = personalYear(r, Y), pm = single(py + m), pd = single(pm + d);
+  var Y = pyYearOf(r, y, m, d), py = personalYear(r, Y), pm = single(cycleOf(py) + m), pd = single(pm + d);
   return { pyYear: Y, py: py, pm: pm, pd: pd };
 }
 function compat(a, b){
@@ -3126,8 +3176,8 @@ var NUM = {
   7: { title:'探究', kw:'分析・洞察・ひとりの時間・精神性', self:'物事の本質を見極めようとする数です。一人で考える時間を大切にし、深く掘り下げることで独自の知恵を得るとされます。', care:'人と距離をとりやすく、疑い深く見られることがあります。', year:'内面を見つめる年。学びや振り返り、休息に向き、外へ広げるより深めるとよいとされます。', period:'学びと内省の時期。専門性や精神面が深まるとされます。', challenge:'心を開くこと、考えすぎて動けなくならないことが課題とされます。', lesson:'ひとりで深く考えること、目に見えないものを大切にすることを学ぶ場面が多くなりやすいとされます。' },
   8: { title:'実現', kw:'達成・影響力・お金・統率', self:'目標を現実の成果に変える数です。大きな目標に向かう粘り強さと、人やお金を動かす力を持つとされます。', care:'仕事一辺倒になったり、支配的に見られたりすることがあります。', year:'実りの年。これまでの努力が成果や評価として返ってきやすいとされます。', period:'社会的な達成やお金のことが中心になる時期とされます。', challenge:'お金や力との付き合い方、成果だけで自分を測らないことが課題とされます。', lesson:'お金や権限を扱うこと、目標を形にすることを学ぶ場面が多くなりやすいとされます。' },
   9: { title:'完成', kw:'包容力・理想・奉仕・手放し', self:'広い視野で人を受け入れる数です。1から8までの要素をあわせ持ち、人の役に立つことや大きな理想に心が動くとされます。', care:'現実離れしたり、自分を後回しにしたりすることがあります。', year:'9年周期の締めくくりの年。区切りをつけ、不要なものを手放して次に備えるとされます。', period:'人や社会への貢献、まとめの時期とされます。', challenge:'', lesson:'広い視野で人を許すこと、手放すことを学ぶ場面が多くなりやすいとされます。' },
-  11: { title:'直感', base:2, kw:'直感・ひらめき・感受性・気づきを与える', self:'マスターナンバーのひとつで、2の性質をより強く持つとされます。鋭い直感と感受性で人に気づきを与える一方、繊細さゆえに疲れやすい面もあるとされます。', care:'感じ取りすぎて緊張しやすいことがあります。', period:'ひらめきや精神面が際立つ時期とされます。' },
-  22: { title:'大きな構築', base:4, kw:'構想力・実行力・社会への影響', self:'マスターナンバーのひとつで、4の性質をより大きなスケールで持つとされます。大きな構想を現実の形にする力がある一方、その分の重圧も感じやすいとされます。', care:'理想が大きいぶん、自分に厳しくなりすぎることがあります。', period:'大きなものを築く機会が巡りやすい時期とされます。' },
+  11: { title:'直感', base:2, kw:'直感・ひらめき・感受性・気づきを与える', self:'マスターナンバーのひとつで、2の性質をより強く持つとされます。鋭い直感と感受性で人に気づきを与える一方、繊細さゆえに疲れやすい面もあるとされます。', care:'感じ取りすぎて緊張しやすいことがあります。', period:'ひらめきや精神面が際立つ時期とされます。', year:'2の年（協力・準備）の性質に、直感と精神面の高まりが重なる年とされます。ひらめきや人との深い縁が訪れやすい一方、感受性が強まり心が揺れやすい年でもあるため、休む時間を意識して取るとよいとされます。' },
+  22: { title:'大きな構築', base:4, kw:'構想力・実行力・社会への影響', self:'マスターナンバーのひとつで、4の性質をより大きなスケールで持つとされます。大きな構想を現実の形にする力がある一方、その分の重圧も感じやすいとされます。', care:'理想が大きいぶん、自分に厳しくなりすぎることがあります。', period:'大きなものを築く機会が巡りやすい時期とされます。', year:'4の年（土台づくり）の性質を大きなスケールで持つ年とされます。長く続く仕組みや大きな計画を形にする力が出やすい一方、責任や重圧も大きくなりやすいので、無理のない段取りが助けになるとされます。' },
   33: { title:'無償の愛', base:6, kw:'慈愛・癒し・献身・おおらかさ', self:'マスターナンバーのひとつで、6の性質をより深く持つとされます。損得を超えて人を包み込む力がある一方、自分をすり減らさない工夫が大切とされます。', care:'人のために動きすぎて、自分のことが後回しになりやすいとされます。', period:'人を支え、癒す役回りが大きくなる時期とされます。' }
 };
 var CHALLENGE0 = '特定の壁よりも、どの課題を選ぶかが自分に任されている数とされます。迷いやすい反面、どの方向にも伸ばせるとされます。';
@@ -3158,7 +3208,7 @@ var TERM = {
 };
 
 var API = {
-  calc: calc, personal: personal, personalYear: personalYear, pyYearOf: pyYearOf, ageAt: ageAt, periodAt: periodAt, compat: compat,
+  calc: calc, personal: personal, personalYear: personalYear, cycleOf: cycleOf, pyYearOf: pyYearOf, ageAt: ageAt, periodAt: periodAt, compat: compat,
   reduce: reduce, digitSum: digitSum, parseName: parseName, kanaToRomaji: kanaToRomaji, letterValue: letterValue, mastersOf: mastersOf,
   NUM: NUM, CHALLENGE0: CHALLENGE0, DEBT_TEXT: DEBT_TEXT, TERM: TERM
 };
@@ -3211,7 +3261,7 @@ var SECTIONS = [
   { id:'k_kaisetsu', sys:'kyusei', label:'解説',        basic:true,  render:function(r){ return renderKyKaisetsu(r); }, wide:true },
   { id:'k_index',  sys:'kyusei', label:'九星と用語（索引）', basic:false, global:true, render:null, wide:true },
   // ホロスコープ
-  { id:'h_chart',  sys:'horo', label:'ホロスコープ図', basic:true,  render:function(r){ return renderHoChart(r); }, wide:true },
+  { id:'h_chart',  sys:'horo', label:'ホロスコープ図', basic:true,  render:function(r, pi){ return renderHoChart(r, pi); }, wide:true },
   { id:'h_planets', sys:'horo', label:'天体の位置',   basic:true,  render:function(r){ return renderHoPlanets(r); } },
   { id:'h_houses', sys:'horo', label:'ハウス・ASC・MC', basic:true, render:function(r){ return renderHoHouses(r); } },
   { id:'h_aspects', sys:'horo', label:'アスペクト',    basic:true,  render:function(r){ return renderHoAspects(r); }, wide:true },
@@ -4372,7 +4422,7 @@ function renderSainou(r){
 // ==================== 数秘術 ====================
 var NUMR = window.Numerology;
 var hashBase = '';
-var NUM_DEFAULT = { lp: 'all', masters: '33', py: 'jan' };
+var NUM_DEFAULT = { lp: 'all', masters: '33', py: 'jan', pym: 'keep' };
 var numOpt = Object.assign({}, NUM_DEFAULT, store.get('num', {}));
 var nun = { from: TODAY.y - 2 };
 // 既存の利用者にも、数秘術の基本の項目を初回だけ表示に加える
@@ -4429,7 +4479,7 @@ document.querySelectorAll('.systabs [data-sys]').forEach(function(b){
 function calcNums(){
   people.forEach(function(pp, i){
     var nm = document.getElementById(i === 0 ? 'nmA' : 'nmB').value;
-    pp.num = NUMR.calc(pp.birth, { name: nm, lp: numOpt.lp, masters: numOpt.masters, py: numOpt.py });
+    pp.num = NUMR.calc(pp.birth, { name: nm, lp: numOpt.lp, masters: numOpt.masters, py: numOpt.py, pym: numOpt.pym });
   });
 }
 function nameHint(id, hid, emptyText){
@@ -4443,7 +4493,7 @@ function nameHint(id, hid, emptyText){
     if (current) { calcNums(); refreshInfo(); applyNames(); draw(); }
   });
 });
-[['n_lp', 'lp'], ['n_ms', 'masters'], ['n_py', 'py']].forEach(function(x){
+[['n_lp', 'lp'], ['n_ms', 'masters'], ['n_py', 'py'], ['n_pym', 'pym']].forEach(function(x){
   document.querySelectorAll('input[name=' + x[0] + ']').forEach(function(r){
     r.checked = r.value === numOpt[x[1]];
     r.addEventListener('change', function(){ numOpt[x[1]] = r.value; store.set('num', numOpt); if (current) { calcNums(); draw(); } });
@@ -4494,8 +4544,9 @@ function renderNumCycle(nr){
   h += ntile('今月<br><small>' + nT('パーソナルマンスナンバー', 'パーソナルマンス') + '</small>', { n: t.pm, steps: TODAY.m + '月' }, { raw: true });
   h += ntile('今日<br><small>' + nT('パーソナルデイナンバー', 'パーソナルデイ') + '</small>', { n: t.pd, steps: TODAY.m + '/' + TODAY.d }, { raw: true });
   h += '</div><div class="ncycle" aria-label="9年周期の今の位置">';
-  for (var k = 1; k <= 9; k++) h += '<span' + (k === t.py ? ' class="on"' : '') + '>' + k + '</span>';
-  h += '</div><p class="note" style="margin-top:2px">' + nT('9年周期') + 'の ' + t.py + '年目です。</p>';
+  var cyc = NUMR.cycleOf(t.py);
+  for (var k = 1; k <= 9; k++) h += '<span' + (k === cyc ? ' class="on"' : '') + '>' + k + '</span>';
+  h += '</div><p class="note" style="margin-top:2px">' + nT('9年周期') + 'の ' + cyc + '年目です' + (t.py > 9 ? '（今年は ' + t.py + '。' + cyc + ' の年の性質をより強く持つマスターナンバーの年）' : '') + '。</p>';
   // 年ごと
   h += '<h3 style="font-size:13px;margin:14px 0 6px">年ごと</h3>' + nnav(nun.from + '〜' + (nun.from + 11) + '年');
   h += '<div style="overflow-x:auto"><table class="daiun"><tr><th>年</th><th>年齢</th><th>イヤー</th><th>テーマ</th><th>時期</th></tr>';
@@ -4514,7 +4565,7 @@ function renderNumCycle(nr){
     cells += '<td' + (m === TODAY.m ? ' class="now"' : '') + '><span class="nnum">' + nGl(pm) + '</span></td>';
   }
   h += '</tr><tr><th>マンス</th>' + cells + '</tr></table></div>';
-  return h + '<p class="note">パーソナルイヤーは「その年の西暦＋誕生月＋誕生日」の数字をすべて足して1桁にした数で、' + (nr.opt.py === 'birthday' ? 'その年の誕生日' : '1月1日') + 'で切り替えます（詳細設定で変えられます）。年齢はその年の誕生日を迎えたときの満年齢。マンスはイヤー＋月、デイはマンス＋日です' + (nr.opt.py === 'birthday' ? '（月ごとの表は各月1日の時点）' : '') + '。</p>';
+  return h + '<p class="note">パーソナルイヤーは「その年の西暦＋誕生月＋誕生日」の数字をすべて足して1桁にした数' + (nr.opt.pym === 'off' ? '' : '（途中で 11・22 になったら残す。詳細設定で1桁にもできます）') + 'で、' + (nr.opt.py === 'birthday' ? 'その年の誕生日' : '1月1日') + 'で切り替えます（詳細設定で変えられます）。年齢はその年の誕生日を迎えたときの満年齢。マンスはイヤー＋月、デイはマンス＋日です' + (nr.opt.py === 'birthday' ? '（月ごとの表は各月1日の時点）' : '') + '。</p>';
 }
 document.getElementById('result').addEventListener('click', function(e){
   var b = e.target.closest('[data-nun]');
@@ -4527,10 +4578,39 @@ document.getElementById('result').addEventListener('click', function(e){
   if (nb) nb.focus();
 });
 
+// ---- 運気のピラミッド（ピナクルとチャレンジを図で。2026-11-27 数秘術の術者の依頼） ----
+function renderNumPyramid(nr){
+  var age = nAge(nr), cur = NUMR.periodAt(nr, age), P = nr.periods, q = nr.parts, by = nr.birth.y;
+  var N = { m:[50,215], d:[180,215], y:[310,215], p1:[115,160], p2:[245,160], p3:[180,100], p4:[180,38], c1:[115,268], c2:[245,268], c3:[180,318], c4:[180,365] };
+  var ln = function(a, b, cls){ return '<line x1="' + N[a][0] + '" y1="' + N[a][1] + '" x2="' + N[b][0] + '" y2="' + N[b][1] + '" class="' + (cls || '') + '"/>'; };
+  var h = '<svg class="npyr" viewBox="-75 0 510 392" role="img" aria-label="運気のピラミッド：上がピナクル（時期ごとの運気）、下がチャレンジ（時期ごとの課題）">';
+  h += ln('m','p1') + ln('d','p1') + ln('d','p2') + ln('y','p2') + ln('p1','p3') + ln('p2','p3') + ln('m','p4','o') + ln('y','p4','o') + ln('p3','p4','o');
+  h += ln('m','c1','c') + ln('d','c1','c') + ln('d','c2','c') + ln('y','c2','c') + ln('c1','c3','c') + ln('c2','c3','c') + ln('m','c4','c o') + ln('y','c4','c o');
+  var node = function(k, n, r, cls, lab, side){
+    var x = N[k][0], y = N[k][1];
+    var t = '<g class="' + cls + '"><circle cx="' + x + '" cy="' + y + '" r="' + r + '"/><text x="' + x + '" y="' + (y + 1) + '" class="nv">' + n + '</text></g>';
+    if (lab) {
+      var lx = side === 'l' ? x - r - 6 : x + r + 6, an = side === 'l' ? 'end' : 'start';
+      t += '<text x="' + lx + '" y="' + (y - 4) + '" text-anchor="' + an + '" class="lb">' + lab[0] + '</text><text x="' + lx + '" y="' + (y + 11) + '" text-anchor="' + an + '" class="sb">' + lab[1] + '</text>';
+    }
+    return t;
+  };
+  var per = function(i){ var p = P[i]; return [ '第' + (i + 1) + '期' + (i === cur ? '（今）' : ''), p.from + '〜' + (p.to == null ? '' : p.to + '歳') + '（' + (by + p.from) + '〜）' ]; };
+  h += node('m', q.m, 15, 'base', ['月', ''], 'l') + node('d', q.d, 15, 'base', null) + node('y', q.y, 15, 'base', ['年', ''], 'r');
+  h += '<text x="180" y="244" text-anchor="middle" class="lb">日</text>';
+  h += node('p1', P[0].pinnacle, 21, 'pin' + (cur === 0 ? ' now' : ''), per(0), 'l');
+  h += node('p2', P[1].pinnacle, 21, 'pin' + (cur === 1 ? ' now' : ''), per(1), 'r');
+  h += node('p3', P[2].pinnacle, 21, 'pin' + (cur === 2 ? ' now' : ''), per(2), 'r');
+  h += node('p4', P[3].pinnacle, 21, 'pin' + (cur === 3 ? ' now' : ''), per(3), 'r');
+  for (var i = 0; i < 4; i++) h += node('c' + (i + 1), P[i].challenge, 15, 'chal' + (cur === i ? ' now' : ''), ['課題' + (i + 1), '第' + (i + 1) + '期'], i === 0 ? 'l' : 'r');
+  h += '</svg>';
+  return '<h3 style="font-size:13px;margin:4px 0 2px">運気のピラミッド</h3>' + h +
+    '<p class="note" style="margin-top:0">真ん中の段は生まれた月・日・年（それぞれ1桁にした数）。上向きの三角が' + nT('ピナクルナンバー', 'ピナクル') + 'で、第1期・第2期から第3期、頂上の第4期へと、人生の時期ごとの運気のテーマが積み上がっていきます。下向きの三角は同じ時期の課題（' + nT('チャレンジナンバー', 'チャレンジ') + '）。色の付いた丸が今の時期です。</p>';
+}
 // ---- ピナクル・チャレンジ（4つの時期） ----
 function renderNumPeriod(nr){
   var age = nAge(nr), cur = NUMR.periodAt(nr, age), by = nr.birth.y;
-  var h = '<h2>ピナクル・チャレンジ <small>人生の4つの時期</small></h2>';
+  var h = '<h2>ピナクル・チャレンジ <small>人生の4つの時期</small></h2>' + renderNumPyramid(nr);
   h += '<div style="overflow-x:auto"><table class="daiun"><tr><th>時期</th><th>年齢<br><small>西暦</small></th><th>' + nT('ピナクルナンバー', 'ピナクル') + '</th><th>' + nT('チャレンジナンバー', 'チャレンジ') + '</th></tr>';
   nr.periods.forEach(function(p, i){
     var now = i === cur;
@@ -4629,7 +4709,7 @@ function numYomi(id, nr, pi){
     h += kaiItem('今年 ' + t.py + '「' + esc(nTitle(t.py)) + '」', '', esc(NUMR.NUM[t.py].year));
     h += kaiItem('今月 ' + t.pm + '「' + esc(nTitle(t.pm)) + '」', '', 'キーワードは ' + esc(NUMR.NUM[t.pm].kw) + '。');
     h += kaiItem('今日 ' + t.pd + '「' + esc(nTitle(t.pd)) + '」', '', 'キーワードは ' + esc(NUMR.NUM[t.pd].kw) + '。');
-    var nx = t.py === 9 ? 1 : t.py + 1;
+    var nx = NUMR.cycleOf(t.py) === 9 ? 1 : NUMR.cycleOf(t.py) + 1;
     h += kaiItem('来年は ' + nx, '', esc(NUMR.NUM[nx].year));
   }
   if (id === 'n_period') {
@@ -5238,7 +5318,7 @@ document.getElementById('result').addEventListener('input', function(e){
 
 // ==================== ホロスコープ ====================
 var HO = window.Horoscope;
-var HO_DEFAULT = { house: 'placidus', node: 'mean', orb: 'std', minor: 'off' };
+var HO_DEFAULT = { house: 'placidus', node: 'mean', orb: 'std', minor: 'off', wheel: '1', outer: 'transit', tdate: '' };   // wheel・outer・tdate は図のカードの中で切り替える（2026-11-27）
 var hoOpt = Object.assign({}, HO_DEFAULT, store.get('horo', {}));
 [['h_house', 'house'], ['h_node', 'node'], ['h_orb', 'orb'], ['h_minor', 'minor']].forEach(function(x){
   document.querySelectorAll('input[name=' + x[0] + ']').forEach(function(r){
@@ -5279,8 +5359,9 @@ function hHead(r){
 // ---- チャート図 ----
 function hChartSvg(r, o){
   o = o || {};
-  var S0 = 520, C = S0 / 2, R1 = 250, R2 = 214, R3 = 186, RP = 168, RI = 92;
-  var base = r.known ? r.houses.asc : 0;
+  var rings = o.rings || [], RW = 40;   // 二重円・三重円：黄道の輪の外に1本ずつ輪を足す
+  var R1 = 250, R2 = 214, R3 = 186, RP = 168, RI = 92, RO = R1 + RW * rings.length, S0 = 2 * (RO + 12), C = S0 / 2;
+  var base = r.hasHouses ? (r.houses.method === 'solar' ? r.houses.cusps[1] : r.houses.asc) : 0;   // ソーラーハウスは1室（太陽のサインの0度）を左に
   var ang = function(lon){ return (180 + lon - base) * Math.PI / 180; };
   var xy = function(lon, rad){ var a = ang(lon); return [C + rad * Math.cos(a), C - rad * Math.sin(a)]; };
   var f = function(n){ return Math.round(n * 10) / 10; };
@@ -5297,7 +5378,7 @@ function hChartSvg(r, o){
   for (var d = 0; d < 360; d += 5) s += line(d, R2, R2 - (d % 10 ? 4 : 7), 'hl');
   s += '<circle cx="' + C + '" cy="' + C + '" r="' + R2 + '" class="hl" fill="none"/><circle cx="' + C + '" cy="' + C + '" r="' + RI + '" class="hl" fill="none"/>';
   // ハウス
-  if (r.known) {
+  if (r.hasHouses) {
     var cu = r.houses.cusps;
     for (var n = 1; n <= 12; n++) {
       var ax = n === 1 || n === 4 || n === 7 || n === 10;
@@ -5324,7 +5405,35 @@ function hChartSvg(r, o){
   });
   // ASC・MC の札
   if (r.known) [['ASC', r.houses.asc], ['MC', r.houses.mc]].forEach(function(x){ var lb = xy(x[1], R2 - 16); s += '<text x="' + f(lb[0]) + '" y="' + f(lb[1]) + '" class="hax-l">' + x[0] + '</text>'; });
-  // アスペクト線
+  // 外側の輪（二重円・三重円）
+  rings.forEach(function(rg, k){
+    var ri = R1 + RW * k, ro = ri + RW, mid = (ri + ro) / 2;
+    s += '<circle cx="' + C + '" cy="' + C + '" r="' + ro + '" class="hl" fill="none"/>';
+    var q = rg.planets.map(function(p){ return { p: p, a: p.lon }; }).sort(function(x, y){ return x.a - y.a; });
+    var gapMin = 7 * 250 / mid;
+    for (var it2 = 0; it2 < 30; it2++) {
+      var mv = false;
+      for (var k2 = 0; k2 < q.length; k2++) {
+        var c2 = q[k2], n2 = q[(k2 + 1) % q.length], gp = HO.norm(n2.a - c2.a);
+        if (q.length > 1 && gp < gapMin) { c2.a = HO.norm(c2.a - (gapMin - gp) / 2); n2.a = HO.norm(n2.a + (gapMin - gp) / 2); mv = true; }
+      }
+      if (!mv) break;
+    }
+    q.forEach(function(x){
+      var p = x.p, g3 = xy(x.a, mid + 6), d3 = xy(x.a, mid - 11);
+      s += line(p.lon, ri, ri + 6, 'hpt hr' + (k + 1)) + line(p.lon, ri + 6, mid - 18, 'hl hthin');
+      s += '<text x="' + f(g3[0]) + '" y="' + f(g3[1]) + '" class="hpg hr' + (k + 1) + '"><title>' + rg.label + '：' + HO.PLANETS[p.id][0] + ' ' + HO.SIGNS[p.sign][0] + ' ' + hDeg(p).replace('′', '分') + (p.retro ? '（逆行）' : '') + '</title>' + hGlyph(p.id) + '</text>';
+      s += '<text x="' + f(d3[0]) + '" y="' + f(d3[1]) + '" class="hdl hr' + (k + 1) + '">' + Math.floor(p.deg) + (p.retro ? 'R' : '') + '</text>';
+    });
+  });
+  // アスペクト線（二重円では内側と外側の天体どうし）
+  if (o.cross) {
+    o.cross.forEach(function(x){
+      var p = xy(x.a.lon, RI - 2), q2 = xy(x.b.lon, RI - 2);
+      s += '<line x1="' + f(p[0]) + '" y1="' + f(p[1]) + '" x2="' + f(q2[0]) + '" y2="' + f(q2[1]) + '" class="ha ha-' + x.asp.kind + (x.asp.major ? '' : ' minor') + '"><title>' + HO.PLANETS[x.a.id][0] + ' ' + x.asp.name + ' ' + (o.crossLabel || '') + 'の' + HO.PLANETS[x.b.id][0] + '</title></line>';
+    });
+    return s + '</svg>';
+  }
   HO.aspects(r.planets.concat(r.angles), null, { orb: hoOpt.orb, minor: hoOpt.minor === 'on' }).forEach(function(x){
     if (x.asp.angle === 0) return;
     var p = xy(x.a.lon, RI - 2), q = xy(x.b.lon, RI - 2);
@@ -5332,19 +5441,79 @@ function hChartSvg(r, o){
   });
   return s + '</svg>';
 }
-function renderHoChart(r){
+// 二重円・三重円の外側（トランジット・プログレス・相手）
+function hTarget(){ var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(hoOpt.tdate || ''); return m ? { y: +m[1], m: +m[2], d: +m[3], today: false } : { y: TODAY.y, m: TODAY.m, d: TODAY.d, today: true }; }
+function hSignDeg(pl){ pl.forEach(function(p){ p.sign = Math.floor(p.lon / 30); p.deg = p.lon - p.sign * 30; }); return pl; }
+function hTransitAt(t){ return HO.transit(t.today ? Date.now() : Date.UTC(t.y, t.m - 1, t.d, 3, 0), hoOpt.node); }   // 日付を選んだときはその日の正午（日本時間）
+function hProgAt(r, t){   // 二次進行法（1日＝1年）。生まれてからの年数の分だけ、生まれた瞬間から日を進めた天体
+  var tu = HO.utOf(t.y, t.m, t.d, 12, 0, 9), years = (tu - r.ut) / 365.2422;
+  return hSignDeg(HO.planetsAt(r.ut + years, hoOpt.node));
+}
+function hRings(r, pi){
+  var t = hTarget(), tl = t.today ? '今' : t.y + '/' + t.m + '/' + t.d, w = hoOpt.wheel, out = hoOpt.outer;
+  var other = people[pi ? 0 : 1], oh = other && other.ho && !other.ho.error ? other.ho : null;
+  if (w === '2' && out === 'partner' && !oh) out = 'transit';
+  if (w === '2') {
+    if (out === 'partner') return [{ label: esc(other.name), planets: oh.planets, key: 'partner' }];
+    if (out === 'prog') return [{ label: 'プログレス（' + tl + '）', planets: hProgAt(r, t), key: 'prog' }];
+    return [{ label: 'トランジット（' + tl + '）', planets: hTransitAt(t), key: 'transit' }];
+  }
+  if (w === '3') return [{ label: 'プログレス（' + tl + '）', planets: hProgAt(r, t), key: 'prog' }, { label: 'トランジット（' + tl + '）', planets: hTransitAt(t), key: 'transit' }];
+  return [];
+}
+function renderHoChart(r, pi){
   if (r.error) return '<h2>ホロスコープ</h2>' + hErr(r);
   var h = '<h2>ホロスコープ <small>' + hHead(r) + '</small></h2>';
-  h += '<div class="hwrap">' + hChartSvg(r) + '</div>';
+  var rings = hRings(r, pi || 0), w = hoOpt.wheel, t = hTarget();
+  var other = people[pi ? 0 : 1], hasP = !!(other && other.ho && !other.ho.error);
+  h += '<div class="hwheel"><div class="gtabs" role="group" aria-label="円の数">' + [['1', '一重円'], ['2', '二重円'], ['3', '三重円']].map(function(x){ return '<button type="button" data-hw="' + x[0] + '" aria-pressed="' + (w === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>';
+  if (w === '2') h += '<div class="gtabs" role="group" aria-label="外側の円">' + [['transit', 'トランジット'], ['prog', 'プログレス']].concat(hasP ? [['partner', '相手（' + esc(other.name) + '）']] : []).map(function(x){ return '<button type="button" data-hwo="' + x[0] + '" aria-pressed="' + (rings[0].key === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>';
+  if (w !== '1' && !(w === '2' && rings[0].key === 'partner')) h += '<label class="hwdate">日付 <input type="date" data-hwd value="' + (hoOpt.tdate || '') + '"> <button type="button" class="linkbtn" data-hwd0="1">今日</button></label>';
+  h += '</div>';
+  var cross = null;
+  if (rings.length === 1) cross = HO.aspects(r.planets.concat(r.angles), rings[0].planets.filter(function(p){ return rings[0].key !== 'transit' || p.id !== 'moon'; }), { orb: hoOpt.orb, minor: false, scale: rings[0].key === 'partner' ? 0.75 : 0.4 });
+  h += '<div class="hwrap' + (rings.length ? ' multi' : '') + '">' + hChartSvg(r, { rings: rings, cross: cross, crossLabel: rings[0] && rings[0].label }) + '</div>';
+  if (rings.length) {
+    h += '<p class="hlegend"><span><i class="hk0"></i>内側：生まれたとき（' + hT('ネイタル') + '）</span>' + rings.map(function(rg, k){ return '<span><i class="hk' + (k + 1) + '"></i>' + (rings.length === 2 && !k ? '中：' : '外側：') + rg.label + '</span>'; }).join('') + '</p>';
+    if (cross && cross.length) {
+      h += '<h3 class="hh3">内側と外側の主な角度</h3><dl class="kv hasl">';
+      cross.slice(0, 10).forEach(function(x){ h += '<dt>生まれの' + hPl(x.a.id) + ' ' + hAsp(x.asp) + ' ' + rings[0].label.replace(/（.*）$/, '') + 'の' + hPl(x.b.id) + '</dt><dd>' + x.asp.name + '・ずれ ' + x.orb.toFixed(1) + '°</dd>'; });
+      h += '</dl>';
+    }
+  }
   h += hNotes(r);
-  return h + '<p class="note">' + (r.known ? '左の横線が ' + hT('ASC') + '（東の地平線）、上の線が ' + hT('MC') + '。ハウスは' + HO.HOUSE_SYS[r.houses.method] + '式' : '出生時刻がないので、牡羊座の0度を左に置いています') + '。中の線は' + hT('アスペクト') + '（青＝調和、赤＝緊張）。天体の横の数字はサインの中の度数、R は' + hT('逆行') + '。</p>';
+  var nt = (r.hasHouses && r.houses.method === 'solar' ? hT('ソーラーハウス') + '（太陽のサインを1室）で、1室の始まりを左に置いています' + (r.known ? '。ASC・MC は札で示しています' : '') : r.known ? '左の横線が ' + hT('ASC') + '（東の地平線）、上の線が ' + hT('MC') + '。ハウスは' + HO.HOUSE_SYS[r.houses.method] + '式' : '出生時刻がないので、牡羊座の0度を左に置いています') + '。天体の横の数字はサインの中の度数、R は' + hT('逆行') + '。';
+  if (!rings.length) nt += '中の線は' + hT('アスペクト') + '（青＝調和、赤＝緊張）。';
+  else if (rings.length === 1) nt += '中の線は内側と外側の天体が作る主な' + hT('アスペクト') + '（青＝調和、赤＝緊張。オーブは狭め）。';
+  else nt += '中の線は生まれたときの天体どうしの' + hT('アスペクト') + '。';
+  if (rings.some(function(x){ return x.key === 'prog'; })) nt += 'プログレスは二次進行法（生まれてからの1日を人生の1年とみなす）で、天体だけを進めています（ASC・MC は進めていません）。';
+  if (rings.some(function(x){ return x.key === 'transit'; })) nt += 'トランジットは' + (t.today ? '今この時点' : '選んだ日の正午（日本時間）') + 'の天体です。';
+  return h + '<p class="note">' + nt + '</p>';
+}
+document.getElementById('result').addEventListener('click', function(e){
+  var b = e.target.closest('[data-hw],[data-hwo],[data-hwd0]');
+  if (!b || !current) return;
+  var sel;
+  if (b.dataset.hw) { hoOpt.wheel = b.dataset.hw; sel = '[data-hw="' + b.dataset.hw + '"]'; }
+  else if (b.dataset.hwo) { hoOpt.outer = b.dataset.hwo; sel = '[data-hwo="' + b.dataset.hwo + '"]'; }
+  else { hoOpt.tdate = ''; sel = '[data-hwd]'; }
+  store.set('horo', hoOpt); hRedraw(sel);
+});
+document.getElementById('result').addEventListener('change', function(e){
+  if (!e.target.matches('[data-hwd]') || !current) return;
+  hoOpt.tdate = /^\d{4}-\d{2}-\d{2}$/.test(e.target.value) ? e.target.value : ''; store.set('horo', hoOpt); hRedraw('[data-hwd]');
+});
+function hRedraw(sel){
+  var s = byId('h_chart');
+  document.querySelectorAll('#result section[data-sec="h_chart"]').forEach(function(x){ x.innerHTML = cardInner(s, +x.dataset.p); autoGloss(x); });
+  var nb = sel && document.querySelector('#result section[data-sec="h_chart"] ' + sel); if (nb) nb.focus();
 }
 // ---- 天体の位置 ----
 function renderHoPlanets(r){
   if (r.error) return '<h2>天体の位置</h2>' + hErr(r);
   var h = '<h2>天体の位置 <small>' + hHead(r) + '</small></h2><div style="overflow-x:auto"><table class="daiun htab"><tr><th>天体</th><th>サイン</th><th>度数</th>' + (r.known ? '<th>ハウス</th>' : '') + '<th></th></tr>';
   r.points.forEach(function(p){
-    h += '<tr><td class="hn">' + hPl(p.id) + '</td><td>' + hSg(p.sign) + '</td><td>' + hDeg(p) + '</td>' + (r.known ? '<td>' + (p.house ? hHs(p.house) : '') + '</td>' : '') + '<td>' + (p.retro ? '<span class="tag alert">' + hT('逆行') + '</span>' : '') + '</td></tr>';
+    h += '<tr><td class="hn">' + hPl(p.id) + '</td><td>' + hSg(p.sign) + '</td><td>' + hDeg(p) + '</td>' + (r.hasHouses ? '<td>' + (p.house ? hHs(p.house) : '') + '</td>' : '') + '<td>' + (p.retro ? '<span class="tag alert">' + hT('逆行') + '</span>' : '') + '</td></tr>';
   });
   h += '</table></div>';
   return h + '<p class="note">サインは春分点を牡羊座0度とする方式（トロピカル）。' + hT('ドラゴンヘッド') + 'は' + (hoOpt.node === 'true' ? '実際の位置（トゥルー）' : '平均の位置（ミーン）') + 'です（詳細設定で変えられます）。度数は分の単位で切り捨て。</p>';
@@ -5352,10 +5521,10 @@ function renderHoPlanets(r){
 // ---- ハウス ----
 function renderHoHouses(r){
   if (r.error) return '<h2>ハウス</h2>' + hErr(r);
-  var h = '<h2>' + hT('ハウス') + ' <small>' + (r.known ? HO.HOUSE_SYS[r.houses.method] + '式' : '出生時刻が必要') + '</small></h2>';
-  if (!r.known) return h + '<p class="empty">ハウス・ASC・MC は出生時刻（と出生地）を入れると出ます。</p>';
+  var h = '<h2>' + hT('ハウス') + ' <small>' + (r.hasHouses ? HO.HOUSE_SYS[r.houses.method] + (r.houses.method === 'solar' ? '' : '式') : '出生時刻が必要') + '</small></h2>';
+  if (!r.hasHouses) return h + '<p class="empty">ハウス・ASC・MC は出生時刻（と出生地）を入れると出ます。時刻が分からないときは、詳細設定で' + hT('ソーラーハウス') + 'にするとハウスを出せます。</p>';
   var A = r.angles[0], M = r.angles[1];
-  h += '<div class="ntiles"><div class="ntile main"><div class="lb">' + hT('ASC') + '</div><div class="nv" style="font-size:20px">' + hSg(A.sign) + '</div><div class="st">' + hDeg(A) + '</div></div>' +
+  if (r.known) h += '<div class="ntiles"><div class="ntile main"><div class="lb">' + hT('ASC') + '</div><div class="nv" style="font-size:20px">' + hSg(A.sign) + '</div><div class="st">' + hDeg(A) + '</div></div>' +
        '<div class="ntile"><div class="lb">' + hT('MC') + '</div><div class="nv" style="font-size:20px">' + hSg(M.sign) + '</div><div class="st">' + hDeg(M) + '</div></div></div>';
   h += '<div style="overflow-x:auto;margin-top:10px"><table class="daiun htab"><tr><th>ハウス</th><th>' + hT('カスプ') + '</th><th>入っている天体</th><th>テーマ</th></tr>';
   for (var n = 1; n <= 12; n++) {
@@ -5364,7 +5533,7 @@ function renderHoHouses(r){
     h += '<tr><td>' + hHs(n) + '</td><td>' + hPos(cp) + '</td><td class="hg">' + (inside || '—') + '</td><td class="hsub">' + esc(HO.HOUSES[n][1]) + '</td></tr>';
   }
   h += '</table></div>';
-  return h + hNotes({ warnings: r.warnings, notes: [] }) + '<p class="note">' + hT('ハウス方式') + 'は詳細設定で選べます（プラシーダス・コッホ・イコール・ホールサイン）。出生時刻が数分ずれると、ASC やカスプは1度前後動きます。</p>';
+  return h + hNotes({ warnings: r.warnings, notes: [] }) + '<p class="note">' + hT('ハウス方式') + 'は詳細設定で選べます（プラシーダス・コッホ・イコール・ホールサイン・ソーラーハウス）。' + (r.houses.method === 'solar' ? 'ソーラーハウスは太陽のあるサインを1室とし、サインの0度をカスプにしています（出生時刻が無くても出せます）。' : '出生時刻が数分ずれると、ASC やカスプは1度前後動きます。') + '</p>';
 }
 // ---- アスペクト ----
 function hAspList(r){ return HO.aspects(r.planets.concat(r.angles), null, { orb: hoOpt.orb, minor: hoOpt.minor === 'on' }); }
@@ -5414,9 +5583,9 @@ function renderHoTransit(r){
   if (r.error) return '<h2>今の天体</h2>' + hErr(r);
   var now = new Date(), tr = HO.transit(now.getTime(), hoOpt.node);
   var h = '<h2>今の天体 <small>' + hT('トランジット') + '・' + (now.getMonth() + 1) + '/' + now.getDate() + ' ' + now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes() + '</small></h2>';
-  h += '<div style="overflow-x:auto"><table class="daiun htab"><tr><th>天体</th><th>今の位置</th>' + (r.known ? '<th>あなたの</th>' : '') + '<th></th></tr>';
+  h += '<div style="overflow-x:auto"><table class="daiun htab"><tr><th>天体</th><th>今の位置</th>' + (r.hasHouses ? '<th>あなたの</th>' : '') + '<th></th></tr>';
   tr.forEach(function(p){
-    h += '<tr><td class="hn">' + hPl(p.id) + '</td><td>' + hPos(p) + '</td>' + (r.known ? '<td>' + hHs(HO.houseOf(p.lon, r.houses.cusps)) + '</td>' : '') + '<td>' + (p.retro ? '<span class="tag alert">逆行</span>' : '') + '</td></tr>';
+    h += '<tr><td class="hn">' + hPl(p.id) + '</td><td>' + hPos(p) + '</td>' + (r.hasHouses ? '<td>' + hHs(HO.houseOf(p.lon, r.houses.cusps)) + '</td>' : '') + '<td>' + (p.retro ? '<span class="tag alert">逆行</span>' : '') + '</td></tr>';
   });
   h += '</table></div>';
   var list = HO.aspects(tr.filter(function(p){ return p.id !== 'moon'; }), r.planets.concat(r.angles), { orb: hoOpt.orb, minor: false, scale: 0.3 });
@@ -5934,6 +6103,14 @@ setSys(store.get('sys', 'sanmei'), true);
 drawChips();
 fromHash();
 window.addEventListener('hashchange', fromHash);
+// 鑑定書（kantei.js）に渡す窓口。変わる値はその都度読む
+window.MeishikiApp = {
+  SECTIONS: SECTIONS, SYS_TEXT: SYS_TEXT, store: store, ACCENTS: ACCENTS, TA: TA,
+  cardInner: cardInner, sysOf: sysOf, byId: byId, refreshInfo: function(){ if (current && !current.seimeiOnly) { refreshInfo(); applyNames(); } }, dispName: dispName, seHasName: seHasName, timg: timg,
+  current: function(){ return current; }, people: function(){ return people; }, sys: function(){ return SYS; },
+  order: function(){ return order; }, visible: function(){ return visible; }, cfg: function(){ return cfg; },
+  tst: function(){ return tst; }, tcfg: function(){ return tcfg; }
+};
 })();
 </script>
 <script>
@@ -6152,7 +6329,412 @@ function toggleRec(){
   draw();
 }
 function alertBox(msg){ var b = panel.querySelector('.mbody'); if (b) b.insertAdjacentHTML('afterbegin', '<div class="warnbox">' + esc(msg) + '</div>'); }
-window.MeishikiMemo = { suggest: suggest, sugg: function(){ return sugg; }, asText: asText };
+window.MeishikiMemo = { suggest: suggest, sugg: function(){ return sugg; }, asText: asText,
+  data: function(){ return { fields: parseFields().map(function(f){ return f.name; }), values: memo.values, notes: memo.notes }; } };   // 鑑定書（kantei.js）が読む
+})();
+
+</script>
+<script>
+/* ---- kantei.js ---- */
+/* 鑑定書（2026-11-27 本人依頼）。全ビルドに入る。
+ * 出した命式のカードを占術・項目ごとに選び（占術をまぜてよい）、読み解き・鑑定者の所見・鑑定メモ・タロットと合わせて
+ * A4 の鑑定書にする。入りきらない分は次のページへ送る（表は行の途中で分け、見出しを付け直す）。
+ * 印刷（PDF に保存）か、1ファイルの HTML で保存。内容はこのブラウザの中だけで作り、どこにも送らない。
+ * index.html の本体が用意する window.MeishikiApp（命式・カードの描き方・設定）を使うので、本体より後に読み込む。
+ */
+(function(){
+'use strict';
+var A = window.MeishikiApp;
+if (!A) return;
+var SECTIONS = A.SECTIONS, SYS_TEXT = A.SYS_TEXT, store = A.store, ACCENTS = A.ACCENTS, TA = A.TA;
+var cardInner = A.cardInner, sysOf = A.sysOf, byId = A.byId, dispName = A.dispName, seHasName = A.seHasName, timg = A.timg;
+var KEY = 'kdoc';
+var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+var para = function(t){ return String(t || '').trim().split(/\n\s*\n/).map(function(p){ return '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>'; }).join(''); };
+var $ = function(sel, root){ return (root || document).querySelector(sel); };
+var DEF = { title: '鑑定書', client: '', date: '', author: '', topic: '', intro: '', outro: '', sel: null, cmt: {}, who: 'both', yomi: true, memo: true, notes: false, tarot: false, cover: false, groups: null };
+var st = Object.assign({}, DEF, store.get(KEY, {}));
+function save(){ store.set(KEY, st); }
+
+// ---- 見た目 ----
+var css = document.createElement('style');
+css.id = 'kdocCss';
+css.textContent = [
+  '#kdoc{position:fixed; inset:0; z-index:70; background:var(--bg); display:none; grid-template-columns:minmax(300px, 380px) minmax(0, 1fr); grid-template-rows:auto minmax(0, 1fr)}',
+  'body.kopen #kdoc{display:grid} body.kopen{overflow:hidden}',
+  '#kdoc .ktop{grid-column:1/-1; display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:8px 12px; border-bottom:1px solid var(--line); background:var(--paper)}',
+  '#kdoc .ktop b{font-size:16px; margin-right:auto}',
+  '#kdoc .kb{font:inherit; font-size:13px; padding:7px 12px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer; white-space:nowrap}',
+  '#kdoc .kb.pri{background:var(--accent); color:var(--paper); border-color:var(--accent); font-weight:600}',
+  '#kdoc .kside{min-width:0; overflow:auto; padding:12px; border-right:1px solid var(--line); background:var(--paper); display:flex; flex-direction:column; gap:12px}',
+  '#kdoc .kside > *{flex-shrink:0}',
+  '#kdoc .kside h3{font-size:13px; margin:6px 0 0; color:var(--sub)}',
+  '#kdoc .kf label{display:block; font-size:12px; color:var(--sub); margin-bottom:3px}',
+  '#kdoc .kf input[type=text], #kdoc .kf input[type=date], #kdoc textarea{font:inherit; font-size:15px; width:100%; box-sizing:border-box; padding:6px 9px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink)}',
+  '#kdoc .kchk{display:flex; align-items:center; gap:6px; font-size:14px; cursor:pointer}',
+  '#kdoc .kgrpbox{border:1px solid var(--line); border-radius:10px; padding:6px 10px 8px; background:var(--bg)}',
+  '#kdoc .kgrpbox summary{cursor:pointer; font-weight:600; font-size:14px; display:flex; align-items:center; gap:6px}',
+  '#kdoc .kgrpbox summary .cnt{font-weight:400; font-size:12px; color:var(--sub); margin-right:auto}',
+  '#kdoc .kgrpbox summary button{font:inherit; font-size:11px; padding:1px 7px; border-radius:6px; border:1px solid var(--line); background:var(--paper); color:var(--ink); cursor:pointer}',
+  '#kdoc .kitem{margin-top:6px}',
+  '#kdoc .kitem textarea{font-size:13px; margin-top:3px}',
+  '#kdoc .kseg{display:flex; gap:4px; flex-wrap:wrap}',
+  '#kdoc .kseg label{font-size:13px; padding:4px 10px; border:1px solid var(--line); border-radius:999px; cursor:pointer}',
+  '#kdoc .kseg input{display:none} #kdoc .kseg input:checked + span{color:var(--accent); font-weight:700}',
+  '#kdoc .knote2{font-size:11px; color:var(--sub); margin:0}',
+  '#kprev{min-width:0; overflow:auto; padding:16px 12px 40px; background:color-mix(in srgb, var(--ink) 8%, var(--bg))}',
+  '#kpagesBox{margin:0 auto; position:relative; overflow:hidden}',
+  '#kpages{transform-origin:top left; display:flex; flex-direction:column; gap:14px; width:210mm}',
+  '#kprev .kinfo{font-size:12px; color:var(--sub); text-align:center; margin:0 0 10px}',
+  /* ページ（画面の色に関係なく、白い紙に印刷する前提の色） */
+  '.kpage{--bg:#f7f5f0; --paper:#ffffff; --ink:#1f2430; --sub:#5d6472; --line:#d9d2c3; --gold:#a8812f; --warn:#8a4b12; --warn-bg:#fbf0e1;',
+  '  width:210mm; height:297mm; box-sizing:border-box; padding:14mm 14mm 17mm; position:relative; background:#fff; color:var(--ink); box-shadow:0 2px 12px rgba(0,0,0,.18); font-size:13px; line-height:1.6; color-scheme:light; -webkit-print-color-adjust:exact; print-color-adjust:exact}',
+  '.kpage .kbody{height:100%; overflow:hidden}',
+  '.kpage .kfoot{position:absolute; left:14mm; right:14mm; bottom:7mm; display:flex; justify-content:space-between; font-size:10px; color:var(--sub); border-top:1px solid var(--line); padding-top:2mm}',
+  '.kpage .kcover{text-align:center; padding:8mm 0 6mm; border-bottom:2px solid var(--accent); margin-bottom:6mm}',
+  '.kpage .kcover.full{height:100%; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; border:0; margin:0}',
+  '.kpage .kcover h1{font-size:30px; letter-spacing:.3em; margin:0 0 6mm; color:var(--accent); font-family:"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP",serif}',
+  '.kpage .kcover .kclient{font-size:22px; margin:0 0 3mm; font-family:"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP",serif}',
+  '.kpage .kcover .ktopic{font-size:14px; margin:0 0 4mm}',
+  '.kpage .kcover .kmeta{font-size:12px; color:var(--sub)}',
+  '.kpage .kgrp{font-size:17px; color:var(--accent); border-left:5px solid var(--accent); padding:1px 0 1px 9px; margin:5mm 0 3mm}',
+  '.kpage .kmsg{margin:0 0 5mm} .kpage .kmsg h2, .kpage .kmemo h2, .kpage .ktarot h2{font-size:16px; margin:0 0 2mm; color:var(--accent)}',
+  '.kpage .kmsg p{margin:0 0 2mm}',
+  '.kpage .card{box-shadow:none !important; border:1px solid var(--line); border-radius:10px; margin:0 0 4mm; padding:4mm 5mm; background:#fff; break-inside:auto; width:auto; max-width:none; grid-column:auto}',
+  '.kpage .card.kcont{border-top-style:dashed}',
+  '.kpage .card h2{font-size:15px; margin-top:0}',
+  '.kpage .gl{text-decoration:none; cursor:default}',
+  '.kpage details.yomi{border:0; padding:0; margin:3mm 0 0} .kpage details.yomi > dl{margin-top:1mm}',
+  '.kpage h3.kyomi{font-size:13px; margin:3mm 0 1mm; color:var(--accent); border-top:1px dashed var(--line); padding-top:2mm}',
+  '.kpage .kcmt{margin:3mm 0 0; padding:3mm 4mm; border-radius:8px; background:color-mix(in srgb, var(--accent) 7%, #fff); border-left:3px solid var(--accent)}',
+  '.kpage .kcmt b{display:block; font-size:12px; color:var(--accent); margin-bottom:1mm} .kpage .kcmt p{margin:0 0 1.5mm}',
+  '.kpage .kmemo dl{display:grid; grid-template-columns:auto 1fr; gap:1mm 5mm; margin:0} .kpage .kmemo dt{color:var(--sub); font-size:12px} .kpage .kmemo dd{margin:0}',
+  '.kpage .kmemo ul{margin:2mm 0 0; padding-left:5mm}',
+  '.kpage .ktarot .krow{display:grid; grid-template-columns:22mm 1fr; gap:4mm; align-items:start; margin:0 0 3mm}',
+  '.kpage .ktarot img{width:22mm; border-radius:4px; display:block} .kpage .ktarot img.rev{transform:rotate(180deg)}',
+  '.kpage .ktarot .kq{font-weight:700} .kpage .ktarot .kmine{color:var(--accent)}',
+  '.kpage .knote{font-size:10.5px; color:var(--sub); margin:4mm 0 0}',
+  '.kpage table{max-width:100%}',
+  '.kpage [style*="overflow-x:auto"], .kpage [style*="overflow-x: auto"]{overflow:visible !important}',
+  '@media (max-width:760px){ #kdoc{grid-template-columns:minmax(0, 1fr); grid-template-rows:auto auto auto; overflow:auto} #kdoc .ktop{position:sticky; top:0; z-index:2} #kdoc .ktop b{width:100%} #kdoc .kside{border-right:0; border-bottom:1px solid var(--line); max-height:none; overflow:visible} #kprev{overflow:visible} }',
+  '@media print{',
+  '  body.kopen > :not(#kdoc){display:none !important}',
+  '  body.kopen{overflow:visible; background:#fff !important}',
+  '  body.kopen #kdoc{position:static; display:block; background:none}',
+  '  #kdoc .ktop, #kdoc .kside, #kprev .kinfo{display:none !important}',
+  '  #kprev{padding:0; overflow:visible; background:none}',
+  '  #kpagesBox{height:auto !important; width:auto !important}',
+  '  #kpages{transform:none !important; gap:0}',
+  '  .kpage{box-shadow:none; break-after:page; page-break-after:always}',
+  '  .kpage:last-child{break-after:auto; page-break-after:auto}',
+  '  @page{size:A4; margin:0}',
+  '}'
+].join('\n');
+document.head.appendChild(css);
+
+// ---- 画面の部品 ----
+var box = document.createElement('div'); box.id = 'kdoc'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', '鑑定書を作る');
+document.body.appendChild(box);
+var hdr = document.querySelector('header .cfgbtn');
+var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'cfgbtn'; btn.id = 'kdocBtn'; btn.textContent = '📄 鑑定書';
+if (hdr) hdr.parentNode.insertBefore(btn, hdr); else document.body.appendChild(btn);
+btn.addEventListener('click', open);
+
+function today(){ var t = new Date(); return t.getFullYear() + '-' + ('0' + (t.getMonth() + 1)).slice(-2) + '-' + ('0' + t.getDate()).slice(-2); }
+function jpDate(iso){ var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? (+m[1]) + '年' + (+m[2]) + '月' + (+m[3]) + '日' : ''; }
+function memoData(){ return window.MeishikiMemo && MeishikiMemo.data ? MeishikiMemo.data() : { fields: [], values: {}, notes: [] }; }
+function defClient(){ var n = dispName('A'); return n ? n + ' 様' : ''; }
+function defTopic(){ return memoData().values['相談内容'] || ''; }
+
+// 占術のグループ（基本情報＋各タブ）。タロットは別扱い
+function sysList(){ return ['info'].concat(Object.keys(SYS_TEXT).filter(function(k){ return k !== 'tarot'; })); }
+function groupOrder(){
+  var all = sysList(), g = (st.groups || []).filter(function(k){ return all.indexOf(k) >= 0; });
+  all.forEach(function(k){ if (g.indexOf(k) < 0) g.push(k); });
+  return g;
+}
+function groupName(k){ return k === 'info' ? '基本情報' : SYS_TEXT[k][0]; }
+function seimeiOnly(){ return !!(A.current() && A.current().seimeiOnly); }
+function havePair(){ return seimeiOnly() ? (seHasName('B')) : A.people().length > 1; }
+function sectionsOf(k){
+  if (!A.current()) return [];
+  if (seimeiOnly() && k !== 'seimei') return [];
+  var list = k === 'info' ? SECTIONS.filter(function(s){ return s.sys === 'all'; }) : SECTIONS.filter(function(s){ return sysOf(s) === k; });
+  list = list.filter(function(s){ return !s.pair || havePair(); });
+  var ord = A.order();
+  return list.slice().sort(function(a, b){ var x = ord.indexOf(a.id), y = ord.indexOf(b.id); return (x < 0 ? 999 : x) - (y < 0 ? 999 : y); });
+}
+function ensureSel(){
+  if (st.sel) return;
+  // 最初は「今のタブで表示している項目」を選んでおく
+  st.sel = {};
+  A.visible().forEach(function(id){ var s = byId(id); if (s && (sysOf(s) === A.sys() || s.sys === 'all') && !s.global) st.sel[id] = true; });
+}
+function pisFor(s){
+  if (s.pair || s.global) return [0];
+  var two = havePair();
+  if (!two) return [0];
+  return st.who === 'a' ? [0] : st.who === 'b' ? [1] : [0, 1];
+}
+
+// ---- 左の欄 ----
+function drawSide(){
+  ensureSel();
+  var md = memoData();
+  var h = '<div class="kf"><label>題名</label><input type="text" data-k="title" value="' + esc(st.title) + '"></div>' +
+    '<div class="kf"><label>お客様のお名前</label><input type="text" data-k="client" value="' + esc(st.client) + '" placeholder="' + esc(defClient() || '例 山田 花子 様') + '"></div>' +
+    '<div class="kf"><label>ご相談の内容（表紙）</label><input type="text" data-k="topic" value="' + esc(st.topic) + '" placeholder="' + esc(defTopic() || '例 これからの仕事の流れ') + '"></div>' +
+    '<div class="kf" style="display:flex;gap:8px"><div style="flex:1"><label>鑑定日</label><input type="date" data-k="date" value="' + esc(st.date || today()) + '"></div><div style="flex:1"><label>鑑定者</label><input type="text" data-k="author" value="' + esc(st.author) + '" placeholder="お名前"></div></div>' +
+    '<label class="kchk"><input type="checkbox" data-k="cover"' + (st.cover ? ' checked' : '') + '> 表紙を1ページ使う</label>' +
+    '<div class="kf"><label>はじめに（任意）</label><textarea data-k="intro" rows="3" placeholder="鑑定書の最初に載せる言葉">' + esc(st.intro) + '</textarea></div>';
+  h += '<h3>載せる項目 <small style="font-weight:400">占術をまぜて選べます。▲▼で占術の順番を変えられます</small></h3>';
+  if (!A.current()) h += '<p class="knote2">生年月日を入れて「命式を出す」を押すと、命式の項目を選べます（姓名判断は名前だけでも出ます）。</p>';
+  if (havePair() && !seimeiOnly()) h += '<div class="kseg" role="radiogroup" aria-label="載せる人">' + [['both', '2人とも'], ['a', (dispName('A') || '自分') + 'だけ'], ['b', (dispName('B') || '相手') + 'だけ']].map(function(o){ return '<label><input type="radio" name="kwho" value="' + o[0] + '"' + (st.who === o[0] ? ' checked' : '') + '><span>' + esc(o[1]) + '</span></label>'; }).join('') + '</div>';
+  var go = groupOrder();
+  go.forEach(function(k, gi){
+    var list = sectionsOf(k);
+    if (!list.length) return;
+    var n = list.filter(function(s){ return st.sel[s.id]; }).length;
+    h += '<details class="kgrpbox"' + (n || k === A.sys() ? ' open' : '') + '><summary>' + esc(groupName(k)) + ' <span class="cnt">' + n + ' / ' + list.length + '</span>' +
+      '<button type="button" data-gup="' + k + '" aria-label="' + esc(groupName(k)) + 'を上へ"' + (gi ? '' : ' disabled') + '>▲</button><button type="button" data-gdn="' + k + '" aria-label="' + esc(groupName(k)) + 'を下へ">▼</button>' +
+      '<button type="button" data-gall="' + k + '">全部</button><button type="button" data-gnone="' + k + '">外す</button></summary>';
+    list.forEach(function(s){
+      var on = !!st.sel[s.id];
+      h += '<div class="kitem"><label class="kchk"><input type="checkbox" data-sel="' + s.id + '"' + (on ? ' checked' : '') + '> ' + esc(s.label) + (s.global ? ' <small style="color:var(--sub)">（長い一覧）</small>' : '') + '</label>' +
+        (on ? '<textarea data-cmt="' + s.id + '" rows="2" placeholder="この項目への所見・メッセージ（任意）">' + esc(st.cmt[s.id] || '') + '</textarea>' : '') + '</div>';
+    });
+    h += '</details>';
+  });
+  h += '<label class="kchk"><input type="checkbox" data-k="yomi"' + (st.yomi ? ' checked' : '') + '> 各項目の「読み解き」も載せる</label>';
+  var hasMemo = md.fields.some(function(f){ return f !== 'お客様' && md.values[f]; });
+  h += '<label class="kchk"><input type="checkbox" data-k="memo"' + (st.memo ? ' checked' : '') + '> 鑑定メモの項目を載せる' + (hasMemo ? '' : ' <small style="color:var(--sub)">（今は空です）</small>') + '</label>';
+  h += '<label class="kchk" style="margin-left:22px"><input type="checkbox" data-k="notes"' + (st.notes ? ' checked' : '') + '> 時刻つきメモも載せる</label>';
+  var hasTarot = A.tst().slots && A.tst().slots.some(function(s){ return s.card; });
+  h += '<label class="kchk"><input type="checkbox" data-k="tarot"' + (st.tarot ? ' checked' : '') + '> タロットのリーディング（今の盤）' + (hasTarot ? '' : ' <small style="color:var(--sub)">（カードがありません）</small>') + '</label>';
+  h += '<div class="kf"><label>鑑定者からのメッセージ（最後に載せる・任意）</label><textarea data-k="outro" rows="4">' + esc(st.outro) + '</textarea></div>';
+  h += '<button type="button" class="kb" data-act="reset">お客様ごとの入力を消す</button>';
+  h += '<p class="knote2">入力した内容はこのブラウザの中だけに保存されます。どこにも送信されません。「お客様ごとの入力を消す」で、お名前・相談内容・はじめに・メッセージ・項目ごとの所見を消します（選んだ項目・鑑定者名は残ります）。</p>';
+  $('.kside', box).innerHTML = h;
+}
+
+// ---- 鑑定書の中身（ブロックの並び） ----
+function cleanCard(html){
+  var d = document.createElement('div'); d.innerHTML = html;
+  d.querySelectorAll('.grip, button, .unnav, select, input, textarea, .bnav').forEach(function(x){ x.remove(); });
+  d.querySelectorAll('details.yomi').forEach(function(x){
+    if (!st.yomi) { x.remove(); return; }
+    x.setAttribute('open', '');
+    var sm = x.querySelector('summary');
+    if (sm) { var h3 = document.createElement('h3'); h3.className = 'kyomi'; h3.textContent = '読み解き'; sm.parentNode.replaceChild(h3, sm); }
+  });
+  d.querySelectorAll('details').forEach(function(x){ x.setAttribute('open', ''); });
+  d.querySelectorAll('[id]').forEach(function(x){ x.removeAttribute('id'); });
+  d.querySelectorAll('[tabindex]').forEach(function(x){ x.removeAttribute('tabindex'); });
+  return d.innerHTML;
+}
+function blocks(){
+  var B = [], md = memoData();
+  var client = st.client || defClient(), topic = st.topic || defTopic();
+  var cover = '<div class="kcover' + (st.cover ? ' full' : '') + '"><h1>' + esc(st.title || '鑑定書') + '</h1>' +
+    (client ? '<p class="kclient">' + esc(client) + '</p>' : '') + (topic ? '<p class="ktopic">ご相談：' + esc(topic) + '</p>' : '') +
+    '<p class="kmeta">' + esc(jpDate(st.date || today())) + (st.author ? '　鑑定：' + esc(st.author) : '') + '</p></div>';
+  B.push({ html: cover, breakAfter: st.cover });
+  if (st.intro.trim()) B.push({ html: '<div class="kmsg"><h2>はじめに</h2>' + para(st.intro) + '</div>' });
+  if (st.memo) {
+    var rows = md.fields.filter(function(f){ return f !== 'お客様' && md.values[f]; });
+    var notes = st.notes ? (md.notes || []) : [];
+    if (rows.length || notes.length) B.push({ html: '<div class="kmemo"><h2>伺った内容</h2>' + (rows.length ? '<dl>' + rows.map(function(f){ return '<dt>' + esc(f) + '</dt><dd>' + esc(md.values[f]) + '</dd>'; }).join('') + '</dl>' : '') +
+      (notes.length ? '<ul>' + notes.map(function(n){ return '<li>' + esc(n.text) + '</li>'; }).join('') + '</ul>' : '') + '</div>' });
+  }
+  if (A.current()) groupOrder().forEach(function(k){
+    var list = sectionsOf(k).filter(function(s){ return st.sel[s.id]; });
+    if (!list.length) return;
+    var first = true;
+    list.forEach(function(s){
+      var pis = pisFor(s);
+      pis.forEach(function(pi, j){
+        var inner;
+        try { inner = cleanCard(cardInner(s, pi)); } catch(e){ inner = '<h2>' + esc(s.label) + '</h2><p class="warn">この項目は出せませんでした。</p>'; }
+        var last = j === pis.length - 1;
+        var cmt = last && (st.cmt[s.id] || '').trim() ? '<div class="kcmt"><b>鑑定者より</b>' + para(st.cmt[s.id]) + '</div>' : '';
+        var cls = s.global || s.pair ? '' : (A.people()[pi] ? ' ' + A.people()[pi].cls : '');
+        var card = '<section class="card panel kcard' + cls + '">' + inner + cmt + '</section>';
+        // 占術の見出しは最初のカードと一緒に置く（見出しだけがページの最後に残らないように）
+        B.push({ html: first ? '<div class="kpair"><h2 class="kgrp">' + esc(groupName(k)) + '</h2>' + card + '</div>' : card });
+        first = false;
+      });
+    });
+  });
+  if (st.tarot && A.tst().slots && A.tst().slots.some(function(s){ return s.card; })) {
+    var th = '<div class="ktarot"><h2 class="kgrp">タロット</h2>' + (A.tst().topic ? '<p>テーマ：' + esc(A.tst().topic) + '</p>' : '');
+    A.tst().slots.forEach(function(s, i){
+      var c = s.card && TA.BY_ID[s.card];
+      if (!c) return;
+      var my = (A.tcfg().interp[c.id] || {})[s.rev ? 'rev' : 'up'];
+      th += '<div class="krow"><img src="' + timg(c.id) + '" alt="' + esc(c.name) + '"' + (s.rev ? ' class="rev"' : '') + '><div><div class="kq">' + (i + 1) + '. ' + esc(s.q || '') + (s.q ? ' — ' : '') + esc(c.name) + (s.rev ? '（逆位置）' : '（正位置）') + '</div>' +
+        '<div>' + esc(s.rev ? c.rev : c.up) + '</div>' + (my ? '<div class="kmine">' + esc(my) + '</div>' : '') + '</div></div>';
+    });
+    B.push({ html: th + '</div>' });
+  }
+  if (st.outro.trim()) B.push({ html: '<div class="kmsg"><h2>鑑定者からのメッセージ</h2>' + para(st.outro) + '</div>' });
+  B.push({ html: '<p class="knote">この鑑定書の内容は、伝統的な計算規則と一般的な解釈にもとづく目安です。性格や将来を断定するものではありません。</p>' });
+  return B;
+}
+
+// ---- A4 に割り付ける ----
+var pagesEl, page, body;
+function newPage(){
+  page = document.createElement('div'); page.className = 'kpage';
+  var acc = (typeof ACCENTS !== 'undefined' && ACCENTS[A.cfg().accent]) || ['#2c4a7a', '#e3e9f3'];
+  page.style.setProperty('--accent', acc[0]); page.style.setProperty('--accent-soft', acc[1]);
+  body = document.createElement('div'); body.className = 'kbody';
+  page.appendChild(body); pagesEl.appendChild(page);
+}
+function over(){ return body.scrollHeight > body.clientHeight + 1; }
+function isHead(el){ return el && /^H[1-4]$/.test(el.tagName); }
+// el の後ろの中身を、ページに収まるまで続きの要素（rest）へ移す。表は行ごとに分け、見出しの行を続きにも付ける。
+// moveHeads：見出しだけが残ったら見出しも続きへ送る（ページの途中から始めたときだけ）
+function carve(el, moveHeads){
+  var rest = el.cloneNode(false);
+  if (rest.classList) rest.classList.add('kcont');
+  while (over()) {
+    var kids = el.children;
+    if (!kids.length) break;
+    var headsOnly = true;
+    for (var i = 0; i < kids.length - 1; i++) if (!isHead(kids[i])) { headsOnly = false; break; }
+    if (headsOnly) {   // 最後の子の中で分ける
+      var sub = carve(el.lastElementChild, moveHeads);
+      if (sub) rest.insertBefore(sub, rest.firstChild);
+      var lc = el.lastElementChild;
+      if (lc && !lc.children.length && !lc.textContent.trim()) el.removeChild(lc);
+      break;
+    }
+    rest.insertBefore(el.lastElementChild, rest.firstChild);
+  }
+  if (moveHeads) while (el.children.length && rest.children.length && Array.prototype.every.call(el.children, isHead)) rest.insertBefore(el.lastElementChild, rest.firstChild);
+  if (el.tagName === 'TBODY' && rest.children.length && el.firstElementChild && el.firstElementChild.querySelector('th') && !(rest.firstElementChild && rest.firstElementChild.querySelector('th'))) rest.insertBefore(el.firstElementChild.cloneNode(true), rest.firstChild);
+  return rest.children.length ? rest : null;
+}
+function shrink(el){
+  var z = 1;
+  for (var k = 0; k < 8 && over(); k++) { z *= Math.max(0.6, body.clientHeight / body.scrollHeight) * 0.99; el.style.zoom = z; }
+}
+function place(el, depth){
+  depth = depth || 0;
+  body.appendChild(el);
+  if (!over()) return;
+  if (body.children.length > 1) {
+    var free = body.offsetTop + body.clientHeight - el.offsetTop;
+    // 新しいページに収まる大きさか、残りの空きが少ないなら次のページから
+    if (el.offsetHeight <= body.clientHeight || free < body.clientHeight * 0.25) { body.removeChild(el); newPage(); place(el, depth + 1); return; }
+  }
+  var alone = body.children.length === 1;
+  var rest = carve(el, !alone);
+  if (!el.children.length && !el.textContent.trim()) { body.removeChild(el); if (rest) { newPage(); place(rest, depth + 1); } return; }
+  if (over()) shrink(el);
+  if (!rest) return;
+  newPage();
+  if (depth > 80) { body.appendChild(rest); shrink(rest); return; }
+  place(rest, depth + 1);
+}
+function paginate(){
+  A.refreshInfo();   // 名前などの入力を、開いたあとに変えても反映する
+  pagesEl = $('#kpages', box);
+  pagesEl.innerHTML = '';
+  newPage();
+  var B = blocks();
+  B.forEach(function(b){
+    var t = document.createElement('div'); t.innerHTML = b.html;
+    var el = t.firstElementChild;
+    if (el) place(el, 0);
+    if (b.breakAfter) newPage();
+  });
+  // 空のページを除く
+  Array.prototype.slice.call(pagesEl.children).forEach(function(p){ if (!p.querySelector('.kbody').children.length && pagesEl.children.length > 1) pagesEl.removeChild(p); });
+  var n = pagesEl.children.length, client = st.client || defClient();
+  Array.prototype.forEach.call(pagesEl.children, function(p, i){
+    var f = document.createElement('div'); f.className = 'kfoot';
+    f.innerHTML = '<span>' + esc(st.title || '鑑定書') + (client ? '　' + esc(client) : '') + '</span><span>' + (i + 1) + ' / ' + n + '</span>';
+    p.appendChild(f);
+  });
+  $('#kinfo', box).textContent = 'A4 ' + n + 'ページ。入りきらない項目は次のページへ送っています。';
+  fit();
+}
+function fit(){
+  var prev = $('#kprev', box), wrapB = $('#kpagesBox', box);
+  if (!prev || !pagesEl) return;
+  var pw = pagesEl.offsetWidth || 794, avail = prev.clientWidth - 24, k = Math.min(1, avail / pw);
+  pagesEl.style.transform = k < 1 ? 'scale(' + k + ')' : '';
+  wrapB.style.width = (pw * k) + 'px';
+  wrapB.style.height = (pagesEl.offsetHeight * k) + 'px';
+}
+window.addEventListener('resize', function(){ if (document.body.classList.contains('kopen')) fit(); });
+
+// ---- 開く・操作 ----
+function open(){
+  box.innerHTML = '<div class="ktop"><b>📄 鑑定書を作る</b><button type="button" class="kb pri" data-act="print">印刷・PDFに保存</button><button type="button" class="kb" data-act="html">HTMLで保存</button><button type="button" class="kb" data-act="close" aria-label="閉じる">✕ 閉じる</button></div>' +
+    '<div class="kside"></div><div id="kprev"><p class="kinfo" id="kinfo"></p><div id="kpagesBox"><div id="kpages"></div></div></div>';
+  document.body.classList.add('kopen');
+  drawSide();
+  paginate();
+}
+function close(){ document.body.classList.remove('kopen'); box.innerHTML = ''; }
+var timer = null;
+function later(){ clearTimeout(timer); timer = setTimeout(paginate, 350); }
+box.addEventListener('input', function(e){
+  var t = e.target;
+  if (t.dataset.k && t.type !== 'checkbox') { st[t.dataset.k] = t.value; save(); later(); }
+  else if (t.dataset.cmt) { st.cmt[t.dataset.cmt] = t.value; save(); later(); }
+});
+box.addEventListener('change', function(e){
+  var t = e.target;
+  if (t.dataset.k && t.type === 'checkbox') { st[t.dataset.k] = t.checked; save(); drawSide(); paginate(); }
+  else if (t.dataset.sel) { st.sel[t.dataset.sel] = t.checked; if (!t.checked) delete st.sel[t.dataset.sel]; save(); keepScroll(drawSide); paginate(); }
+  else if (t.name === 'kwho') { st.who = t.value; save(); paginate(); }
+});
+function keepScroll(fn){ var s = $('.kside', box), y = s ? s.scrollTop : 0; var openG = Array.prototype.map.call(box.querySelectorAll('.kgrpbox'), function(d){ return d.open; }); fn(); s = $('.kside', box); if (s) s.scrollTop = y; box.querySelectorAll('.kgrpbox').forEach(function(d, i){ if (openG[i] != null) d.open = openG[i]; }); }
+box.addEventListener('click', function(e){
+  var b = e.target.closest('button');
+  if (!b) return;
+  var a = b.dataset.act, k;
+  if (a === 'close') close();
+  else if (a === 'print') { clearTimeout(timer); paginate(); setTimeout(function(){ window.print(); }, 50); }
+  else if (a === 'html') { clearTimeout(timer); paginate(); saveHtml(); }
+  else if (a === 'reset') { if (!window.confirm('お名前・相談内容・はじめに・メッセージ・項目ごとの所見を消します。よろしいですか？')) return; st.client = ''; st.topic = ''; st.intro = ''; st.outro = ''; st.cmt = {}; st.date = ''; save(); drawSide(); paginate(); }
+  else if ((k = b.dataset.gall) || (k = b.dataset.gnone)) { e.preventDefault(); var on = !!b.dataset.gall; sectionsOf(k).forEach(function(s){ if (on) st.sel[s.id] = true; else delete st.sel[s.id]; }); save(); keepScroll(drawSide); paginate(); }
+  else if ((k = b.dataset.gup) || (k = b.dataset.gdn)) {
+    e.preventDefault();
+    var g = groupOrder().filter(function(x){ return sectionsOf(x).length; }), i = g.indexOf(k), j = b.dataset.gup ? i - 1 : i + 1;
+    if (j < 0 || j >= g.length) return;
+    var tmp = g[i]; g[i] = g[j]; g[j] = tmp;
+    st.groups = g.concat(groupOrder().filter(function(x){ return g.indexOf(x) < 0; })); save(); keepScroll(drawSide); paginate();
+  }
+});
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && document.body.classList.contains('kopen') && !e.target.closest('textarea,input')) close(); });
+
+// ---- HTML で保存（1ファイル。絵は埋め込む） ----
+function toDataUrl(src){
+  if (/^data:/.test(src)) return Promise.resolve(src);
+  return fetch(src).then(function(r){ return r.blob(); }).then(function(bl){ return new Promise(function(res){ var fr = new FileReader(); fr.onload = function(){ res(fr.result); }; fr.onerror = function(){ res(src); }; fr.readAsDataURL(bl); }); }).catch(function(){ return src; });
+}
+function saveHtml(){
+  var clone = pagesEl.cloneNode(true);
+  clone.removeAttribute('style');
+  var imgs = Array.prototype.slice.call(clone.querySelectorAll('img'));
+  Promise.all(imgs.map(function(im){ return toDataUrl(im.getAttribute('src')).then(function(u){ im.setAttribute('src', u); }); })).then(function(){
+    var styles = Array.prototype.map.call(document.querySelectorAll('style'), function(s){ return s.textContent; }).join('\n');
+    var extra = 'body.ksaved{background:#e9e6df !important; margin:0; padding:20px 0; background-image:none !important}\n.ksaved #kpages{margin:0 auto; gap:16px; transform:none}\n@media print{body.ksaved{padding:0; background:#fff !important} .ksaved #kpages{gap:0} .kpage{box-shadow:none; break-after:page} .kpage:last-child{break-after:auto} @page{size:A4; margin:0}}';
+    var client = st.client || defClient();
+    var title = (st.title || '鑑定書') + (client ? '　' + client : '');
+    var html = '<!doctype html>\n<html lang="ja">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<meta name="robots" content="noindex">\n<title>' + esc(title) + '</title>\n<style>\n' + styles + '\n' + extra + '\n</style>\n</head>\n<body class="ksaved">\n' + clone.outerHTML + '\n</bo' + 'dy>\n</html>\n';
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+    a.download = ((st.title || '鑑定書') + (client ? '_' + client.replace(/\s*様$/, '') : '') + '_' + (st.date || today())).replace(/[\\/:*?"<>|\s]+/g, '_') + '.html';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  });
+}
+window.MeishikiKantei = { open: open, close: close, paginate: paginate, state: function(){ return st; } };
 })();
 
 </script>
