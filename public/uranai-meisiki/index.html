@@ -255,6 +255,19 @@ header .htext{flex:1}
 .systabs button:hover{color:var(--ink)}
 .systabs button[aria-selected="true"]{color:var(--accent); border-bottom-color:var(--accent)}
 .systabs button:focus-visible{outline:2px solid var(--gold); outline-offset:-2px}
+.stwrap{position:relative}
+.stwrap.canR .systabs{-webkit-mask-image:linear-gradient(to right, #000 calc(100% - 64px), transparent); mask-image:linear-gradient(to right, #000 calc(100% - 64px), transparent)}
+.stwrap.canL .systabs{-webkit-mask-image:linear-gradient(to left, #000 calc(100% - 64px), transparent); mask-image:linear-gradient(to left, #000 calc(100% - 64px), transparent)}
+.stwrap.canL.canR .systabs{-webkit-mask-image:linear-gradient(to right, transparent, #000 56px, #000 calc(100% - 64px), transparent); mask-image:linear-gradient(to right, transparent, #000 56px, #000 calc(100% - 64px), transparent)}
+.starr{position:absolute; top:50%; transform:translateY(-50%); z-index:2; width:32px; height:32px; border-radius:50%; border:1px solid var(--line); background:var(--paper); color:var(--accent); font-size:20px; line-height:1; font-weight:700; display:none; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.25); padding:0 0 2px}
+.starr.l{left:0} .starr.r{right:0}
+.stwrap.canL .starr.l, .stwrap.canR .starr.r{display:flex}
+.stwrap.canR .starr.r{animation:stnudge 1.6s ease-in-out 2}
+@keyframes stnudge{0%,100%{transform:translateY(-50%)} 50%{transform:translate(4px,-50%)}}
+@media (prefers-reduced-motion:reduce){ .stwrap.canR .starr.r{animation:none} }
+.sthint{font-size:11px; color:var(--sub); text-align:right; margin:2px 2px 0; display:none}
+.stwrap.canR + .sthint{display:block}
+@media print{ .starr, .sthint{display:none !important} }
 .field input.nm{font:inherit; font-size:16px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink); width:240px}
 .field input.nm::placeholder{color:var(--sub); opacity:.7; font-size:14px}
 @media (max-width:640px){ .field input.nm{width:100%} }
@@ -3869,10 +3882,11 @@ function glHtml(type, name){
   else if (type === 'tarot' && window.Tarot) {
     var tp = name.split(':'), tc = Tarot.BY_ID[tp[0]], trv = tp[1] === '1';
     if (!tc) return '';
-    var tmy = (tcfg.interp[tc.id] || {}), tmine = trv ? tmy.rev : tmy.up;
+    var tmy = (tcfg.interp[tc.id] || {});
+    // 自分の解釈は正位置・逆位置の両方を出す（2026-11-27 本人依頼）。置いてある向きの方を濃く
+    var tpos = function(lab, kw, mine, on){ return '<div' + (on ? '' : ' style="color:var(--sub)"') + '><b style="font-size:12px">' + lab + '</b> ' + esc(kw) + (mine ? '<div style="color:var(--accent);' + (on ? '' : 'opacity:.75;') + 'margin:1px 0 3px">自分の解釈：' + esc(mine) + '</div>' : '') + '</div>'; };
     h = '<b>' + esc(tc.name) + '</b><div class="meta">' + (tc.major ? '大アルカナ ' + tc.num : esc(tc.suitName + '・' + tc.elem + '・' + tc.suitKw)) + '</div>' +
-      '<div' + (trv ? ' style="color:var(--sub)"' : '') + '><b style="font-size:12px">正位置</b> ' + esc(tc.up) + '</div><div' + (trv ? '' : ' style="color:var(--sub)"') + '><b style="font-size:12px">逆位置</b> ' + esc(tc.rev) + '</div>' +
-      (tmine ? '<div style="margin-top:4px;color:var(--accent)">自分の解釈：' + esc(tmine) + '</div>' : '');
+      tpos('正位置', tc.up, tmy.up, !trv) + tpos('逆位置', tc.rev, tmy.rev, trv);
   }
   else if (type === 'stsu' && window.Shichu && Shichu.TSUHEN_TEXT[name]) h += '<div class="meta">通変星</div>' + esc(Shichu.TSUHEN_TEXT[name].kw) + '<br><span style="color:var(--sub)">' + esc(Shichu.TSUHEN_TEXT[name].text) + '</span>';
   else if (type === 'sjuni' && window.Shichu && Shichu.JUNIUN_TEXT[name]) h += '<div class="meta">十二運・' + (Shichu.JUNIUN.indexOf(name) + 1) + '番目</div>' + esc(Shichu.JUNIUN_TEXT[name].kw) + '<br><span style="color:var(--sub)">' + esc(Shichu.JUNIUN_TEXT[name].text) + '</span>';
@@ -4448,6 +4462,17 @@ var SYS_TEXT = {
 };
 var SYS_IDS = Object.keys(SYS_TEXT);
 document.querySelector('.systabs').innerHTML = SYS_IDS.map(function(k){ return '<button type="button" role="tab" data-sys="' + k + '" aria-selected="false">' + SYS_TEXT[k][0] + '</button>'; }).join('');
+// 占術タブが画面に入りきらないとき（スマホ）、横に続きがあることを示す
+(function(){
+  var tabs = document.querySelector('.systabs'), wrap = document.createElement('div');
+  wrap.className = 'stwrap'; tabs.parentNode.insertBefore(wrap, tabs); wrap.appendChild(tabs);
+  var mk = function(cls, lab, txt, dir){ var b = document.createElement('button'); b.type = 'button'; b.className = 'starr ' + cls; b.setAttribute('aria-label', lab); b.textContent = txt; b.addEventListener('click', function(){ tabs.scrollBy({ left: dir * tabs.clientWidth * 0.7, behavior: 'smooth' }); }); wrap.appendChild(b); };
+  mk('l', '前の占術を表示', '‹', -1); mk('r', '続きの占術を表示', '›', 1);
+  var hint = document.createElement('p'); hint.className = 'sthint'; hint.textContent = '占術は全' + SYS_IDS.length + 'つ。横にスライドすると続きがあります →';
+  wrap.parentNode.insertBefore(hint, wrap.nextSibling);
+  var upd = function(){ var max = tabs.scrollWidth - tabs.clientWidth; wrap.classList.toggle('canL', tabs.scrollLeft > 4); wrap.classList.toggle('canR', max - tabs.scrollLeft > 4); };
+  tabs.addEventListener('scroll', upd, { passive: true }); window.addEventListener('resize', upd); upd(); setTimeout(upd, 300);
+})();
 function sysSuffix(){ return SYS === 'sanmei' ? '' : SYS === 'suhi' ? '/suhi' : '/sys=' + SYS; }
 function setSys(s, silent){
   SYS = SYS_TEXT[s] ? s : 'sanmei';
