@@ -260,11 +260,10 @@ header .htext{flex:1}
 @media (max-width:640px){ .field input.nm{width:100%} }
 /* タロット */
 #tarotApp{margin-top:16px; display:grid; gap:14px; grid-template-columns:minmax(0,1fr)}
+#tarotApp .tmain{display:grid; gap:14px; grid-template-columns:minmax(0,1fr)}   /* 盤と山。山の追従はこの枠の中だけ */
 @media (min-width:900px){
-  #tarotApp{grid-template-columns:minmax(0,1fr) 300px; align-items:start}
-  #tarotApp .tctl, #tarotApp .treading, #tarotApp .tedit{grid-column:1/-1}
-  #tarotApp .tboard{grid-column:1; grid-row:2}
-  #tarotApp .tdeck{grid-column:2; grid-row:2; position:sticky; top:10px; max-height:calc(100vh - 20px); overflow:auto}
+  #tarotApp .tmain{grid-template-columns:minmax(0,1fr) 300px; align-items:start}
+  #tarotApp .tdeck{position:sticky; top:10px; max-height:calc(100vh - 20px); overflow:auto}
   #tarotApp .tgrid{grid-template-columns:repeat(3, 1fr)}
 }
 .tctl{display:flex; flex-wrap:wrap; gap:10px 16px; align-items:flex-end}
@@ -4752,7 +4751,21 @@ function tDraw(){
     (tst.spread === 'free' ? '<label class="tfield">枚数<select id="tCount">' + cnt + '</select></label>' : '') +
     '<div class="tbtns"><button type="button" class="filebtn" data-t="draw">ランダムに引く</button><label class="tchk"><input type="checkbox" id="tRandRev"' + (tst.randRev ? ' checked' : '') + '> 逆位置も混ぜる</label>' +
     '<button type="button" class="filebtn" data-t="clear">カードを山に戻す</button><button type="button" class="filebtn" data-t="layout">位置を並べ直す</button><button type="button" class="filebtn" data-t="edit" aria-expanded="' + (tst.edit ? 'true' : 'false') + '">✎ 問いと解釈の編集</button></div></div>';
+  // 編集（相談内容・並べ方の欄と、盤の間に出す）
+  if (tst.edit) {
+    var ec = tst.editCard || 'm00', e = tcfg.interp[ec] || {};
+    h += '<div class="panel tedit"><h2>問いと解釈の編集 <small>このブラウザに保存されます</small></h2>' +
+      '<label class="tfield wide">問いの選択肢（1行に1つ）<textarea id="tQList" rows="6">' + esc(tcfg.questions.join('\n')) + '</textarea></label>' +
+      '<div class="tbtns"><button type="button" class="linkbtn" data-t="qreset">問いを初期の選択肢に戻す</button></div>' +
+      '<h3 style="font-size:14px;margin:14px 0 6px">カードごとの自分の解釈</h3>' +
+      '<label class="tfield">カード<select id="tEditCard">' + TA.CARDS.map(function(c){ return '<option value="' + c.id + '"' + (c.id === ec ? ' selected' : '') + '>' + esc(c.name) + (tcfg.interp[c.id] && (tcfg.interp[c.id].up || tcfg.interp[c.id].rev) ? ' ✎' : '') + '</option>'; }).join('') + '</select></label>' +
+      '<p class="note" style="margin:4px 0 8px">一般的なキーワード：正位置「' + esc(TA.BY_ID[ec].up) + '」／逆位置「' + esc(TA.BY_ID[ec].rev) + '」</p>' +
+      '<label class="tfield wide">正位置の自分の解釈<textarea id="tMyUp" rows="3">' + esc(e.up || '') + '</textarea></label>' +
+      '<label class="tfield wide">逆位置の自分の解釈<textarea id="tMyRev" rows="3">' + esc(e.rev || '') + '</textarea></label>' +
+      '<p class="note">入れた解釈は、カードにカーソルを合わせたときと、リーディングの欄に出ます。</p></div>';
+  }
   // 盤
+  h += '<div class="tmain">';
   var nn = tst.slots.length, tw = nn >= 9 ? 66 : nn >= 6 ? 80 : nn >= 4 ? 96 : 120;
   h += '<div class="tboard" id="tboard" style="--tw:calc(' + tw + 'px * var(--tscale, 1))">';
   tst.slots.forEach(function(s, i){
@@ -4771,7 +4784,7 @@ function tDraw(){
   TA.CARDS.filter(function(c){ return c.group === tst.deck; }).forEach(function(c){
     h += '<button type="button" class="tpick' + (used[c.id] ? ' used' : '') + '" data-tcard="' + c.id + '" aria-label="' + esc(c.name) + 'を置く">' + tGl(c.id, false, '<img src="' + timg(c.id) + '" alt="" loading="lazy" draggable="false">') + '<span>' + esc(c.major ? c.num + ' ' + c.name : c.rank) + '</span></button>';
   });
-  h += '</div><p class="note">カードを押すと、選んでいる枠（' + (tst.sel + 1) + '枚目）に置きます。盤の枠へ引きずって置くこともできます。枠は左上の ⠿ をつかんで好きな位置へ動かせます。</p></div>';
+  h += '</div><p class="note">カードを押すと、選んでいる枠（' + (tst.sel + 1) + '枚目）に置きます。盤の枠へ引きずって置くこともできます。枠は左上の ⠿ をつかんで好きな位置へ動かせます。</p></div></div>';
   // 読み
   h += '<div class="panel treading"><h2>リーディング' + (tst.topic ? ' <small>' + esc(tst.topic) + '</small>' : '') + '</h2><dl class="kai">';
   tst.slots.forEach(function(s, i){
@@ -4782,19 +4795,6 @@ function tDraw(){
       esc(s.rev ? c.rev : c.up) + (mine ? '<br><span class="tmine">自分の解釈：' + esc(mine) + '</span>' : ''));
   });
   h += '</dl><p class="note"><button type="button" class="linkbtn" data-t="copy">文章としてコピー</button></p></div>';
-  // 編集
-  if (tst.edit) {
-    var ec = tst.editCard || 'm00', e = tcfg.interp[ec] || {};
-    h += '<div class="panel tedit"><h2>問いと解釈の編集 <small>このブラウザに保存されます</small></h2>' +
-      '<label class="tfield wide">問いの選択肢（1行に1つ）<textarea id="tQList" rows="6">' + esc(tcfg.questions.join('\n')) + '</textarea></label>' +
-      '<div class="tbtns"><button type="button" class="linkbtn" data-t="qreset">問いを初期の選択肢に戻す</button></div>' +
-      '<h3 style="font-size:14px;margin:14px 0 6px">カードごとの自分の解釈</h3>' +
-      '<label class="tfield">カード<select id="tEditCard">' + TA.CARDS.map(function(c){ return '<option value="' + c.id + '"' + (c.id === ec ? ' selected' : '') + '>' + esc(c.name) + (tcfg.interp[c.id] && (tcfg.interp[c.id].up || tcfg.interp[c.id].rev) ? ' ✎' : '') + '</option>'; }).join('') + '</select></label>' +
-      '<p class="note" style="margin:4px 0 8px">一般的なキーワード：正位置「' + esc(TA.BY_ID[ec].up) + '」／逆位置「' + esc(TA.BY_ID[ec].rev) + '」</p>' +
-      '<label class="tfield wide">正位置の自分の解釈<textarea id="tMyUp" rows="3">' + esc(e.up || '') + '</textarea></label>' +
-      '<label class="tfield wide">逆位置の自分の解釈<textarea id="tMyRev" rows="3">' + esc(e.rev || '') + '</textarea></label>' +
-      '<p class="note">入れた解釈は、カードにカーソルを合わせたときと、リーディングの欄に出ます。</p></div>';
-  }
   app.innerHTML = h;
 }
 // 操作
@@ -5935,6 +5935,226 @@ drawChips();
 fromHash();
 window.addEventListener('hashchange', fromHash);
 })();
+</script>
+<script>
+/* ---- memo.js ---- */
+/* 鑑定メモ（全ビルドに入る。2026-11-27 公開版にも搭載）。
+ * 鑑定メモ：どのタブからでも開ける横のパネル。項目の欄・候補のワンタップ入力・時刻つきメモ・音声の文字起こし（Chrome）。
+ * 内容はこのブラウザの中（localStorage）だけに保存する。音声認識を使うときだけ、音声が Google に送られる（初回に確認する）。
+ */
+(function(){
+'use strict';
+var KEY = 'meishiki.memo', KEY_CFG = 'meishiki.memoCfg', KEY_HIST = 'meishiki.memoHist';
+var get = function(k, d){ try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } };
+var set = function(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+var Y = new Date().getFullYear();
+var YEARS = ['今年', '来年', '再来年', String(Y), String(Y + 1), String(Y + 2), String(Y + 3)];
+// 項目（名前｜候補をカンマ区切り）。設定で書き換えられる
+var DEFAULT_FIELDS = [
+  'お客様｜',
+  '相談内容｜仕事,恋愛,結婚,家族,お金,健康,人間関係,引っ越し',
+  '職業｜会社員,公務員,自営業,フリーランス,パート,主婦・主夫,学生,経営者,医療職,教育職,美容職',
+  '転職・独立の時期｜' + YEARS.join(','),
+  '結婚｜未婚,既婚,離婚歴あり,再婚,婚約中,交際中',
+  '子ども｜なし,あり,1人,2人,3人,妊娠中,希望あり',
+  '出産の時期｜' + YEARS.join(','),
+  '健康｜良好,気になる所あり,通院中',
+  '引っ越し・住まい｜予定あり,検討中,' + YEARS.slice(0, 3).join(','),
+  '家族・その他｜'
+];
+var cfg = Object.assign({ fields: DEFAULT_FIELDS.slice(), speechOk: false }, get(KEY_CFG, {}));
+var memo = Object.assign({ values: {}, notes: [], transcript: [], started: null }, get(KEY, {}));
+function parseFields(){ return cfg.fields.map(function(l){ var p = l.split('｜'); return { name: p[0].trim(), opts: (p[1] || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean) }; }).filter(function(f){ return f.name; }); }
+function save(){ set(KEY, memo); }
+function now(){ var d = new Date(); return (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes(); }
+
+// ---- 見た目 ----
+var css = document.createElement('style');
+css.textContent = [
+  '#memoBtn{position:fixed; right:16px; bottom:16px; z-index:40; font:inherit; font-size:14px; font-weight:600; padding:10px 16px; border-radius:999px; border:0; background:var(--accent); color:var(--paper); box-shadow:0 6px 18px rgba(0,0,0,.25); cursor:pointer}',
+  '@media (max-width:640px){ #memoBtn{bottom:calc(64px + env(safe-area-inset-bottom)); right:10px; padding:9px 13px} }',
+  '#memoPanel{position:fixed; top:0; right:0; bottom:0; width:min(400px, 100vw); z-index:65; background:var(--paper); color:var(--ink); border-left:1px solid var(--line); box-shadow:-10px 0 30px rgba(0,0,0,.25); display:flex; flex-direction:column; transform:translateX(105%); transition:transform .2s}',
+  '#memoPanel.on{transform:none}',
+  '#memoPanel header{display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1px solid var(--line)}',
+  '#memoPanel header b{flex:1; font-size:15px}',
+  '#memoPanel .mbody{flex:1; min-height:0; overflow:auto; padding:10px 12px 20px; display:flex; flex-direction:column; gap:12px}',
+  '#memoPanel .mbody > *{flex-shrink:0}',
+  '#memoPanel .mf label{display:block; font-size:12px; color:var(--sub); margin-bottom:3px}',
+  '#memoPanel .mf input, #memoPanel textarea, #memoPanel .mnote input{font:inherit; font-size:15px; width:100%; padding:6px 9px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink)}',
+  '#memoPanel .chips{display:flex; flex-wrap:wrap; gap:4px; margin-top:4px}',
+  '#memoPanel .chips button{font:inherit; font-size:12px; padding:3px 9px; border-radius:999px; border:1px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer}',
+  '#memoPanel .chips button:hover{border-color:var(--accent)}',
+  '#memoPanel .chips button.sug{border-color:var(--gold); background:color-mix(in srgb, var(--gold) 15%, var(--bg))}',
+  '#memoPanel .mbtn{white-space:nowrap; font:inherit; font-size:13px; padding:6px 11px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer}',
+  '#memoPanel .mbtn.rec{background:#c0392b; color:#fff; border-color:#c0392b}',
+  '#memoPanel .mrow{display:flex; gap:6px; flex-wrap:wrap; align-items:center}',
+  '#memoPanel .mlist{font-size:13px; line-height:1.6; max-height:180px; overflow:auto; border:1px solid var(--line); border-radius:8px; padding:6px 8px; background:var(--bg)}',
+  '#memoPanel .mlist div{border-bottom:1px dashed var(--line); padding:2px 0}',
+  '#memoPanel .mlist small{color:var(--sub); margin-right:6px}',
+  '#memoPanel .interim{color:var(--sub); font-style:italic}',
+  '#memoPanel h3{font-size:13px; margin:4px 0 0; color:var(--sub)}',
+  '#memoPanel .mnote{display:flex; gap:6px}',
+  '#memoPanel .warnbox{font-size:12px; background:var(--warn-bg); color:var(--warn); border-radius:8px; padding:8px 10px}'
+].join('\n');
+document.head.appendChild(css);
+var btn = document.createElement('button'); btn.id = 'memoBtn'; btn.type = 'button'; btn.textContent = '📝 鑑定メモ'; btn.setAttribute('aria-controls', 'memoPanel');
+var panel = document.createElement('aside'); panel.id = 'memoPanel'; panel.setAttribute('aria-label', '鑑定メモ');
+document.body.appendChild(btn); document.body.appendChild(panel);
+btn.addEventListener('click', function(){ panel.classList.toggle('on'); if (panel.classList.contains('on')) draw(); });
+
+var sugg = {};   // 音声から出した候補 {項目名: [値]}
+var editing = false, rec = null, recOn = false, interim = '';
+function draw(){
+  var F = parseFields();
+  var h = '<header><b>鑑定メモ</b><button type="button" class="mbtn" data-m="close" aria-label="閉じる">✕</button></header><div class="mbody">';
+  if (editing) {
+    h += '<div class="mf"><label>項目（1行に1つ。「項目名｜候補,候補…」の形）</label><textarea id="mFields" rows="12">' + esc(cfg.fields.join('\n')) + '</textarea></div>' +
+      '<div class="mrow"><button type="button" class="mbtn" data-m="fieldsDone">できた</button><button type="button" class="mbtn" data-m="fieldsReset">初期の項目に戻す</button></div>';
+  } else {
+    h += '<div class="mrow"><button type="button" class="mbtn" data-m="info">基本情報から取り込む</button><button type="button" class="mbtn' + (recOn ? ' rec' : '') + '" data-m="rec">' + (recOn ? '■ 文字起こしを止める' : '🎙 文字起こし') + '</button></div>';
+    F.forEach(function(f){
+      var v = memo.values[f.name] || '', sg = sugg[f.name] || [];
+      h += '<div class="mf"><label for="mf_' + esc(f.name) + '">' + esc(f.name) + '</label><input type="text" id="mf_' + esc(f.name) + '" data-mf="' + esc(f.name) + '" value="' + esc(v) + '">';
+      if (f.opts.length || sg.length) h += '<div class="chips">' + sg.map(function(o){ return '<button type="button" class="sug" data-mc="' + esc(f.name) + '" data-v="' + esc(o) + '" title="音声から見つけた候補">＋' + esc(o) + '</button>'; }).join('') + f.opts.map(function(o){ return '<button type="button" data-mc="' + esc(f.name) + '" data-v="' + esc(o) + '">' + esc(o) + '</button>'; }).join('') + '</div>';
+      h += '</div>';
+    });
+    h += '<h3>メモ（時刻つき）</h3><div class="mnote"><input type="text" id="mNote" placeholder="入力して Enter"><button type="button" class="mbtn" data-m="note">追加</button></div>';
+    if (memo.notes.length) h += '<div class="mlist" id="mNotes">' + memo.notes.map(function(n, i){ return '<div><small>' + n.t + '</small>' + esc(n.text) + ' <button type="button" class="linkbtn" data-mdel="' + i + '" aria-label="削除">×</button></div>'; }).join('') + '</div>';
+    h += '<h3>文字起こし</h3>';
+    if (!SR) h += '<div class="warnbox">このブラウザでは文字起こしが使えません（パソコン・Android の Chrome で使えます）。</div>';
+    h += '<div class="mlist" id="mTrans">' + (memo.transcript.length ? memo.transcript.map(function(n){ return '<div><small>' + n.t + '</small>' + esc(n.text) + '</div>'; }).join('') : '<span style="color:var(--sub)">「🎙 文字起こし」を押すと、話した内容がここに出ます。項目に当てはまりそうな言葉は、各項目の上に＋の候補として出ます。</span>') + (interim ? '<div class="interim">' + esc(interim) + '</div>' : '') + '</div>';
+    h += '<div class="mrow"><button type="button" class="mbtn" data-m="copy">文章としてコピー</button><button type="button" class="mbtn" data-m="dl">ファイルに保存</button><button type="button" class="mbtn" data-m="new">新しい鑑定を始める</button><button type="button" class="linkbtn" data-m="edit">項目を編集</button></div>';
+    var hist = get(KEY_HIST, []);
+    if (hist.length) h += '<h3>これまでのメモ（このブラウザ）</h3><div class="mlist">' + hist.map(function(x, i){ return '<div><small>' + esc(x.date) + '</small>' + esc(x.values['お客様'] || '（名前なし）') + ' <button type="button" class="linkbtn" data-mopen="' + i + '">開く</button> <button type="button" class="linkbtn" data-mhdel="' + i + '">削除</button></div>'; }).join('') + '</div>';
+    h += '<p style="font-size:11px;color:var(--sub);margin:0">メモはこのブラウザの中だけに保存されます。文字起こしは Chrome の音声認識を使うため、音声が Google のサーバーで文字にされます。</p>';
+  }
+  h += '</div>';
+  var ob = panel.querySelector('.mbody'), keep = ob ? ob.scrollTop : 0;   // 押すたびに上へ戻らないよう位置を残す
+  panel.innerHTML = h;
+  var nb = panel.querySelector('.mbody'); if (nb) nb.scrollTop = keep;
+  var tl = panel.querySelector('#mTrans'); if (tl) tl.scrollTop = tl.scrollHeight;
+  var nl = panel.querySelector('#mNotes'); if (nl) nl.scrollTop = nl.scrollHeight;
+}
+function asText(){
+  var F = parseFields(), out = ['鑑定メモ ' + (memo.started || '')];
+  F.forEach(function(f){ if (memo.values[f.name]) out.push(f.name + '：' + memo.values[f.name]); });
+  if (memo.notes.length) { out.push('', '■ メモ'); memo.notes.forEach(function(n){ out.push('[' + n.t + '] ' + n.text); }); }
+  if (memo.transcript.length) { out.push('', '■ 文字起こし'); memo.transcript.forEach(function(n){ out.push('[' + n.t + '] ' + n.text); }); }
+  return out.join('\n');
+}
+function addValue(name, v){
+  var cur = memo.values[name] || '';
+  var parts = cur ? cur.split('、') : [];
+  if (parts.indexOf(v) < 0) parts.push(v);
+  memo.values[name] = parts.join('、');
+  if (!memo.started) memo.started = new Date().toLocaleString('ja-JP');
+  save();
+}
+panel.addEventListener('click', function(e){
+  var b = e.target.closest('button'); if (!b) return;
+  var m = b.dataset.m;
+  if (b.dataset.mc) { addValue(b.dataset.mc, b.dataset.v); if (sugg[b.dataset.mc]) sugg[b.dataset.mc] = sugg[b.dataset.mc].filter(function(x){ return x !== b.dataset.v; }); draw(); return; }
+  if (b.dataset.mdel != null) { memo.notes.splice(+b.dataset.mdel, 1); save(); draw(); return; }
+  if (b.dataset.mopen != null) {
+    var hist = get(KEY_HIST, []), idx = +b.dataset.mopen, x = hist[idx];
+    hist.splice(idx, 1);
+    if (memo.started || memo.notes.length || memo.transcript.length || Object.keys(memo.values).length) hist.unshift({ date: memo.started || new Date().toLocaleString('ja-JP'), values: memo.values, notes: memo.notes, transcript: memo.transcript });
+    memo = { values: x.values || {}, notes: x.notes || [], transcript: x.transcript || [], started: x.date };
+    sugg = {}; set(KEY_HIST, hist); save(); draw(); return;
+  }
+  if (b.dataset.mhdel != null) { var hh = get(KEY_HIST, []); hh.splice(+b.dataset.mhdel, 1); set(KEY_HIST, hh); draw(); return; }
+  if (m === 'close') panel.classList.remove('on');
+  else if (m === 'edit') { editing = true; draw(); }
+  else if (m === 'fieldsDone') { cfg.fields = panel.querySelector('#mFields').value.split('\n').map(function(x){ return x.trim(); }).filter(Boolean); set(KEY_CFG, cfg); editing = false; draw(); }
+  else if (m === 'fieldsReset') { cfg.fields = DEFAULT_FIELDS.slice(); set(KEY_CFG, cfg); draw(); }
+  else if (m === 'note') addNote();
+  else if (m === 'info') {
+    var g = function(id){ var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+    var nm = (g('seiA') + ' ' + g('meiA')).trim() || g('nmA');
+    if (nm) memo.values['お客様'] = nm + (g('birth') ? '（' + g('birth') + (g('timeA') ? ' ' + g('timeA') : '') + '生）' : '');
+    else if (g('birth')) memo.values['お客様'] = g('birth') + '生';
+    if (!memo.started) memo.started = new Date().toLocaleString('ja-JP');
+    save(); draw();
+  }
+  else if (m === 'copy') { if (navigator.clipboard) navigator.clipboard.writeText(asText()).then(function(){ b.textContent = 'コピーしました'; setTimeout(draw, 1200); }); }
+  else if (m === 'dl') {
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([asText()], { type: 'text/plain' }));
+    a.download = '鑑定メモ_' + (memo.values['お客様'] || '').replace(/[\\/:*?"<>|（）() ]/g, '').slice(0, 12) + '_' + new Date().toISOString().slice(0, 10) + '.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  else if (m === 'new') {
+    if (memo.started || memo.notes.length || memo.transcript.length || Object.keys(memo.values).length) {
+      var hs = get(KEY_HIST, []); hs.unshift({ date: memo.started || new Date().toLocaleString('ja-JP'), values: memo.values, notes: memo.notes, transcript: memo.transcript }); set(KEY_HIST, hs.slice(0, 50));
+    }
+    memo = { values: {}, notes: [], transcript: [], started: null }; sugg = {}; save(); draw();
+  }
+  else if (m === 'rec') toggleRec();
+});
+panel.addEventListener('input', function(e){ var f = e.target.dataset && e.target.dataset.mf; if (f) { memo.values[f] = e.target.value; if (!memo.started) memo.started = new Date().toLocaleString('ja-JP'); save(); } });
+panel.addEventListener('keydown', function(e){ if (e.target.id === 'mNote' && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); addNote(); } });
+function addNote(){
+  var el = panel.querySelector('#mNote'); if (!el || !el.value.trim()) return;
+  memo.notes.push({ t: now(), text: el.value.trim() }); if (!memo.started) memo.started = new Date().toLocaleString('ja-JP');
+  save(); draw(); var n = panel.querySelector('#mNote'); if (n) n.focus();
+}
+
+// ---- 音声の文字起こし（Chrome の Web Speech API） ----
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+// 言葉から項目の候補を拾う（候補として出すだけ。確定は自分で押す）
+var KANJI_NUM = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5 };
+var JOBS = ['看護師', '介護士', '保育士', '教師', '教員', '会社員', '公務員', '自営業', 'フリーランス', 'エンジニア', 'デザイナー', '美容師', '営業', '事務', 'パート', 'アルバイト', '主婦', '経営者', '医師', '薬剤師', '販売', '飲食', 'ライター', 'カウンセラー', 'セラピスト', '占い師'];
+function when(t){
+  var m = t.match(/(20\d\d)年|令和(\d+|元)年|(今年|来年|再来年)|(\d+)年後|(\d+)歳/);
+  if (!m) return '';
+  if (m[1]) return m[1];
+  if (m[2]) return String(2018 + (m[2] === '元' ? 1 : +m[2]));
+  if (m[3]) return m[3];
+  if (m[4]) return String(Y + +m[4]);
+  if (m[5]) return m[5] + '歳';
+  return '';
+}
+// 読点・句点で区切った節ごとに調べる（別の話の年を拾わないように）
+function suggest(text){ String(text).split(/[、。,.!?！？\r\n]/).forEach(function(t){ if (t.trim()) suggestOne(t); }); }
+function suggestOne(t){
+  var add = function(f, v){ if (!v) return; sugg[f] = sugg[f] || []; if (sugg[f].indexOf(v) < 0 && (memo.values[f] || '').indexOf(v) < 0) sugg[f].push(v); };
+  JOBS.forEach(function(j){ if (t.indexOf(j) >= 0) add('職業', j); });
+  if (/(転職|退職|独立|起業|辞め)/.test(t)) add('転職・独立の時期', when(t) || (t.match(/転職|独立|起業/) || [''])[0]);
+  var c = t.match(/(子ども|子供|こども|息子|娘)[がはも]?([0-9一二三四五])人/);
+  if (c) add('子ども', (KANJI_NUM[c[2]] || c[2]) + '人');
+  else if (/(子ども|子供|こども)[はが]?(いない|いません|なし)/.test(t)) add('子ども', 'なし');
+  else if (/(息子|娘|子ども|子供)[がはも]?(いる|います)/.test(t)) add('子ども', 'あり');
+  if (/(妊娠|出産|妊活|赤ちゃん)/.test(t)) { add('出産の時期', when(t)); if (/妊娠中/.test(t)) add('子ども', '妊娠中'); }
+  if (/離婚/.test(t)) add('結婚', '離婚歴あり'); else if (/再婚/.test(t)) add('結婚', '再婚'); else if (/(結婚して|既婚|旦那|夫が|妻が|主人)/.test(t)) add('結婚', '既婚'); else if (/(独身|未婚)/.test(t)) add('結婚', '未婚');
+  if (/(引っ越|引越|転居|移住)/.test(t)) add('引っ越し・住まい', when(t) || '予定あり');
+  if (/(病院|通院|手術|入院|持病)/.test(t)) add('健康', '通院中');
+}
+function toggleRec(){
+  if (!SR) { draw(); return; }
+  if (recOn) { recOn = false; try { rec.stop(); } catch(e){} draw(); return; }
+  if (!cfg.speechOk) {
+    if (!window.confirm('文字起こしは Chrome の音声認識を使います。話した音声は Google のサーバーに送られて文字になります（このツールのどこにも保存はされません）。始めてよいですか？')) return;
+    cfg.speechOk = true; set(KEY_CFG, cfg);
+  }
+  rec = new SR(); rec.lang = 'ja-JP'; rec.continuous = true; rec.interimResults = true;
+  rec.onresult = function(ev){
+    interim = '';
+    for (var i = ev.resultIndex; i < ev.results.length; i++) {
+      var r = ev.results[i], t = r[0].transcript.trim();
+      if (r.isFinal) { if (t) { memo.transcript.push({ t: now(), text: t }); suggest(t); if (!memo.started) memo.started = new Date().toLocaleString('ja-JP'); save(); } }
+      else interim += t;
+    }
+    if (!editing) draw();
+  };
+  rec.onerror = function(ev){ if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') { recOn = false; alertBox('マイクが使えません。ブラウザのマイクの許可を確認してください。'); } };
+  rec.onend = function(){ if (recOn) { try { rec.start(); } catch(e){} } else draw(); };   // 無音で止まったら続ける
+  recOn = true; try { rec.start(); } catch(e){}
+  draw();
+}
+function alertBox(msg){ var b = panel.querySelector('.mbody'); if (b) b.insertAdjacentHTML('afterbegin', '<div class="warnbox">' + esc(msg) + '</div>'); }
+window.MeishikiMemo = { suggest: suggest, sugg: function(){ return sugg; }, asText: asText };
+})();
+
 </script>
 <script>
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))) {
