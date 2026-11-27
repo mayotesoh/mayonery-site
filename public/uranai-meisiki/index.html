@@ -70,7 +70,7 @@ button.go:hover{filter:brightness(1.08)}
 
 /* 結果 */
 #result{margin-top:18px; display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px}
-#result .card.wide{grid-column:1/-1}
+#result .card.wide, #result .card.autowide{grid-column:1/-1}
 #result .card{position:relative}
 #result .card.pa{border-left:5px solid var(--pa)}
 #result .card.pb{border-left:5px solid var(--pb)}
@@ -94,8 +94,8 @@ button.go:hover{filter:brightness(1.08)}
 #result .card.lifting{opacity:.45}
 #result .card.drop-before{box-shadow:-5px 0 0 var(--accent)}
 #result .card.drop-after{box-shadow:5px 0 0 var(--accent)}
-#result .card.wide.drop-before{box-shadow:0 -5px 0 var(--accent)}
-#result .card.wide.drop-after{box-shadow:0 5px 0 var(--accent)}
+#result .card.wide.drop-before, #result .card.autowide.drop-before{box-shadow:0 -5px 0 var(--accent)}
+#result .card.wide.drop-after, #result .card.autowide.drop-after{box-shadow:0 5px 0 var(--accent)}
 .card h2{font-size:15px; margin:0 0 10px; display:block; letter-spacing:.04em; line-height:1.6}
 .card h2 small{margin-left:8px}
 .card h2 .who{margin-right:8px; vertical-align:2px}
@@ -4004,7 +4004,7 @@ function renderAishou(){
     clearMarks(); drag.target = null;
     if (!t || t === drag.sec || t.dataset.sec === drag.id) return;
     var r = t.getBoundingClientRect();
-    var before = t.classList.contains('wide') || r.width > res.clientWidth * 0.7
+    var before = t.classList.contains('wide') || t.classList.contains('autowide') || r.width > res.clientWidth * 0.7
       ? e.clientY < r.top + r.height / 2
       : e.clientX < r.left + r.width / 2;
     t.classList.add(before ? 'drop-before' : 'drop-after');
@@ -6484,6 +6484,32 @@ window.addEventListener('hashchange', fromHash);
     else if (b.dataset.pd != null) { var L = list(), p = L[+b.dataset.pd]; if (p && window.confirm('「' + p.name + '」を削除しますか？')) { L.splice(+b.dataset.pd, 1); store.set(KEY, L); drawList(); } }
   });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && box.classList.contains('on')) box.classList.remove('on'); });
+})();
+// ---- 横にはみ出すカードは自動で横いっぱいに広げる（2026-11-27 本人依頼「横スクロールが必要なセクションは横に引き伸ばして全て収まるように」）----
+// 表などが枠に収まらず横スクロールが出るカードに .autowide（＝.wide と同じく1行を占める）を付ける。幅が変わったら測り直す
+(function(){
+  var res = document.getElementById('result'), busy = false, lastW = 0;
+  function over(sec){
+    if (sec.scrollWidth > sec.clientWidth + 2) return true;
+    var els = sec.querySelectorAll('div, table, svg');
+    for (var i = 0; i < els.length; i++) { var el = els[i]; if (el.scrollWidth <= el.clientWidth + 2) continue; var ox = getComputedStyle(el).overflowX; if (ox === 'auto' || ox === 'scroll') return true; }
+    return false;
+  }
+  function fit(){
+    busy = false;
+    var secs = res.querySelectorAll('section.card');
+    secs.forEach(function(sec){ sec.classList.remove('autowide'); });
+    var cols = getComputedStyle(res).gridTemplateColumns.split(' ').length;
+    if (cols < 2) return;   // 1列（スマホ）では広げても同じ
+    // 2人並びのときは、同じ項目の2枚をそろえて広げる（左右の並びが崩れないように）
+    var ids = {};
+    secs.forEach(function(sec){ if (!sec.classList.contains('wide') && over(sec)) ids[sec.dataset.sec] = 1; });
+    secs.forEach(function(sec){ if (ids[sec.dataset.sec] && !sec.classList.contains('wide')) sec.classList.add('autowide'); });
+  }
+  function later(){ if (busy) return; busy = true; requestAnimationFrame(fit); }
+  new MutationObserver(later).observe(res, { childList: true, subtree: true });
+  window.addEventListener('resize', function(){ if (Math.abs(window.innerWidth - lastW) < 4) return; lastW = window.innerWidth; later(); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(later);
 })();
 // 鑑定書（kantei.js）に渡す窓口。変わる値はその都度読む
 window.MeishikiApp = {
