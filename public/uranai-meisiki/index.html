@@ -373,7 +373,15 @@ table.hgrid{border-collapse:collapse; font-size:13px; margin:4px 0}
 table.hgrid th, table.hgrid td{border:1px solid var(--line); width:30px; height:28px; text-align:center; padding:0}
 table.hgrid td.e{border:0}
 table.hgrid td small{font-size:9px; color:var(--sub); margin-left:1px}
-dl.hasl dt{font-weight:400}
+.sctbl .ssc{font-size:11px; line-height:1.5; color:var(--sub); text-align:left; vertical-align:top}
+.ss{display:inline-block; font-size:11px; line-height:1.4; padding:1px 6px; margin:1px 2px 1px 0; border-radius:999px; border:1px solid var(--line); white-space:nowrap; color:var(--ink); background:var(--bg)}
+.ss.g{border-color:var(--accent); color:var(--accent); background:var(--accent-soft)}
+.ss.c{border-color:var(--warn); color:var(--warn); background:var(--warn-bg)}
+.sstbl td{vertical-align:top; text-align:left}
+dl.hasl{grid-template-columns:minmax(0,1fr); gap:0}
+dl.hasl dt{font-weight:400; color:var(--ink); padding-top:7px; border-top:1px dashed var(--line)}
+dl.hasl dt:first-of-type{border-top:0; padding-top:0}
+dl.hasl dd{font-size:12.5px; color:var(--sub); padding:1px 0 7px 1em}
 .hh3{font-size:14px; margin:14px 0 6px}
 .hh3 small{font-weight:400; color:var(--sub); font-size:12px}
 .hbar{display:grid; grid-template-columns:minmax(90px,1.2fr) 2fr 24px minmax(70px,1.4fr); gap:8px; align-items:center; margin:3px 0}
@@ -621,6 +629,21 @@ input.sman{width:64px; font-size:16px; padding:3px 6px; text-align:center}
         <input type="radio" name="s_zou" id="szA" value="all"><label for="szA">4つの支とも日数で</label>
         <input type="radio" name="s_zou" id="szM" value="month"><label for="szM">月支だけ日数で</label>
         <input type="radio" name="s_zou" id="szH" value="honki"><label for="szH">本気だけ</label>
+      </div>
+    </div>
+    <div class="field only-shichu">
+      <label>神殺の起点（駅馬・桃花・華蓋など三合で見るもの）</label>
+      <div class="seg" role="radiogroup">
+        <input type="radio" name="s_ss" id="sssB" value="both"><label for="sssB">年支と日支</label>
+        <input type="radio" name="s_ss" id="sssY" value="year"><label for="sssY">年支だけ</label>
+        <input type="radio" name="s_ss" id="sssD" value="day"><label for="sssD">日支だけ</label>
+      </div>
+    </div>
+    <div class="field only-shichu">
+      <label>命式・大運・歳運の表に神殺を出す</label>
+      <div class="seg" role="radiogroup">
+        <input type="radio" name="s_ssrow" id="ssrOn" value="on"><label for="ssrOn">出す</label>
+        <input type="radio" name="s_ssrow" id="ssrOff" value="off"><label for="ssrOff">出さない</label>
       </div>
     </div>
     <div class="field only-shichu">
@@ -1808,6 +1831,116 @@ function calc(y, m, d, opt){
 // 歳運（その年の干支。立春で切り替え）
 function saiun(r, Y){ var gi = (((Y - 4) % 60) + 60) % 60; return { y: Y, idx: gi, ganshi: gname(gi), tsuhen: tsuhen(r.nikkan, KAN[gi % 10]), juniun: juniun(r.nikkan, SHI[gi % 12]), koubou: r.koubou.indexOf(SHI[gi % 12]) >= 0 }; }
 
+// ---- 神殺（2026-11-27 本人依頼）。表は通行の早見表（三命通会などの系統）。流派で違うものは引き継ぎ書 2-25 ----
+// 日干から見て、4つの柱の地支に出るもの
+var SS_DK = {
+  天乙貴人: { 甲: '丑未', 戊: '丑未', 庚: '丑未', 乙: '子申', 己: '子申', 丙: '亥酉', 丁: '亥酉', 辛: '寅午', 壬: '巳卯', 癸: '巳卯' },
+  文昌貴人: { 甲: '巳', 乙: '午', 丙: '申', 丁: '酉', 戊: '申', 己: '酉', 庚: '亥', 辛: '子', 壬: '寅', 癸: '卯' },
+  金輿: { 甲: '辰', 乙: '巳', 丙: '未', 丁: '申', 戊: '未', 己: '申', 庚: '戌', 辛: '亥', 壬: '丑', 癸: '寅' },
+  暗禄: { 甲: '亥', 乙: '戌', 丙: '申', 丁: '未', 戊: '申', 己: '未', 庚: '巳', 辛: '辰', 壬: '寅', 癸: '丑' },
+  禄神: { 甲: '寅', 乙: '卯', 丙: '巳', 丁: '午', 戊: '巳', 己: '午', 庚: '申', 辛: '酉', 壬: '亥', 癸: '子' },
+  羊刃: { 甲: '卯', 乙: '辰', 丙: '午', 丁: '未', 戊: '午', 己: '未', 庚: '酉', 辛: '戌', 壬: '子', 癸: '丑' },
+  飛刃: { 甲: '酉', 乙: '戌', 丙: '子', 丁: '丑', 戊: '子', 己: '丑', 庚: '卯', 辛: '辰', 壬: '午', 癸: '未' },
+  紅艶: { 甲: '午', 乙: '午', 丙: '寅', 丁: '未', 戊: '辰', 己: '辰', 庚: '戌', 辛: '酉', 壬: '子', 癸: '申' }
+};
+// 年支・日支の三合（申子辰・寅午戌・巳酉丑・亥卯未）から見て、ほかの柱の地支に出るもの
+var SS_SAN = { 申: 0, 子: 0, 辰: 0, 寅: 1, 午: 1, 戌: 1, 巳: 2, 酉: 2, 丑: 2, 亥: 3, 卯: 3, 未: 3 };
+var SS_BR = {
+  駅馬: ['寅', '申', '亥', '巳'], 桃花: ['酉', '卯', '午', '子'], 華蓋: ['辰', '戌', '丑', '未'], 将星: ['子', '午', '酉', '卯'],
+  劫殺: ['巳', '亥', '寅', '申'], 亡神: ['亥', '巳', '申', '寅'], 災殺: ['午', '子', '卯', '酉']
+};
+// 月支から見て、ほかの柱の干（天徳は支のときもある）・支に出るもの
+var SS_TENTOKU = { 寅: '丁', 卯: '申', 辰: '壬', 巳: '辛', 午: '亥', 未: '甲', 申: '癸', 酉: '寅', 戌: '丙', 亥: '乙', 子: '巳', 丑: '庚' };
+var SS_GETTOKU = ['壬', '丙', '庚', '甲'];   // SS_SAN の順
+// 年支から見る孤辰・寡宿（亥子丑→寅・戌、寅卯辰→巳・丑、巳午未→申・辰、申酉戌→亥・未）
+var SS_KOSHIN = { 亥: '寅', 子: '寅', 丑: '寅', 寅: '巳', 卯: '巳', 辰: '巳', 巳: '申', 午: '申', 未: '申', 申: '亥', 酉: '亥', 戌: '亥' };
+var SS_KASHUKU = { 亥: '戌', 子: '戌', 丑: '戌', 寅: '丑', 卯: '丑', 辰: '丑', 巳: '辰', 午: '辰', 未: '辰', 申: '未', 酉: '未', 戌: '未' };
+// 日柱そのもので見るもの
+var SS_KAIGOU = ['庚辰', '庚戌', '壬辰', '戊戌'];
+var SS_INYOU = ['丙子', '丁丑', '戊寅', '辛卯', '壬辰', '癸巳', '丙午', '丁未', '戊申', '辛酉', '壬戌', '癸亥'];
+var SS_ORDER = ['天乙貴人', '天徳貴人', '月徳貴人', '文昌貴人', '天医', '金輿', '暗禄', '禄神', '将星', '駅馬', '華蓋', '桃花', '紅艶', '羊刃', '飛刃', '魁罡', '劫殺', '亡神', '災殺', '孤辰', '寡宿', '陰陽差錯'];
+var SS_KIND = { 天乙貴人: 'g', 天徳貴人: 'g', 月徳貴人: 'g', 文昌貴人: 'g', 天医: 'g', 金輿: 'g', 暗禄: 'g', 禄神: 'g', 将星: 'g', 駅馬: 'n', 華蓋: 'n', 桃花: 'n', 紅艶: 'n', 羊刃: 'c', 飛刃: 'c', 魁罡: 'n', 劫殺: 'c', 亡神: 'c', 災殺: 'c', 孤辰: 'c', 寡宿: 'c', 陰陽差錯: 'c' };
+var PK = ['year', 'month', 'day', 'hour'], PJ = { year: '年支', month: '月支', day: '日支', hour: '時支' };
+// base: 'both'（年支と日支）・'year'・'day'。三合で見る神殺の起点
+function shinsatsu(r, base){
+  base = base || 'both';
+  var P = r.pillars, dk = r.nikkan, out = { year: [], month: [], day: [], hour: [] }, list = [];
+  var add = function(k, name, from){
+    var a = out[k], e = a.filter(function(x){ return x.name === name; })[0];
+    if (e) { if (e.from.indexOf(from) < 0) e.from.push(from); return; }
+    a.push({ name: name, kind: SS_KIND[name], from: [from] });
+  };
+  PK.forEach(function(k){
+    var p = P[k]; if (!p) return;
+    Object.keys(SS_DK).forEach(function(n){ if (SS_DK[n][dk].indexOf(p.shi) >= 0) add(k, n, '日干'); });
+  });
+  var bases = base === 'year' ? ['year'] : base === 'day' ? ['day'] : ['year', 'day'];
+  bases.forEach(function(b){
+    var g = SS_SAN[P[b].shi];
+    PK.forEach(function(k){
+      if (k === b || !P[k]) return;
+      Object.keys(SS_BR).forEach(function(n){ if (SS_BR[n][g] === P[k].shi) add(k, n, PJ[b]); });
+    });
+  });
+  var ms = P.month.shi, tt = SS_TENTOKU[ms], gt = SS_GETTOKU[SS_SAN[ms]], ti = SHI[(SHI.indexOf(ms) + 11) % 12];
+  PK.forEach(function(k){
+    var p = P[k]; if (!p) return;
+    if (k !== 'month') {
+      if (p.kan === tt || p.shi === tt) add(k, '天徳貴人', '月支');
+      if (p.kan === gt) add(k, '月徳貴人', '月支');
+      if (p.shi === ti) add(k, '天医', '月支');
+    }
+    if (k !== 'year') {
+      if (p.shi === SS_KOSHIN[P.year.shi]) add(k, '孤辰', '年支');
+      if (p.shi === SS_KASHUKU[P.year.shi]) add(k, '寡宿', '年支');
+    }
+  });
+  if (SS_KAIGOU.indexOf(P.day.ganshi) >= 0) add('day', '魁罡', '日柱');
+  if (SS_INYOU.indexOf(P.day.ganshi) >= 0) add('day', '陰陽差錯', '日柱');
+  PK.forEach(function(k){
+    out[k].sort(function(a, b){ return SS_ORDER.indexOf(a.name) - SS_ORDER.indexOf(b.name); });
+    out[k].forEach(function(x){ list.push({ name: x.name, kind: x.kind, pillar: k, from: x.from }); });
+  });
+  return { byPillar: out, list: list, base: base };
+}
+// 年・大運の干支1つに出る神殺（日干・年支・日支・月支から）
+function shinsatsuOf(r, ganshi, base){
+  var kan = ganshi.charAt(0), shi = ganshi.charAt(1), P = r.pillars, dk = r.nikkan, res = [];
+  var push = function(n){ if (res.indexOf(n) < 0) res.push(n); };
+  Object.keys(SS_DK).forEach(function(n){ if (SS_DK[n][dk].indexOf(shi) >= 0) push(n); });
+  (base === 'year' ? ['year'] : base === 'day' ? ['day'] : ['year', 'day']).forEach(function(b){
+    var g = SS_SAN[P[b].shi]; Object.keys(SS_BR).forEach(function(n){ if (SS_BR[n][g] === shi) push(n); });
+  });
+  var ms = P.month.shi, tt = SS_TENTOKU[ms];
+  if (kan === tt || shi === tt) push('天徳貴人');
+  if (kan === SS_GETTOKU[SS_SAN[ms]]) push('月徳貴人');
+  return res.sort(function(a, b){ return SS_ORDER.indexOf(a) - SS_ORDER.indexOf(b); });
+}
+var SHINSATSU_TEXT = {
+  天乙貴人: { rule: '日干から見る', kw: '助け・引き立て', text: '最も代表的な吉の神殺。困ったときに人から助けられる、目上や周りに引き立てられる縁を表すとされます。' },
+  天徳貴人: { rule: '月支から見る', kw: '守り・徳', text: '生まれ月から見る守りの星。大きな災いをやわらげ、人柄の徳によって守られるとされます。' },
+  月徳貴人: { rule: '月支から見る', kw: '穏やかさ・守り', text: '天徳貴人と並ぶ守りの星。穏やかで品のよい人柄と、自然と災いを避ける力を表すとされます。' },
+  文昌貴人: { rule: '日干から見る', kw: '学び・知性・文才', text: '学問と文章の星。頭の回転がよく、学ぶこと、書くこと、伝えることに向くとされます。' },
+  天医: { rule: '月支から見る', kw: '癒やし・医療・心のケア', text: '人を癒やす星。医療・福祉・カウンセリングなど、人を手当てすることに縁があるとされます。' },
+  金輿: { rule: '日干から見る', kw: '豊かさ・よい縁', text: '金の車を表す星。暮らしの豊かさや、配偶者・周りからの恵みに縁があるとされます。' },
+  暗禄: { rule: '日干から見る', kw: '陰の助け・思わぬ恵み', text: '目立たないところから来る助けの星。困ったときに思わぬ支えが現れるとされます。' },
+  禄神: { rule: '日干から見る', kw: '自立・安定した収入', text: '日干が力を得る支。自分の力で身を立て、安定した糧を得る力を表すとされます（建禄・干禄とも）。' },
+  将星: { rule: '年支・日支から見る', kw: '統率・リーダーシップ', text: '将軍の星。人をまとめ、責任ある立場に立つ力を表すとされます。' },
+  駅馬: { rule: '年支・日支から見る', kw: '移動・変化・活動', text: '早馬の星。旅行・転居・出張など動きが多く、動くことで運が開けるとされます。' },
+  華蓋: { rule: '年支・日支から見る', kw: '芸術・宗教・孤高', text: '高貴な人にさしかける傘の星。芸術や精神世界への感性が強く、一人の時間を大切にする面を表すとされます。' },
+  桃花: { rule: '年支・日支から見る', kw: '魅力・人気・恋愛', text: '咸池（かんち）とも。人を惹きつける華やかさと、恋愛や人気に縁があることを表すとされます。' },
+  紅艶: { rule: '日干から見る', kw: '色気・華やかさ', text: '異性を惹きつける魅力の星。華やかで人目を引く反面、恋愛ごとが多くなりやすいとされます。' },
+  羊刃: { rule: '日干から見る', kw: '強さ・激しさ・突破力', text: '刃物の星。強い意志と突破力を表す一方、力が行き過ぎると衝突やけがに注意とされます。' },
+  飛刃: { rule: '日干から見る', kw: '急な出来事・勢い', text: '羊刃と向かい合う支。思いがけない出来事や勢い余っての失敗に気をつけたいとされます。' },
+  魁罡: { rule: '日柱そのもの', kw: '決断力・剛さ・極端さ', text: '日柱が庚辰・庚戌・壬辰・戊戌の人。頭がよく決断が早い、良くも悪くも極端に出やすいとされます。' },
+  劫殺: { rule: '年支・日支から見る', kw: '奪われる・急な変化', text: '外から何かを持っていかれる暗示の星。思い切りのよさにもなる一方、損失や争いに注意とされます。' },
+  亡神: { rule: '年支・日支から見る', kw: '失う・内側の迷い', text: '見えないところで物事が失われる暗示の星。策略や計算高さとして出ることもあるとされます。' },
+  災殺: { rule: '年支・日支から見る', kw: '思わぬ災い', text: '白虎殺とも。思わぬトラブルやけがに気をつけたい星とされます。' },
+  孤辰: { rule: '年支から見る', kw: '独立心・ひとり', text: '孤独の星（男性に重く見る流派が多い）。人に頼らず生きる独立心として出ることもあるとされます。' },
+  寡宿: { rule: '年支から見る', kw: '自立・ひとり', text: '孤辰と対になる星（女性に重く見る流派が多い）。自分の世界を持ち、自立して生きる力にもなるとされます。' },
+  陰陽差錯: { rule: '日柱そのもの', kw: 'すれ違い・家族の縁', text: '日柱が12の干支のどれかの人。結婚や親族との関係で、思いのすれ違いが起きやすいとされます。' }
+};
+
 // ---- 意味（書き下ろし） ----
 var TSUHEN_TEXT = {
   比肩: { kw: '自立・自分らしさ・意志の強さ', text: '自分と同じ五行・同じ陰陽の星。自分の考えを貫き、人に頼らず進む力を表すとされます。' },
@@ -1847,7 +1980,7 @@ var TERM = {
   '中心星': '月柱の蔵干の通変星。性格の核を表すとよく言われます。',
   '時柱': '生まれた時刻（2時間ごと）の干支。晩年や子どもとの縁を表すとされます。出生時刻が分からないときは出しません。'
 };
-var API = { calc: calc, saiun: saiun, tsuhen: tsuhen, juniun: juniun, zouOf: zouOf, zouAll: zouAll, eot: eot, TSUHEN_TEXT: TSUHEN_TEXT, JUNIUN_TEXT: JUNIUN_TEXT, TERM: TERM, JUNIUN: JUNIUN, SHI_ELEM: SHI_ELEM };
+var API = { calc: calc, saiun: saiun, shinsatsu: shinsatsu, shinsatsuOf: shinsatsuOf, SHINSATSU_TEXT: SHINSATSU_TEXT, SS_ORDER: SS_ORDER, tsuhen: tsuhen, juniun: juniun, zouOf: zouOf, zouAll: zouAll, eot: eot, TSUHEN_TEXT: TSUHEN_TEXT, JUNIUN_TEXT: JUNIUN_TEXT, TERM: TERM, JUNIUN: JUNIUN, SHI_ELEM: SHI_ELEM };
 if (typeof module !== 'undefined' && module.exports) module.exports = API;
 else root.Shichu = API;
 })(typeof window !== 'undefined' ? window : this);
@@ -3315,6 +3448,7 @@ var SECTIONS = [
   // 四柱推命
   { id:'s_meishiki', sys:'shichu', label:'命式',        basic:true,  render:function(r){ return renderScMeishiki(r); } },
   { id:'s_gogyo',  sys:'shichu', label:'五行のバランス', basic:true,  render:function(r){ return renderScGogyo(r); } },
+  { id:'s_shinsatsu', sys:'shichu', label:'神殺',      basic:true,  render:function(r){ return renderScShinsatsu(r); }, wide:true },
   { id:'s_daiun',  sys:'shichu', label:'大運',          basic:true,  render:function(r){ return renderScDaiun(r); }, wide:true },
   { id:'s_saiun',  sys:'shichu', label:'歳運',          basic:true,  render:function(r){ return renderScSaiun(r); }, wide:true },
   { id:'s_aishou', sys:'shichu', label:'相性（日干）',  basic:true,  pair:true, render:null, wide:true },
@@ -3442,7 +3576,8 @@ if (firstCfg) applyUnOrder();   // 以前の既定（大運→年運→月運→
 function sanitizeOrder(o){
   var ids = defaultOrder.slice();
   var out = (Array.isArray(o) ? o : []).filter(function(x){ return ids.indexOf(x) >= 0; });
-  ids.forEach(function(x){ if (out.indexOf(x) < 0) out.push(x); });
+  // 新しく増えた項目は、本来の並びで直前にある項目のすぐ後ろに入れる
+  ids.forEach(function(x, i){ if (out.indexOf(x) >= 0) return; var j = i - 1; while (j >= 0 && out.indexOf(ids[j]) < 0) j--; if (j < 0) out.push(x); else out.splice(out.indexOf(ids[j]) + 1, 0, x); });
   return out;
 }
 function byId(id){ return SECTIONS.filter(function(s){ return s.id === id; })[0]; }
@@ -3592,7 +3727,7 @@ document.getElementById('birth').addEventListener('input', function(){ showHint(
 var WIDE = window.matchMedia ? window.matchMedia('(min-width:641px)').matches : true;
 document.getElementById('adv').open = WIDE;
 document.getElementById('pbox').open = WIDE;
-var SHORT = { s_meishiki:'命式', s_gogyo:'五行', s_daiun:'大運', s_saiun:'歳運', s_aishou:'相性', s_kaisetsu:'解説', s_index:'索引', k_core:'九星', k_board:'盤', k_today:'方位', k_doukai:'年運', k_aishou:'相性', k_kaisetsu:'解説', k_index:'索引', h_chart:'図', h_planets:'天体', h_houses:'ハウス', h_aspects:'アスペクト', h_balance:'元素', h_transit:'今', h_aishou:'相性', h_kaisetsu:'解説', h_index:'索引', m_gokaku:'五格', m_moji:'画数', m_sansai:'三才', m_inyou:'陰陽', m_aishou:'相性', m_kaisetsu:'解説', m_index:'索引', info:'基本', n_core:'主な数', n_cycle:'イヤー', n_period:'ピナクル', n_name:'名前', n_aishou:'相性', n_kaisetsu:'解説', n_index:'索引', kaisetsu:'解説', glossary:'索引', inzan:'陰占', yousen:'陽占', daiun:'大運', nenun:'年運', getsuun:'月運', nichiun:'日運', tenchu:'天中殺', isou:'位相法', ijou:'異常干支', suuri:'数理法', shugo:'守護神', sainou:'才能', aishou:'相性' };
+var SHORT = { s_meishiki:'命式', s_gogyo:'五行', s_daiun:'大運', s_saiun:'歳運', s_shinsatsu:'神殺', s_aishou:'相性', s_kaisetsu:'解説', s_index:'索引', k_core:'九星', k_board:'盤', k_today:'方位', k_doukai:'年運', k_aishou:'相性', k_kaisetsu:'解説', k_index:'索引', h_chart:'図', h_planets:'天体', h_houses:'ハウス', h_aspects:'アスペクト', h_balance:'元素', h_transit:'今', h_aishou:'相性', h_kaisetsu:'解説', h_index:'索引', m_gokaku:'五格', m_moji:'画数', m_sansai:'三才', m_inyou:'陰陽', m_aishou:'相性', m_kaisetsu:'解説', m_index:'索引', info:'基本', n_core:'主な数', n_cycle:'イヤー', n_period:'ピナクル', n_name:'名前', n_aishou:'相性', n_kaisetsu:'解説', n_index:'索引', kaisetsu:'解説', glossary:'索引', inzan:'陰占', yousen:'陽占', daiun:'大運', nenun:'年運', getsuun:'月運', nichiun:'日運', tenchu:'天中殺', isou:'位相法', ijou:'異常干支', suuri:'数理法', shugo:'守護神', sainou:'才能', aishou:'相性' };
 function buildNav(){
   var nav = document.getElementById('bnav');
   if (!current) { nav.innerHTML = ''; return; }
@@ -4516,6 +4651,10 @@ if (!store.get('numSeen', false)) {
   SECTIONS.forEach(function(s){ if (s.sys === 'suhi' && s.basic && visible.indexOf(s.id) < 0) visible.push(s.id); });
   store.set('visible', visible); store.set('numSeen', true);
 }
+if (!store.get('seen_shinsatsu', false)) {
+  if (visible.indexOf('s_meishiki') >= 0 && visible.indexOf('s_shinsatsu') < 0) visible.splice(visible.indexOf('s_meishiki') + 1, 0, 's_shinsatsu');
+  store.set('visible', visible); store.set('seen_shinsatsu', true);
+}
 ['kyusei', 'shichu', 'horo', 'seimei'].forEach(function(sy){
   if (store.get('seen_' + sy, false)) return;
   SECTIONS.forEach(function(s){ if (s.sys === sy && s.basic && visible.indexOf(s.id) < 0) visible.push(s.id); });
@@ -5113,10 +5252,10 @@ function tDraw(){
 
 // ==================== 四柱推命 ====================
 var SC = window.Shichu;
-var SC_DEFAULT = { dayChange: '23', correct: 'none', zou: 'all', round: 'round' };
+var SC_DEFAULT = { dayChange: '23', correct: 'none', zou: 'all', round: 'round', ss: 'both', ssrow: 'on' };
 var scOpt = Object.assign({}, SC_DEFAULT, store.get('shichu', {}));
 var sun = { from: TODAY.y - 2 };
-[['s_dc', 'dayChange'], ['s_cor', 'correct'], ['s_zou', 'zou'], ['s_rnd', 'round']].forEach(function(x){
+[['s_dc', 'dayChange'], ['s_cor', 'correct'], ['s_zou', 'zou'], ['s_rnd', 'round'], ['s_ss', 'ss'], ['s_ssrow', 'ssrow']].forEach(function(x){
   document.querySelectorAll('input[name=' + x[0] + ']').forEach(function(r){
     r.checked = r.value === scOpt[x[1]];
     r.addEventListener('change', function(){ scOpt[x[1]] = r.value; store.set('shichu', scOpt); if (current) { calcSc(); draw(); } });
@@ -5144,6 +5283,7 @@ function renderScMeishiki(r){
   h += row(sT('蔵干'), function(p){ return '<span class="' + KCLS(p.zou) + '">' + gl('kan', p.zou) + '</span><div class="zall">' + p.zouAll.join(' ') + '</div>'; });
   h += row('蔵干の通変星', function(p, k){ return sTs(p.zouTsuhen) + (k === 'month' ? ' <span class="tag">' + sT('中心星') + '</span>' : ''); });
   h += row(sT('十二運'), function(p){ return sJu(p.juniun); });
+  if (scOpt.ssrow !== 'off') { var ssr = SC.shinsatsu(r, scOpt.ss); h += row('神殺', function(p, k){ return ssTags(ssr.byPillar[k].map(function(x){ return x.name; })) || '<span style="color:var(--sub)">—</span>'; }, 'ssrow'); }
   h += '</table></div><dl class="kv" style="margin-top:10px"><dt>' + sT('日主') + '</dt><dd><span class="' + KCLS(r.nikkan) + '">' + gl('kan', r.nikkan) + '</span>（' + S.GOGYO[S.ELEM[r.nikkan]] + '・' + (S.YIN[r.nikkan] ? '陰' : '陽') + '）</dd>';
   h += '<dt>' + sT('空亡') + '</dt><dd>' + r.koubou + '</dd></dl>';
   r.warnings.forEach(function(w){ h += '<p class="warn">' + esc(w) + '</p>'; });
@@ -5152,6 +5292,32 @@ function renderScMeishiki(r){
   if (r.known && r.corr) opt.push('時刻の補正 ' + (r.corr > 0 ? '+' : '') + r.corr + '分（' + r.localTime.h + '時' + (r.localTime.m < 10 ? '0' : '') + r.localTime.m + '分として日柱・時柱を計算）');
   if (r.yashi) opt.push('23時台の生まれのため、日柱はその日のまま、時柱の干は翌日の日干から出しています（夜子時）');
   return h + '<p class="note">節入り：' + r.setsu.name + ' ' + r.setsu.at + '（生まれた日は' + r.dayCount + '日目）。蔵干は阿部泰山式の表で、' + (scOpt.zou === 'honki' ? '各支の本気' : scOpt.zou === 'month' ? '月支だけ節入りからの日数で選び、他の支は本気' : '節入りからの日数で4つの支とも選んだ干') + 'です。小さい字は支に含まれる干のすべて。' + opt.join('。') + (opt.length ? '。' : '') + '</p>';
+}
+// ---- 神殺（2026-11-27 本人依頼） ----
+function ssTags(names){
+  return names.map(function(n){ var t = SC.SHINSATSU_TEXT[n], k = { 天乙貴人: 'g', 天徳貴人: 'g', 月徳貴人: 'g', 文昌貴人: 'g', 天医: 'g', 金輿: 'g', 暗禄: 'g', 禄神: 'g', 将星: 'g', 羊刃: 'c', 飛刃: 'c', 劫殺: 'c', 亡神: 'c', 災殺: 'c', 孤辰: 'c', 寡宿: 'c', 陰陽差錯: 'c' }[n] || '';
+    return '<span class="ss ' + k + '" title="' + esc(n + '：' + t.kw) + '">' + n + '</span>'; }).join('');
+}
+var SS_BASE = { both: '年支と日支', year: '年支', day: '日支' };
+function renderScShinsatsu(r){
+  var ss = SC.shinsatsu(r, scOpt.ss), ks = scOrder(), P = r.pillars;
+  var h = '<h2>神殺 <small>命式に出ている星</small></h2>';
+  h += '<div style="overflow-x:auto"><table class="sctbl sstbl"><tr><th></th>' + ks.map(function(k){ return '<th>' + SC_PNAME[k] + '</th>'; }).join('') + '</tr>';
+  h += '<tr class="big"><th>干支</th>' + ks.map(function(k){ return '<td>' + (P[k] ? '<span class="kanshi">' + P[k].ganshi + '</span>' : '<span style="color:var(--sub)">—</span>') + '</td>'; }).join('') + '</tr>';
+  h += '<tr><th>神殺</th>' + ks.map(function(k){ return '<td>' + (P[k] ? (ssTags(ss.byPillar[k].map(function(x){ return x.name; })) || '<span style="color:var(--sub)">—</span>') : '') + '</td>'; }).join('') + '</tr>';
+  h += '</table></div>';
+  if (!ss.list.length) h += '<p class="empty">この命式には、ここで見ている神殺は出ていません。</p>';
+  else {
+    var seen = {}, items = '';
+    SC.SS_ORDER.forEach(function(n){
+      var hits = ss.list.filter(function(x){ return x.name === n; }); if (!hits.length) return;
+      var t = SC.SHINSATSU_TEXT[n];
+      var where = hits.map(function(x){ return SC_PNAME[x.pillar] + (x.from[0] === '日柱' ? '' : '（' + x.from.join('・') + 'から）'); }).join('、');
+      items += kaiItem(ssTags([n]), esc(t.kw) + '・' + esc(where), esc(t.text));
+    });
+    h += '<dl class="kai" style="margin-top:10px">' + items + '</dl>';
+  }
+  return h + '<p class="note">吉の星は青、気をつけたい星はオレンジの枠です。日干から見るもの（天乙貴人・文昌貴人・羊刃など）、月支から見るもの（天徳・月徳・天医）、' + SS_BASE[scOpt.ss] + 'の三合から見るもの（駅馬・桃花・華蓋・将星・劫殺・亡神・災殺）、年支から見る孤辰・寡宿、日柱そのもので見る魁罡・陰陽差錯を出しています。神殺は流派によって採る星や表が違います（羊刃の陰干など）。起点は詳細設定で変えられます。単独で吉凶を決めるものではなく、命式全体と合わせて見る目安です。' + (r.known ? '' : '時刻が分からないので時柱は出していません。') + '</p>';
 }
 var GNAME = ['木', '火', '土', '金', '水'];
 function renderScGogyo(r){
@@ -5167,12 +5333,12 @@ function renderScDaiun(r){
   if (!r.daiun) return h + '<p class="empty">性別を選ぶと表示します。</p>';
   var D = r.daiun, age = ageNow({ input: r.birth });
   h += '<dl class="kv"><dt>' + sT('立運') + '</dt><dd><b>' + D.label + '</b>（' + (D.forward ? '順行' : '逆行') + '・節入りまで ' + D.days.toFixed(1) + '日 ÷ 3 ＝ ' + D.years.toFixed(2) + '年）</dd></dl>';
-  h += '<div style="overflow-x:auto"><table class="daiun" style="margin-top:8px"><tr><th>年齢</th><th>西暦</th><th>干支</th><th>' + sT('通変星') + '</th><th>' + sT('十二運') + '</th><th>' + sT('空亡') + '</th></tr>';
+  h += '<div style="overflow-x:auto"><table class="daiun" style="margin-top:8px"><tr><th>年齢</th><th>西暦</th><th>干支</th><th>' + sT('通変星') + '</th><th>' + sT('十二運') + '</th><th>' + sT('空亡') + '</th>' + (scOpt.ssrow !== 'off' ? '<th>神殺</th>' : '') + '</tr>';
   var fmt = function(a){ return scOpt.round === 'dec' ? a.toFixed(1) : scOpt.round === 'ym' ? (Math.floor(a) + (a % 1 ? '歳' + Math.round(a % 1 * 12) + 'か月' : '')) : String(a); };
-  h += '<tr><td>0〜</td><td>' + r.birth.y + '〜</td><td><span class="kanshi" style="font-size:17px">' + r.pillars.month.ganshi + '</span></td><td colspan="3" style="color:var(--sub)">月柱（立運まで）</td></tr>';
+  h += '<tr><td>0〜</td><td>' + r.birth.y + '〜</td><td><span class="kanshi" style="font-size:17px">' + r.pillars.month.ganshi + '</span></td><td colspan="' + (scOpt.ssrow !== 'off' ? 4 : 3) + '" style="color:var(--sub)">月柱（立運まで）</td></tr>';
   D.list.forEach(function(x){
     var now = age >= x.from && age < x.from + 10, td = now ? '<td class="now">' : '<td>', kb = r.koubou.indexOf(x.ganshi.charAt(1)) >= 0;
-    h += '<tr' + (kb ? ' class="tc"' : '') + '>' + td + fmt(x.from) + '〜' + (now ? ' <span class="tag">今</span>' : '') + '</td>' + td + Math.floor(r.birth.y + x.from) + '〜</td>' + td + '<span class="kanshi" style="font-size:17px">' + x.ganshi + '</span></td>' + td + sTs(x.tsuhen) + '</td>' + td + sJu(x.juniun) + '</td>' + td + (kb ? '空亡' : '') + '</td></tr>';
+    h += '<tr' + (kb ? ' class="tc"' : '') + '>' + td + fmt(x.from) + '〜' + (now ? ' <span class="tag">今</span>' : '') + '</td>' + td + Math.floor(r.birth.y + x.from) + '〜</td>' + td + '<span class="kanshi" style="font-size:17px">' + x.ganshi + '</span></td>' + td + sTs(x.tsuhen) + '</td>' + td + sJu(x.juniun) + '</td>' + td + (kb ? '空亡' : '') + '</td>' + (scOpt.ssrow !== 'off' ? td + ssTags(SC.shinsatsuOf(r, x.ganshi, scOpt.ss)) + '</td>' : '') + '</tr>';
   });
   h += '</table></div>';
   return h + '<p class="note">年干が陽で男性、陰で女性なら順行（月柱の次の干支から）、それ以外は逆行。立運は節入りまでの日数を3で割った年齢で、' + (scOpt.round === 'ym' ? '年と月' : scOpt.round === 'dec' ? '小数第1位' : '四捨五入した整数') + 'で表示しています（詳細設定で変えられます）。赤字は支が空亡の大運。</p>';
@@ -5181,10 +5347,10 @@ function renderScSaiun(r){
   var h = '<h2>歳運 <small>年ごとの運（立春で切り替え）</small></h2>';
   h += '<div class="unnav"><button type="button" data-sun="-12" aria-label="前へ">◀</button><b>' + sun.from + '〜' + (sun.from + 11) + '年</b><button type="button" data-sun="+12" aria-label="次へ">▶</button><button type="button" class="linkbtn" data-sun="0">今年</button></div>';
   var nowY = KY.kigakuOf(S.dayNum(TODAY.y, TODAY.m, TODAY.d)).kanYear;
-  h += '<div style="overflow-x:auto"><table class="daiun"><tr><th>年</th><th>年齢</th><th>干支</th><th>' + sT('通変星') + '</th><th>' + sT('十二運') + '</th><th>' + sT('空亡') + '</th></tr>';
+  h += '<div style="overflow-x:auto"><table class="daiun"><tr><th>年</th><th>年齢</th><th>干支</th><th>' + sT('通変星') + '</th><th>' + sT('十二運') + '</th><th>' + sT('空亡') + '</th>' + (scOpt.ssrow !== 'off' ? '<th>神殺</th>' : '') + '</tr>';
   for (var y = sun.from; y < sun.from + 12; y++) {
     var x = SC.saiun(r, y), now = y === nowY, td = now ? '<td class="now">' : '<td>';
-    h += '<tr' + (x.koubou ? ' class="tc"' : '') + '>' + td + y + (now ? ' <span class="tag">今年</span>' : '') + '</td>' + td + (y - r.birth.y >= 0 ? (y - r.birth.y) + '歳' : '—') + '</td>' + td + '<span class="kanshi" style="font-size:17px">' + x.ganshi + '</span></td>' + td + sTs(x.tsuhen) + '</td>' + td + sJu(x.juniun) + '</td>' + td + (x.koubou ? '空亡' : '') + '</td></tr>';
+    h += '<tr' + (x.koubou ? ' class="tc"' : '') + '>' + td + y + (now ? ' <span class="tag">今年</span>' : '') + '</td>' + td + (y - r.birth.y >= 0 ? (y - r.birth.y) + '歳' : '—') + '</td>' + td + '<span class="kanshi" style="font-size:17px">' + x.ganshi + '</span></td>' + td + sTs(x.tsuhen) + '</td>' + td + sJu(x.juniun) + '</td>' + td + (x.koubou ? '空亡' : '') + '</td>' + (scOpt.ssrow !== 'off' ? td + ssTags(SC.shinsatsuOf(r, x.ganshi, scOpt.ss)) + '</td>' : '') + '</tr>';
   }
   return h + '</table></div><p class="note">その年の干支を日干から見た通変星・十二運です。赤字は空亡の年。年齢はその年の誕生日を迎えたときの満年齢。</p>';
 }
