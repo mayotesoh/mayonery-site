@@ -71,6 +71,12 @@ button.go:hover{filter:brightness(1.08)}
 /* 結果 */
 #result{margin-top:18px; display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px}
 #result .card.wide, #result .card.autowide{grid-column:1/-1}
+/* 数秘術（1人）は主な数・イヤー・ピナクルが横長なので、基本情報も横長にして項目を2〜3列に並べる（2026-11-28 本人依頼） */
+@media (min-width:700px){
+  body.sys-suhi #result:not(.pairgrid) .card[data-sec="info"]{grid-column:1/-1}
+  body.sys-suhi #result:not(.pairgrid) .card[data-sec="info"] dl.kv{grid-template-columns:repeat(2, auto minmax(0,1fr)); column-gap:14px}
+}
+@media (min-width:1000px){ body.sys-suhi #result:not(.pairgrid) .card[data-sec="info"] dl.kv{grid-template-columns:repeat(3, auto minmax(0,1fr))} }
 #result .card{position:relative}
 #result .card.pa{border-left:5px solid var(--pa)}
 #result .card.pb{border-left:5px solid var(--pb)}
@@ -3480,7 +3486,7 @@ var SECTIONS = [
   { id:'m_aishou', sys:'seimei', label:'相性（名前）',   basic:true,  pair:true, render:null },
   { id:'m_kaisetsu', sys:'seimei', label:'解説',        basic:true,  render:function(r){ return renderSeKaisetsu(r); }, wide:true },
   { id:'m_index',  sys:'seimei', label:'数と用語（索引）', basic:false, global:true, render:null, wide:true },
-  { id:'n_core',   sys:'suhi', label:'主な数',         basic:true,  render:function(r){ return renderNumCore(r); } },
+  { id:'n_core',   sys:'suhi', label:'主な数',         basic:true,  render:function(r){ return renderNumCore(r); }, wide:true },
   { id:'n_cycle',  sys:'suhi', label:'パーソナルイヤー', basic:true,  render:function(r){ return renderNumCycle(r); }, wide:true },
   { id:'n_period', sys:'suhi', label:'ピナクル・チャレンジ', basic:true, render:function(r){ return renderNumPeriod(r); }, wide:true },
   { id:'n_name',   sys:'suhi', label:'名前の数の内訳',   basic:false, render:function(r){ return renderNumName(r); } },
@@ -3570,7 +3576,13 @@ function relRank(label){
   return label === '宿命' || String(label).indexOf('＋') >= 0 ? -1 : (c in r ? r[c] : 9);
 }
 var defaultOrder = SECTIONS.map(function(s){ return s.id; });
+defaultOrder.splice(defaultOrder.indexOf('n_core'), 1); defaultOrder.splice(defaultOrder.indexOf('info'), 0, 'n_core');   // 数秘術は「主な数」が先頭
 var order = sanitizeOrder(store.get('order', defaultOrder));
+// 数秘術の「主な数」を先頭（基本情報より前）へ。既存の利用者にも1回だけ（2026-11-28 本人依頼）
+if (!store.get('numCoreTop', false)) {
+  order.splice(order.indexOf('n_core'), 1); order.splice(Math.max(0, order.indexOf('info')), 0, 'n_core');
+  store.set('order', order); store.set('numCoreTop', true);
+}
 var visible = store.get('visible', null) || SECTIONS.filter(function(s){ return s.basic; }).map(function(s){ return s.id; });
 if (firstCfg) applyUnOrder();   // 以前の既定（大運→年運→月運→日運）で保存されている人も、日→月→年 にそろえる
 function sanitizeOrder(o){
@@ -6405,7 +6417,7 @@ function bgSync(){
 
 // 基本情報カードは、以前からの利用者にも先頭に1回だけ出す
 if (!store.get('infoSeen', false)) {
-  order.splice(order.indexOf('info'), 1); order.unshift('info'); store.set('order', order);
+  order.splice(order.indexOf('info'), 1); order.unshift('info'); order.splice(order.indexOf('n_core'), 1); order.unshift('n_core'); store.set('order', order);   // 数秘術の主な数だけは基本情報より前
   if (visible.indexOf('info') < 0) visible.push('info'); store.set('visible', visible); store.set('infoSeen', true);
 }
 applySysVis();
