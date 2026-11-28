@@ -3576,12 +3576,12 @@ function relRank(label){
   return label === '宿命' || String(label).indexOf('＋') >= 0 ? -1 : (c in r ? r[c] : 9);
 }
 var defaultOrder = SECTIONS.map(function(s){ return s.id; });
-defaultOrder.splice(defaultOrder.indexOf('n_core'), 1); defaultOrder.splice(defaultOrder.indexOf('info'), 0, 'n_core');   // 数秘術は「主な数」が先頭
+defaultOrder.splice(defaultOrder.indexOf('n_core'), 1); defaultOrder.splice(defaultOrder.indexOf('info') + 1, 0, 'n_core');   // 数秘術は「主な数」が基本情報のすぐ後ろ
 var order = sanitizeOrder(store.get('order', defaultOrder));
-// 数秘術の「主な数」を先頭（基本情報より前）へ。既存の利用者にも1回だけ（2026-11-28 本人依頼）
-if (!store.get('numCoreTop', false)) {
-  order.splice(order.indexOf('n_core'), 1); order.splice(Math.max(0, order.indexOf('info')), 0, 'n_core');
-  store.set('order', order); store.set('numCoreTop', true);
+// 数秘術の「主な数」を基本情報のすぐ後ろへ。既存の利用者にも1回だけ（2026-11-28 本人依頼。基本情報は先頭のまま）
+if (!store.get('numCoreNext', false)) {
+  order.splice(order.indexOf('n_core'), 1); order.splice(order.indexOf('info') + 1, 0, 'n_core');
+  store.set('order', order); store.set('numCoreNext', true);
 }
 var visible = store.get('visible', null) || SECTIONS.filter(function(s){ return s.basic; }).map(function(s){ return s.id; });
 if (firstCfg) applyUnOrder();   // 以前の既定（大運→年運→月運→日運）で保存されている人も、日→月→年 にそろえる
@@ -6417,7 +6417,7 @@ function bgSync(){
 
 // 基本情報カードは、以前からの利用者にも先頭に1回だけ出す
 if (!store.get('infoSeen', false)) {
-  order.splice(order.indexOf('info'), 1); order.unshift('info'); order.splice(order.indexOf('n_core'), 1); order.unshift('n_core'); store.set('order', order);   // 数秘術の主な数だけは基本情報より前
+  order.splice(order.indexOf('info'), 1); order.unshift('info'); order.splice(order.indexOf('n_core'), 1); order.splice(1, 0, 'n_core'); store.set('order', order);   // 数秘術の主な数は基本情報のすぐ後ろ
   if (visible.indexOf('info') < 0) visible.push('info'); store.set('visible', visible); store.set('infoSeen', true);
 }
 applySysVis();
